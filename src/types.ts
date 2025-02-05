@@ -4,21 +4,23 @@ export interface CredentialsData {
   mnemonic: string;
   nostr_sk: string;
   "did:key": string;
-  alchemy_key : string,
+  alchemy_key: string,
   witness_eth_network: string;
   witness_eth_platform: string;
 }
 
 export interface AquaOperationData {
-  aquaObject :Option<AquaObject> 
-  logData : Array<LogData>
+  aquaObjects:  Option<AquaObject[]>
+  aquaObject: Option<AquaObject>
+  logData: Array<LogData>
 }
 
-export type RevisionType =   "file" | "witness" | "sign" | "form" | "link"
+export type RevisionType = "file" | "witness" | "sign" | "form" | "link"
 
 export interface FileObject {
-  fileName : string,
-  fileContent : string
+  fileName: string,
+  fileContent: string,
+  path: string
 }
 
 export enum LogType {
@@ -34,8 +36,8 @@ export enum LogType {
   scalar
 }
 export interface LogData {
-  logType : LogType,
-  log : string
+  logType: LogType,
+  log: string
 }
 
 
@@ -82,11 +84,18 @@ export interface TreeMapping {
   latestHash: string;
 }
 
+
+export interface AquaObjectWrapper {
+  aquaObject: AquaObject;
+  fileObject: FileObject;
+  revision: string;
+}
+
 export interface AquaObject {
   revisions: Revisions;
   file_index: FileIndex;
-  tree : RevisionTree;
-  treeMapping :  TreeMapping;
+  tree: RevisionTree;
+  treeMapping: TreeMapping;
 }
 
 export const WitnessEnvironment = {
@@ -105,11 +114,20 @@ export interface SignatureResult {
 
 
 export interface SignatureData {
-  payload:    string;
+  payload: string;
   signatures: SignatureItem[];
 }
 
 export interface SignatureItem {
   protected: string;
   signature: string;
+}
+
+
+export interface IWitnessConfig {
+  witnessNetwork: string,
+  smartContractAddress: string,
+  witnessEventVerificationHash: string,
+  port: number,
+  host: string
 }
