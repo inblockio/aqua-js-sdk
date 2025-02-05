@@ -21,7 +21,13 @@
     "key-did-provider-ed25519": "^4.0.2",
     "key-did-resolver": "^4.0.0",
     "merkletreejs": "^0.4.0",
-    "rustic": "^1.2.2"
+    "rustic": "^1.2.2",
+    "asn1js": "^3.0.5",
+    "nostr-tools": "^2.7.2",
+    "open": "^10.1.0",
+    "openid-client": "^5.7.0",
+    "pkijs": "^3.2.4",
+    "sigstore": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",

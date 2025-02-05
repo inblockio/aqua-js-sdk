@@ -4,7 +4,7 @@ import { Relay, Subscription } from 'nostr-tools/relay'
 import { hexToBytes } from '@noble/hashes/utils'
 import * as nip19 from 'nostr-tools/nip19'
 import { CredentialsData } from '../types'
-import { Err, Result } from 'rustic'
+import { Err, Ok, Result } from 'rustic'
 
 interface Credentials {
     nostr_sk: string;
@@ -90,7 +90,7 @@ const witness = async (witnessEventVerificationHash: string, credentials: Creden
     const witnessTimestamp = publishEvent.created_at
     console.log(`got event https://snort.social/${nevent}`)
 
-    return [nevent, npub, witnessTimestamp]
+    return Ok([nevent, npub, witnessTimestamp])
 }
 
 interface VerifyResult {
