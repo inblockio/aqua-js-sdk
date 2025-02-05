@@ -14,7 +14,7 @@ export interface AquaOperationData {
   logData : Array<LogData>
 }
 
-export type RevisionType =   "file" | "witness" | "sign" | "form"
+export type RevisionType =   "file" | "witness" | "sign" | "form" | "link"
 
 export interface FileObject {
   fileName : string,
