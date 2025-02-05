@@ -12,6 +12,7 @@
     "format": "prettier --write src/**/*.ts"
   },
   "dependencies": {
+    "asn1js": "^3.0.5",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "did-resolver": "^4.1.0",
@@ -21,16 +22,17 @@
     "key-did-provider-ed25519": "^4.0.2",
     "key-did-resolver": "^4.0.0",
     "merkletreejs": "^0.4.0",
-    "rustic": "^1.2.2",
-    "asn1js": "^3.0.5",
     "nostr-tools": "^2.7.2",
     "open": "^10.1.0",
     "openid-client": "^5.7.0",
     "pkijs": "^3.2.4",
+    "rustic": "^1.2.2",
     "sigstore": "^3.0.0"
   },
   "devDependencies": {
+    "@types/asn1js": "^3.0.11",
     "@types/node": "^20.11.24",
+    "@types/pkijs": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",

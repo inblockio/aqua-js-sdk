@@ -89,6 +89,10 @@ export interface AquaObject {
   treeMapping :  TreeMapping;
 }
 
+export const WitnessEnvironment = {
+  NODE: 'node',
+  BROWSER: 'browser'
+};
 
 export interface SignaturePayload {
   message: string;
