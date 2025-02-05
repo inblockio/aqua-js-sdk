@@ -4,7 +4,7 @@ import { linkAquaObjectUtil, linkMultipleAquaObjectsUtil, verifyLinkUtil } from 
 import { createNewRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
 import { signAquaObjectUtil, signMultipleAquaObjectsUtil, verifySignatureUtil } from "./core/signature";
 import { verifyWitnessUtil, witnessAquaObjectUtil, witnessMultipleAquaObjectsUtil } from "./core/witness";
-import { AquaObject, AquaObjectWrapper, AquaOperationData, FileObject, LogData, Revision, RevisionType } from "./types"
+import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, RevisionType, SignType, WitnessNetwork, WitnessType } from "./types"
 import { Result, Err, Ok, isOk, Option } from 'rustic';
 
 class AquaTree {
@@ -14,13 +14,12 @@ class AquaTree {
     }
 
     // Content
-    createContentRevision = async (aquaObjects: AquaObjectWrapper): Promise<Result<AquaOperationData, LogData[]>> => {
-        return createContentRevisionUtil(aquaObjects)
+    createContentRevision = async (aquaObject: AquaObjectWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createContentRevisionUtil(aquaObject, enableScalar)
     }
 
-    createNewRevision = async (timestamp: string, revisionType: RevisionType, enableScalar: boolean, fileObject: Option<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
-
-        return createNewRevisionUtil(timestamp, revisionType, enableScalar, fileObject)
+    createNewRevision = async (timestamp: string, revisionType: RevisionType, fileObject: Option<FileObject>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createNewRevisionUtil(timestamp, revisionType, fileObject, enableScalar)
     }
 
     verifyAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
@@ -29,16 +28,16 @@ class AquaTree {
     }
 
     // Wittness
-    verifyWitness = async (witness: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
-        return verifyWitnessUtil(witness)
+    verifyWitness = async (witnessRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
+        return verifyWitnessUtil(witnessRevision)
     }
 
-    witnessAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
-        return witnessAquaObjectUtil(aquaObject)
+    witnessAquaObject = async (aquaObject: AquaObject, hash: string, witnessType: WitnessType, witnessNetwork: WitnessNetwork, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return witnessAquaObjectUtil(aquaObject, hash, witnessType, witnessNetwork, enableScalar)
     }
 
-    witnessMultipleAquaObjects = async (aquaObjects: AquaObjectWrapper[]): Promise<Result<AquaOperationData, LogData[]>> => {
-        return witnessMultipleAquaObjectsUtil(aquaObjects)
+    witnessMultipleAquaObjects = async (aquaObjects: AquaObjectWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return witnessMultipleAquaObjectsUtil(aquaObjects, witnessType, witnessNetwork, enableScalar)
     }
 
 
@@ -47,12 +46,12 @@ class AquaTree {
         return verifySignatureUtil(signature)
     }
 
-    signAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
-        return signAquaObjectUtil(aquaObject)
+    signAquaObject = async (aquaObject: AquaObject, hash: string, signType: SignType, credentials: Option<CredentialsData>): Promise<Result<AquaOperationData, LogData[]>> => {
+        return signAquaObjectUtil(aquaObject, hash, signType, credentials)
     }
 
-    signMultipleAquaObjects = async (aquaObjects: AquaObjectWrapper[]): Promise<Result<AquaOperationData, LogData[]>> => {
-        return signMultipleAquaObjectsUtil(aquaObjects)
+    signMultipleAquaObjects = async (aquaObjects: AquaObjectWrapper[], signType: SignType, credentials: Option<CredentialsData>): Promise<Result<AquaOperationData, LogData[]>> => {
+        return signMultipleAquaObjectsUtil(aquaObjects, signType, credentials)
     }
 
     // Link 
@@ -71,7 +70,7 @@ class AquaTree {
     // Forms -- also and form key ,remove form key
     verifyForm = async (formRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
         return verifyFormUtil(formRevision)
-    } 
+    }
 
     LinkAquaObjectToForm = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
         return LinkAquaObjectToFormUtil(aquaObject)

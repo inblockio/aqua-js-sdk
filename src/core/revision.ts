@@ -7,7 +7,7 @@ export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOpera
     return Err(logs)
 }
 
-export async function createNewRevisionUtil(timestamp: string, revisionType: RevisionType, enableScalar: boolean, fileObject: Option<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
+export async function createNewRevisionUtil(timestamp: string, revisionType: RevisionType, fileObject: Option<FileObject>, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     return Err(logs);
 }

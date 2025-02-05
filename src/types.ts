@@ -16,6 +16,9 @@ export interface AquaOperationData {
 }
 
 export type RevisionType = "file" | "witness" | "sign" | "form" | "link"
+export type WitnessType = "tsa" | "eth" | "cli"
+export type WitnessNetwork = "sepolia" | "mainnet" | "nostr"
+export type SignType = "cli" | "metamask" | "did"
 
 export interface FileObject {
   fileName: string,
