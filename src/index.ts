@@ -10,13 +10,11 @@ class AquaTree {
   
     createNewRevision = async (timestamp : string, revisionType : RevisionType, enableScalar :  boolean, fileObject : Option<FileObject>) : Promise<Result<AquaOperationData, LogData[]>> => {
         let logs : Array<LogData> = [];
-
-        return Err(logs)
+        return Err(logs);
     }
 
     verifyAquaObject =  async (aquaObject :AquaObject) : Promise<Result<AquaOperationData, LogData[]>> => {
         let logs : Array<LogData> = [];
-
         return Err(logs) 
     }
 
