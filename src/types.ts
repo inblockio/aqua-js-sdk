@@ -15,7 +15,7 @@ export interface AquaOperationData {
   logData: Array<LogData>
 }
 
-export type RevisionType = "file" | "witness" | "sign" | "form" | "link"
+export type RevisionType = "file" | "witness" | "signature" | "form" | "link"
 export type WitnessType = "tsa" | "eth" | "cli"
 export type WitnessNetwork = "sepolia" | "mainnet" | "nostr"
 export type SignType = "cli" | "metamask" | "did"
@@ -54,7 +54,7 @@ export interface RevisionTree {
 export interface Revision {
   previous_verification_hash: string;
   local_timestamp: string;
-  revision_type: "file" | "witness";
+  revision_type: "file" | "witness" | "signature" | "form" | "link";
   file_hash?: string;
   file_nonce?: string;
   witness_merkle_root?: string;
@@ -64,10 +64,10 @@ export interface Revision {
   witness_transaction_hash?: string;
   witness_sender_account_address?: string;
   witness_merkle_proof?: string[];
-  signature: string;
-  signature_public_key: string;
-  signature_wallet_address: string;
-  signature_type: string;
+  signature?: string  | SignatureData;
+  signature_public_key?: string;
+  signature_wallet_address?: string;
+  signature_type?: string;
   [key: string]: any;
 
 }
@@ -133,4 +133,8 @@ export interface IWitnessConfig {
   witnessEventVerificationHash: string,
   port: number,
   host: string
+}
+
+export interface AnObject {
+  [key: string]: string | number | boolean |  any;
 }

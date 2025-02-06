@@ -4,9 +4,8 @@ import * as KeyResolver from 'key-did-resolver'
 import { SignaturePayload, SignatureResult } from '../types'
 
 
-
-const signature = {
-  verify: async (jws: any, key: string, hash: string): Promise<boolean> => {
+export class DIDSigner {
+    public async   verify (jws: any, key: string, hash: string): Promise<boolean>  {
     const expected: SignaturePayload = { message: `I sign this revision: [${hash}]` }
     try {
       const resolver = KeyResolver.getResolver()
@@ -18,9 +17,9 @@ const signature = {
       return false
     }
     return true
-  },
+  }
 
-  sign: async (verificationHash: string, privateKey: Uint8Array): Promise<SignatureResult> => {
+  public async  sign (verificationHash: string, privateKey: Uint8Array): Promise<SignatureResult>  {
     const payload: SignaturePayload = { 
       message: `I sign this revision: [${verificationHash}]` 
     }
@@ -39,8 +38,8 @@ const signature = {
   }
 }
 
-export {
-  signature,
-  SignaturePayload,
-  SignatureResult
-}
+// export {
+//   signature,
+//   SignaturePayload,
+//   SignatureResult
+// }

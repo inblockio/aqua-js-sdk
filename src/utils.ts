@@ -1,8 +1,20 @@
 import { createHash } from 'crypto';
-import { AquaObject, CredentialsData, RevisionTree, TreeMapping } from './types';
+import { AnObject, AquaObject, CredentialsData, RevisionTree, TreeMapping } from './types';
 import { ethers, HDNodeWallet } from "ethers";
 import { Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
+
+
+export function dict2Leaves  (obj : AnObject) : string[] {
+  return Object.keys(obj)
+    .sort()  // MUST be sorted for deterministic Merkle tree
+    .map((key) => getHashSum(`${key}:${obj[key]}`))
+}
+
+export function  getFileHashSum (fileContent :  string) : string {
+  return getHashSum(fileContent)
+}
+
 export function getHashSum(data: string | Buffer): string {
   return createHash('sha256').update(data).digest('hex');
 }
@@ -59,6 +71,14 @@ export function createCredentials () {
   }
 }
 
+export function formatMwTimestamp(ts : string) {
+  // Format timestamp into the timestamp format found in Mediawiki outputs
+  return ts
+    .replace(/-/g, "")
+    .replace(/:/g, "")
+    .replace("T", "")
+    .replace("Z", "")
+}
 
 export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, providerUrl: string) => {
   try {
@@ -105,3 +125,7 @@ export const estimateWitnessGas = async (wallet_address: string, witness_event_v
     return { error: error.message };
   }
 };
+
+
+
+

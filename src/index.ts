@@ -46,8 +46,8 @@ class AquaTree {
         return verifySignatureUtil(signature)
     }
 
-    signAquaObject = async (aquaObject: AquaObject, hash: string, signType: SignType, credentials: Option<CredentialsData>): Promise<Result<AquaOperationData, LogData[]>> => {
-        return signAquaObjectUtil(aquaObject, hash, signType, credentials)
+    signAquaObject = async (aquaObject: AquaObjectWrapper, hash: string, signType: SignType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return signAquaObjectUtil(aquaObject, hash, signType, credentials, enableScalar)
     }
 
     signMultipleAquaObjects = async (aquaObjects: AquaObjectWrapper[], signType: SignType, credentials: Option<CredentialsData>): Promise<Result<AquaOperationData, LogData[]>> => {
