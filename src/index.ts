@@ -1,7 +1,7 @@
 import { createContentRevisionUtil, getFileByHashUtil } from "./core/content";
 import { LinkAquaObjectToFormUtil, verifyFormUtil } from "./core/forms";
 import { linkAquaObjectUtil, linkMultipleAquaObjectsUtil, verifyLinkUtil } from "./core/link";
-import { createNewRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
+import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
 import { signAquaObjectUtil, signMultipleAquaObjectsUtil, verifySignatureUtil } from "./core/signature";
 import { verifyWitnessUtil, witnessAquaObjectUtil, witnessMultipleAquaObjectsUtil } from "./core/witness";
 import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, RevisionType, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
@@ -18,8 +18,8 @@ class AquaTree {
         return createContentRevisionUtil(aquaObject, enableScalar)
     }
 
-    createNewRevision = async (timestamp: string, revisionType: RevisionType, fileObject: Option<FileObject>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-        return createNewRevisionUtil(timestamp, revisionType, fileObject, enableScalar)
+    createGenesisRevision = async (timestamp: string, revisionType: RevisionType, fileObject: Option<FileObject>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createGenesisRevision(timestamp, revisionType, fileObject, enableScalar)
     }
 
     verifyAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
@@ -78,8 +78,13 @@ class AquaTree {
 
 
     // Revisions
-    getRevisionByHash = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
-        return getRevisionByHashUtil(aquaObject)
+    getRevisionByHash =  (aquaObject: AquaObject, hash : string): Result<Revision, LogData[]> => {
+        return getRevisionByHashUtil(aquaObject, hash)
+    }
+
+    // Revisions
+    getLastRevision =  (aquaObject: AquaObject): Result<Revision, LogData[]>=> {
+        return getLastRevisionUtil(aquaObject)
     }
 
     // get file
