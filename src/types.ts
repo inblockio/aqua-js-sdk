@@ -30,6 +30,7 @@ export interface FileObject {
 }
 
 export enum LogType {
+  SUCCESS,
   INFO,
   ERROR,
   WARNING,
