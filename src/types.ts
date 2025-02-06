@@ -18,8 +18,10 @@ export interface AquaOperationData {
 export type RevisionType = "file" | "witness" | "signature" | "form" | "link"
 export type WitnessType = "tsa" | "eth" | "nostr"
 export type WitnessPlatformType = 'cli' | 'metamask';
-export type WitnessNetwork = "sepolia" | "mainnet" | "nostr"
+export type WitnessNetwork = "sepolia" | "mainnet" | "holesky"
 export type SignType = "cli" | "metamask" | "did"
+
+export type WitnessEnvironment =  'node'| 'browser'
 
 export interface FileObject {
   fileName: string,
@@ -102,10 +104,7 @@ export interface AquaObject {
   treeMapping: TreeMapping;
 }
 
-export const WitnessEnvironment = {
-  NODE: 'node',
-  BROWSER: 'browser'
-};
+
 
 export interface SignaturePayload {
   message: string;
@@ -166,4 +165,48 @@ export interface GasEstimateResult {
   gasEstimate? : string ;
   gasFee? : string;
   balance? : string
+}
+
+export interface WitnessConfig {
+  witnessEventVerificationHash: string;
+  witnessNetwork: WitnessNetwork;
+  smartContractAddress: string;
+}
+
+export  interface TransactionResult {
+  error: string | null;
+  transactionHash?: string;
+}
+
+export  interface WitnessTransactionData {
+  transaction_hash: string;
+  wallet_address: string;
+}
+
+
+export  interface WitnessTSAResponse {
+  base64Response: string;
+  provider: string;
+  timestamp: number;
+}
+
+export  interface WitnessEthResponse {
+  transactionHash :string,
+      walletAddress : string
+  
+}
+
+export interface WitnessNostrResponse {
+    nevent: string;
+    npub: string;
+    timestamp: number;
+}
+
+export interface WitnessNostrVerifyResult {
+  type: string;
+  data: {
+      id: string;
+      relays?: string[];
+      author?: string;
+  };
 }

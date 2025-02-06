@@ -5,13 +5,46 @@ import { Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
 
 
-export function dict2Leaves  (obj : AnObject) : string[] {
+export function maybeUpdateFileIndex(aquaObject: AquaObject, verificationData: any, revisionType: string, aquaFileName: string, formFileName: string): AquaObject {
+  const validRevisionTypes = ["file", "form", "link"];
+  if (!validRevisionTypes.includes(revisionType)) {
+    console.error(`Invalid revision type for file index: ${revisionType}`);
+    process.exit(1)
+    return aquaObject;
+  }
+  let verificationHash = "";
+
+  switch (revisionType) {
+    case "form":
+      verificationHash = verificationData.verification_hash
+      // fileHash = verificationData.data.file_hash
+      aquaObject.file_index[verificationHash] = formFileName
+      break
+    case "file":
+      verificationHash = verificationData.verification_hash
+      // fileHash = verificationData.data.file_hash
+      aquaObject.file_index[verificationHash] = aquaFileName //filename
+      break
+    case "link":
+      console.log("FIX ME.....")
+      process.exit(1)
+    // const linkURIsArray = linkURIs.split(",")
+    // const linkVHs = verificationData.data.link_verification_hashes
+    // for (const [idx, vh] of linkVHs.entries()) {
+    //   aquaObject.file_index[vh] = `${linkURIsArray[idx]}`
+    // }
+  }
+
+  return aquaObject
+}
+
+export function dict2Leaves(obj: AnObject): string[] {
   return Object.keys(obj)
     .sort()  // MUST be sorted for deterministic Merkle tree
     .map((key) => getHashSum(`${key}:${obj[key]}`))
 }
 
-export function  getFileHashSum (fileContent :  string) : string {
+export function getFileHashSum(fileContent: string): string {
   return getHashSum(fileContent)
 }
 
@@ -38,7 +71,7 @@ export function prepareNonce(): string {
   return getHashSum(Date.now().toString());
 }
 
-export function getWallet(mnemonic: string) : [HDNodeWallet, string, string] {
+export function getWallet(mnemonic: string): [HDNodeWallet, string, string] {
   // Always trim the last new line
   const wallet = Wallet.fromPhrase(mnemonic.trim())
   const walletAddress = wallet.address.toLowerCase()
@@ -46,7 +79,7 @@ export function getWallet(mnemonic: string) : [HDNodeWallet, string, string] {
   return [wallet, walletAddress, wallet.publicKey]
 }
 
-export function createCredentials () {
+export function createCredentials() {
   console.log('Credential file  does not exist.Creating wallet');
 
   // Generate random entropy (128 bits for a 12-word mnemonic)
@@ -55,23 +88,23 @@ export function createCredentials () {
   // Convert entropy to a mnemonic phrase
   const mnemonic = Mnemonic.fromEntropy(entropy);
 
-  let credentialsObject : CredentialsData = {
-      mnemonic: mnemonic.phrase, nostr_sk: "", "did:key": "",
-      alchemy_key: "ZaQtnup49WhU7fxrujVpkFdRz4JaFRtZ", // project defualt key
-      witness_eth_network: "sepolia",
-      witness_eth_platform: "metamask"
+  let credentialsObject: CredentialsData = {
+    mnemonic: mnemonic.phrase, nostr_sk: "", "did:key": "",
+    alchemy_key: "ZaQtnup49WhU7fxrujVpkFdRz4JaFRtZ", // project defualt key
+    witness_eth_network: "sepolia",
+    witness_eth_platform: "metamask"
   };
   try {
-    
-      return credentialsObject;
+
+    return credentialsObject;
   } catch (error) {
-      console.error("Failed to write mnemonic:", error)
-      process.exit(1)
+    console.error("Failed to write mnemonic:", error)
+    process.exit(1)
 
   }
 }
 
-export function formatMwTimestamp(ts : string) {
+export function formatMwTimestamp(ts: string) {
   // Format timestamp into the timestamp format found in Mediawiki outputs
   return ts
     .replace(/-/g, "")
@@ -80,7 +113,7 @@ export function formatMwTimestamp(ts : string) {
     .replace("Z", "")
 }
 
-export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, providerUrl: string) : Promise<GasEstimateResult>=> {
+export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, providerUrl: string): Promise<GasEstimateResult> => {
   try {
     // Connect to Ethereum provider
     // const provider = new ethers.JsonRpcProvider(providerUrl);
@@ -120,9 +153,9 @@ export const estimateWitnessGas = async (wallet_address: string, witness_event_v
 
     return { error: null, gasEstimate: estimatedGas.toString(), gasFee: gasCostInEth, balance: balanceInEth, hasEnoughBalance };
 
-  } catch (error : any) {
+  } catch (error: any) {
     console.error("Error estimating gas:", error);
-    return { error: error.message  , hasEnoughBalance : false};
+    return { error: error.message, hasEnoughBalance: false };
   }
 };
 

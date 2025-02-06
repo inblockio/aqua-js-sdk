@@ -3,116 +3,108 @@ import * as asn1js from "asn1js"
 import * as pkijs from "pkijs"
 import { createHash } from "node:crypto"
 
-interface WitnessResponse {
-  base64Response: string;
-  provider: string;
-  timestamp: number;
-}
 
 
-const isoDate2unix = (t: Date | string): number => {
+export class WitnessTSA {
+  isoDate2unix = (t: Date | string): number => {
     const date = t instanceof Date ? t : new Date(t)
     return Math.floor(date.getTime() / 1000)
   }
 
-const extractGenTimeFromResp = (resp: pkijs.TimeStampResp): number => {
-  const signedData = new pkijs.SignedData({
-    schema: resp.timeStampToken?.content,
-  })
-  const tstInfoAsn1 = asn1js.fromBER(
-    signedData.encapContentInfo.eContent!!.valueBlock.valueHexView,
-  )
-  const tstInfo = new pkijs.TSTInfo({ schema: tstInfoAsn1.result })
-  return isoDate2unix(tstInfo.genTime)
-}
+  extractGenTimeFromResp = (resp: pkijs.TimeStampResp): number => {
+    const signedData = new pkijs.SignedData({
+      schema: resp.timeStampToken?.content,
+    })
+    const tstInfoAsn1 = asn1js.fromBER(
+      signedData.encapContentInfo.eContent!!.valueBlock.valueHexView,
+    )
+    const tstInfo = new pkijs.TSTInfo({ schema: tstInfoAsn1.result })
+    return this.isoDate2unix(tstInfo.genTime)
+  }
 
-const witness = async (hash: string, tsaUrl: string): Promise<[string, string, number]> => {
-  console.log("Hash before: ", hash)
-  // DigiCert only supports up to SHA256
-  const hashHex = createHash("sha256").update(hash).digest("hex")
-  const hashBuffer = Uint8Array.from(Buffer.from(hashHex, "hex")) // Convert hex to ArrayBuffer
-  console.log("Hash buffer: ", hashBuffer)
+  witness = async (hash: string, tsaUrl: string): Promise<[string, string, number]> => {
+    console.log("Hash before: ", hash)
+    // DigiCert only supports up to SHA256
+    const hashHex = createHash("sha256").update(hash).digest("hex")
+    const hashBuffer = Uint8Array.from(Buffer.from(hashHex, "hex")) // Convert hex to ArrayBuffer
+    console.log("Hash buffer: ", hashBuffer)
 
-  const tspReq = new pkijs.TimeStampReq({
-    version: 1,
-    messageImprint: new pkijs.MessageImprint({
-      hashAlgorithm: new pkijs.AlgorithmIdentifier({
-        algorithmId: "2.16.840.1.101.3.4.2.1", // OID for SHA2-256
+    const tspReq = new pkijs.TimeStampReq({
+      version: 1,
+      messageImprint: new pkijs.MessageImprint({
+        hashAlgorithm: new pkijs.AlgorithmIdentifier({
+          algorithmId: "2.16.840.1.101.3.4.2.1", // OID for SHA2-256
+        }),
+        hashedMessage: new asn1js.OctetString({ valueHex: hashBuffer.buffer }),
       }),
-      hashedMessage: new asn1js.OctetString({ valueHex: hashBuffer.buffer }),
-    }),
-    nonce: new asn1js.Integer({ value: Date.now() }),
-    certReq: true,
-  })
+      nonce: new asn1js.Integer({ value: Date.now() }),
+      certReq: true,
+    })
 
-  console.log("TSA Request: ", tspReq)
-  
-  // Encode the TimeStampReq to DER format
-  const tspReqSchema = tspReq.toSchema()
-  const tspReqBuffer = tspReqSchema.toBER(false)
-  
-  console.log("TSA Request 1: ", tspReqSchema)
-  console.log("TSA Request 2: ", tspReqBuffer)
+    console.log("TSA Request: ", tspReq)
 
-  const response = await fetch(tsaUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/timestamp-query",
-    },
-    body: tspReqBuffer,
-  })
+    // Encode the TimeStampReq to DER format
+    const tspReqSchema = tspReq.toSchema()
+    const tspReqBuffer = tspReqSchema.toBER(false)
 
-  const tspResponseBuffer = await response.arrayBuffer()
+    console.log("TSA Request 1: ", tspReqSchema)
+    console.log("TSA Request 2: ", tspReqBuffer)
 
-  const tspResponseAsn1 = asn1js.fromBER(tspResponseBuffer)
-  const tspResponse = new pkijs.TimeStampResp({
-    schema: tspResponseAsn1.result,
-  })
+    const response = await fetch(tsaUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/timestamp-query",
+      },
+      body: tspReqBuffer,
+    })
 
-  if (tspResponse.status.status !== 0) {
-    throw new Error("TSA response is invalid. Failed to witness")
+    const tspResponseBuffer = await response.arrayBuffer()
+
+    const tspResponseAsn1 = asn1js.fromBER(tspResponseBuffer)
+    const tspResponse = new pkijs.TimeStampResp({
+      schema: tspResponseAsn1.result,
+    })
+
+    if (tspResponse.status.status !== 0) {
+      throw new Error("TSA response is invalid. Failed to witness")
+    }
+
+    const base64EncodedResp = Buffer.from(tspResponseBuffer).toString("base64")
+    const witnessTimestamp = this.extractGenTimeFromResp(tspResponse)
+
+    return [base64EncodedResp, "DigiCert", witnessTimestamp]
   }
 
-  const base64EncodedResp = Buffer.from(tspResponseBuffer).toString("base64")
-  const witnessTimestamp = extractGenTimeFromResp(tspResponse)
+  verify = async (
+    transactionHash: string,
+    expectedMR: string,
+    expectedTimestamp: number
+  ): Promise<boolean> => {
+    const tspResponseBuffer = Buffer.from(transactionHash, "base64")
+    const tspResponseAsn1 = asn1js.fromBER(tspResponseBuffer)
+    const tspResponse = new pkijs.TimeStampResp({
+      schema: tspResponseAsn1.result,
+    })
 
-  return [base64EncodedResp, "DigiCert", witnessTimestamp]
-}
+    const signedData = new pkijs.SignedData({
+      schema: tspResponse.timeStampToken!!.content,
+    })
+    const tstInfoAsn1 = asn1js.fromBER(
+      signedData.encapContentInfo.eContent!!.valueBlock.valueHexView,
+    )
+    const tstInfo = new pkijs.TSTInfo({ schema: tstInfoAsn1.result })
 
-const verify = async (
-  transactionHash: string, 
-  expectedMR: string, 
-  expectedTimestamp: number
-): Promise<boolean> => {
-  const tspResponseBuffer = Buffer.from(transactionHash, "base64")
-  const tspResponseAsn1 = asn1js.fromBER(tspResponseBuffer)
-  const tspResponse = new pkijs.TimeStampResp({
-    schema: tspResponseAsn1.result,
-  })
+    if (this.isoDate2unix(tstInfo.genTime) !== expectedTimestamp) {
+      return false
+    }
 
-  const signedData = new pkijs.SignedData({
-    schema: tspResponse.timeStampToken!!.content,
-  })
-  const tstInfoAsn1 = asn1js.fromBER(
-    signedData.encapContentInfo.eContent!!.valueBlock.valueHexView,
-  )
-  const tstInfo = new pkijs.TSTInfo({ schema: tstInfoAsn1.result })
+    // Verifying the content itself
+    const hashHex = createHash("sha256").update(expectedMR).digest("hex")
 
-  if (isoDate2unix(tstInfo.genTime) !== expectedTimestamp) {
-    return false
+    const messageImprintHash = Buffer.from(
+      tstInfo.messageImprint.hashedMessage.valueBlock.valueHexView,
+    ).toString("hex")
+    return messageImprintHash === hashHex
   }
 
-  // Verifying the content itself
-  const hashHex = createHash("sha256").update(expectedMR).digest("hex")
-
-  const messageImprintHash = Buffer.from(
-    tstInfo.messageImprint.hashedMessage.valueBlock.valueHexView,
-  ).toString("hex")
-  return messageImprintHash === hashHex
-}
-
-export { 
-  witness, 
-  verify,
-  type WitnessResponse 
 }
