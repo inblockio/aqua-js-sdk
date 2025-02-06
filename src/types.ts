@@ -16,7 +16,8 @@ export interface AquaOperationData {
 }
 
 export type RevisionType = "file" | "witness" | "signature" | "form" | "link"
-export type WitnessType = "tsa" | "eth" | "cli"
+export type WitnessType = "tsa" | "eth" | "nostr"
+export type WitnessPlatformType = 'cli' | 'metamask';
 export type WitnessNetwork = "sepolia" | "mainnet" | "nostr"
 export type SignType = "cli" | "metamask" | "did"
 
@@ -116,6 +117,7 @@ export interface SignatureResult {
 }
 
 
+
 export interface SignatureData {
   payload: string;
   signatures: SignatureItem[];
@@ -137,4 +139,31 @@ export interface IWitnessConfig {
 
 export interface AnObject {
   [key: string]: string | number | boolean |  any;
+}
+
+
+export interface WitnessMerkleProof {
+  depth?: string;
+  left_leaf?: string;
+  right_leaf?: string | null;
+  successor?: string;
+}
+
+export interface WitnessResult {
+  witness_merkle_root: string;
+  witness_timestamp: number;
+  witness_network: string;
+  witness_smart_contract_address: string;
+  witness_transaction_hash: string;
+  witness_sender_account_address: string;
+  witness_merkle_proof: string[] | WitnessMerkleProof[];
+}
+
+
+export interface GasEstimateResult {
+  error: string | null;
+  hasEnoughBalance: boolean ;
+  gasEstimate? : string ;
+  gasFee? : string;
+  balance? : string
 }

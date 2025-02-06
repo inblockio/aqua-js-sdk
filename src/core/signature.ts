@@ -6,6 +6,7 @@ import { CLISigner } from "../signature/sign_cli";
 import { dict2Leaves, formatMwTimestamp, getHashSum, getWallet } from "../utils";
 import { DIDSigner } from "../signature/sign_did";
 import MerkleTree from "merkletreejs";
+import { createAquaTree } from "../aquavhtree";
 
 
 
@@ -46,7 +47,7 @@ export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, h
                     })
                     return Err(logs);
                 }
-                let [wallet, walletAddress, publicKey] = getWallet(credentials.mnemonic)
+                let [wallet, _walletAddress, _publicKey] = getWallet(credentials.mnemonic)
                 let sign = new CLISigner();
                 signature = await sign.doSign(wallet, targetRevisionHash)
             } catch (error) {
@@ -107,10 +108,18 @@ export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, h
         aquaObject: aquaObject,
         logData: logs
     }
-    return Ok(data)
+    // Tree creation
+    let aquaObjectWithTree = createAquaTree(data)
+
+    return Ok(aquaObjectWithTree)
 }
 
-export async function signMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[], signType: SignType, credentials: Option<CredentialsData>): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[], signType: SignType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
+    logs.push({
+        log: "unimplmented need to be fixes",
+        logType :  LogType.ERROR
+    });
+
     return Err(logs)
 }

@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { AnObject, AquaObject, CredentialsData, RevisionTree, TreeMapping } from './types';
+import { AnObject, AquaObject, CredentialsData, GasEstimateResult, RevisionTree, TreeMapping } from './types';
 import { ethers, HDNodeWallet } from "ethers";
 import { Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
@@ -80,7 +80,7 @@ export function formatMwTimestamp(ts : string) {
     .replace("Z", "")
 }
 
-export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, providerUrl: string) => {
+export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, providerUrl: string) : Promise<GasEstimateResult>=> {
   try {
     // Connect to Ethereum provider
     // const provider = new ethers.JsonRpcProvider(providerUrl);
@@ -122,7 +122,7 @@ export const estimateWitnessGas = async (wallet_address: string, witness_event_v
 
   } catch (error : any) {
     console.error("Error estimating gas:", error);
-    return { error: error.message };
+    return { error: error.message  , hasEnoughBalance : false};
   }
 };
 
