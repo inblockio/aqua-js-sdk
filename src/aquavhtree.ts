@@ -1,6 +1,6 @@
 // import { RevisionTree } from "./model.js";
 
-import { RevisionTree } from "./types";
+import { AquaObject, RevisionTree } from "./types";
 
 function findNode(tree: RevisionTree, hash: string): RevisionTree | null {
     if (tree.hash === hash) {
@@ -76,7 +76,7 @@ export function createAquaObjectTree(aquaObject: any) {
 
 }
 
-export function createAquaTree(aquaObject: any) {
+export function createAquaTree(aquaObject: any) : AquaObject {
     let tree = createAquaObjectTree(aquaObject)
     let pathResult = findHashWithLongestPath(tree)
 

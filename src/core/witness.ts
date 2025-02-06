@@ -5,6 +5,7 @@ import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getWall
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
+import { createAquaTree } from "../aquavhtree";
 
 
 export async function verifyWitnessUtil(witness: Revision): Promise<Result<AquaOperationData, LogData[]>> {
@@ -12,9 +13,60 @@ export async function verifyWitnessUtil(witness: Revision): Promise<Result<AquaO
     return Err(logs)
 }
 
-export async function witnessAquaObjectUtil(aquaObject: AquaObject, hash: string, witnessType: WitnessType, witnessNetwork: WitnessNetwork, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
-    return Err(logs)
+
+
+    const verificationHashes = Object.keys(aquaObject.revisions);
+    let lastRevisionHash = verificationHashes[verificationHashes.length - 1];
+
+    const now = new Date().toISOString()
+    const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+    const revisionType = "witness";
+
+    let verificationData: any = {
+        previous_verification_hash: lastRevisionHash,
+        local_timestamp: timestamp,
+        revision_type: revisionType,
+
+    }
+    const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials!!, witnessNetwork)
+    
+    if (isErr(revisionResultData)) {
+        revisionResultData.data.forEach((e) => logs.push(e));
+        return Err(logs)
+    }
+
+    let witness : WitnessResult = revisionResultData.data;
+
+    verificationData = { ...verificationData, ...witness }
+
+    // Merklelize the dictionary
+    const leaves = dict2Leaves(verificationData)
+    const tree = new MerkleTree(leaves, getHashSum, {
+        duplicateOdd: false,
+    })
+
+
+    let verification_hash = "";
+    if (!enableScalar) {
+        verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
+        verificationData.leaves = leaves
+    } else {
+        verification_hash = tree.getHexRoot()
+    }
+
+    const revisions = aquaObject.revisions
+    revisions[verification_hash] = verificationData
+
+    let aquaObjectWithTree = createAquaTree(aquaObject)
+
+    let result: AquaOperationData = {
+        aquaObject: aquaObjectWithTree,
+        aquaObjects: null,
+        logData: logs
+    }
+    return Ok(result)
 }
 
 export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
@@ -266,6 +318,8 @@ const prepareWitness = async (
         witness_sender_account_address: publisher,
         witness_merkle_proof: [verificationHash],
     };
+
+
 
     return Ok(witness);
 };
