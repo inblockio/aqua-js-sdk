@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { AquaObject, CredentialsData, RevisionTree, TreeMapping } from './types';
-import { ethers } from "ethers";
+import { ethers, HDNodeWallet } from "ethers";
 import { Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
 export function getHashSum(data: string | Buffer): string {
@@ -26,7 +26,7 @@ export function prepareNonce(): string {
   return getHashSum(Date.now().toString());
 }
 
-export function getWallet(mnemonic: string) {
+export function getWallet(mnemonic: string) : [HDNodeWallet, string, string] {
   // Always trim the last new line
   const wallet = Wallet.fromPhrase(mnemonic.trim())
   const walletAddress = wallet.address.toLowerCase()
