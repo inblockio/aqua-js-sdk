@@ -111,14 +111,19 @@ export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, h
     // Tree creation
     let aquaObjectWithTree = createAquaTree(data)
 
-    return Ok(aquaObjectWithTree)
+    let result: AquaOperationData = {
+        aquaObject: aquaObjectWithTree,
+        aquaObjects: null,
+        logData: logs
+    }
+    return Ok(result)
 }
 
 export async function signMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[], signType: SignType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     logs.push({
         log: "unimplmented need to be fixes",
-        logType :  LogType.ERROR
+        logType: LogType.ERROR
     });
 
     return Err(logs)
