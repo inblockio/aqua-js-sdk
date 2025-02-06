@@ -1,5 +1,9 @@
 import { Result, Err, Option, Ok } from "rustic";
 import { AquaObject, AquaOperationData, LogData, RevisionType, FileObject, Revision, LogType } from "../types";
+import { checkFileHashAlreadyNotarized, createNewAquaObject, dict2Leaves, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
+import MerkleTree from "merkletreejs";
+import { createAquaTree } from "../aquavhtree";
+import { log } from "console";
 
 
 export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOperationData, LogData[]> {
@@ -53,10 +57,101 @@ export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOpera
 
 }
 
-export async function createGenesisRevision(timestamp: string, revisionType: RevisionType, fileObject: Option<FileObject>, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+// improve this function t work with form as genesis
+export async function createGenesisRevision(timestamp: string, revisionType: RevisionType, fileObject: FileObject, enableContent: boolean, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
-    return Err(logs);
+
+    let verificationData: any = {
+        previous_verification_hash: "",
+        local_timestamp: timestamp,
+        revision_type: revisionType,
+    }
+
+
+    verificationData["file_hash"] = getHashSum(fileObject.fileContent)
+    verificationData["file_nonce"] = prepareNonce()
+
+    switch (revisionType) {
+        case "file":
+            if (enableContent) {
+                verificationData["content"] = fileObject.fileContent
+
+                logs.push({
+                    log: `📄 content flag detected.`,
+                    logType: LogType.INFO
+                });
+            }
+
+            break
+        case "form":
+
+
+            let form_data_json: any = {}
+            try {
+                // Attempt to parse the JSON data
+                form_data_json = JSON.parse(fileObject.fileContent)
+            } catch (parseError) {
+                // Handle invalid JSON data
+                console.error("Error: The file does not contain valid JSON data.")
+                process.exit(1)
+            }
+
+            // Sort the keys
+            let form_data_sorted_keys = Object.keys(form_data_json)
+            let form_data_sorted_with_prefix: any = {}
+            for (let key of form_data_sorted_keys) {
+                form_data_sorted_with_prefix[`forms_${key}`] = form_data_json[key]
+            }
+
+            verificationData = {
+                ...verificationData,
+                ...form_data_sorted_with_prefix,
+            }
+            break
+
+        default:
+            logs.push({
+                log: `Genesis revision can either be form  or file.`,
+                logType: LogType.ERROR
+            })
+            return Err(logs);
+
+
+    }
+
+    const leaves = dict2Leaves(verificationData)
+    const tree = new MerkleTree(leaves, getHashSum, {
+        duplicateOdd: false,
+    })
+    let verificationHash = "";
+    if (enableScalar) {
+        verificationHash = "0x" + getHashSum(JSON.stringify(verificationData));
+
+        verificationData.leaves = leaves
+    } else {
+        verificationHash = tree.getHexRoot();
+    }
+
+    const aquaObject = createNewAquaObject();
+    const revisions = aquaObject.revisions
+    revisions[verificationHash] = verificationData.feeData
+
+
+    maybeUpdateFileIndex(aquaObject, verificationData, revisionType, fileObject.fileName, "")
+
+    // Tree creation
+    let aquaObjectWithTree = createAquaTree(aquaObject)
+
+    let result: AquaOperationData = {
+        aquaObject: aquaObjectWithTree,
+        aquaObjects: null,
+        logData: logs
+    }
+
+    return Ok(result);
+
+
 }
 
 
