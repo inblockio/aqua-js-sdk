@@ -1,7 +1,7 @@
 import { Result, Err, Option, Ok, isErr } from "rustic";
 import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData, IWitnessConfig, WitnessEthResponse, LogType, WitnessConfig, TransactionResult } from "../types";
 import MerkleTree from "merkletreejs";
-import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getWallet, maybeUpdateFileIndex } from "../utils";
+import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getWallet, maybeUpdateFileIndex, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
@@ -31,13 +31,13 @@ export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType:
 
     }
     const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials!!, witnessNetwork)
-    
+
     if (isErr(revisionResultData)) {
         revisionResultData.data.forEach((e) => logs.push(e));
         return Err(logs)
     }
 
-    let witness : WitnessResult = revisionResultData.data;
+    let witness: WitnessResult = revisionResultData.data;
 
     verificationData = { ...verificationData, ...witness }
 
@@ -323,3 +323,81 @@ const prepareWitness = async (
 
     return Ok(witness);
 };
+
+
+export async function verifyWitness(
+    witnessData: Revision,
+    verificationHash: string,
+    doVerifyMerkleProof: boolean,
+): Promise<[boolean, LogData[]]> {
+    let logs: Array<LogData> = [];
+
+
+
+    let isValid: boolean = false;
+    if (verificationHash === "") {
+
+        logs.push({
+            log: `The verification Hash MUST NOT be empty`,
+            logType: LogType.ERROR,
+        })
+        return [isValid, logs]
+    }
+
+    if (witnessData.witness_network === "nostr") {
+        let witnessNostr = new WitnessNostr();
+        isValid = await witnessNostr.verify(
+            witnessData.witness_transaction_hash!,
+            witnessData.witness_merkle_root!,
+            witnessData.witness_timestamp!,
+        )
+    } else if (witnessData.witness_network === "TSA_RFC3161") {
+        let witnessTsa = new WitnessTSA();
+        isValid = await witnessTsa.verify(
+            witnessData.witness_transaction_hash!,
+            witnessData.witness_merkle_root!,
+            witnessData.witness_timestamp!,
+        )
+    } else {
+        // Verify the transaction hash via the Ethereum blockchain
+        // let  witnessEth =  new WitnessEth();
+        let logMessage = "";
+        [isValid, logMessage] = await WitnessEth.verify(
+            witnessData.witness_network as WitnessNetwork,
+            witnessData.witness_transaction_hash!,
+            witnessData.witness_merkle_root!,
+            witnessData.witness_timestamp,
+        )
+        logs.push({
+            log: logMessage,
+            logType: isValid ? LogType.SUCCESS : LogType.ERROR
+        })
+
+
+    }
+
+    // At this point, we know that the witness matches.
+    if (doVerifyMerkleProof) {
+        logs.push({
+            log: `verifying merkle integrity`,
+            logType: LogType.INFO
+        })
+        // Only verify the witness merkle proof when verifyWitness is successful,
+        // because this step is expensive.
+
+        //todo this will improved
+        isValid = verifyMerkleIntegrity(
+            // JSON.parse(witnessData.witness_merkle_proof),
+            // verification_hash,
+            witnessData.witness_merkle_proof ?? [],
+            witnessData.witness_merkle_root!
+        )
+
+        logs.push({
+            log: `Merkle integrity is ${isValid ? '' : 'NOT'} valid `,
+            logType: isValid ? LogType.SUCCESS : LogType.ERROR
+        })
+
+    }
+    return [isValid, logs]
+}

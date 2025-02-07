@@ -68,7 +68,7 @@ export interface Revision {
   witness_transaction_hash?: string;
   witness_sender_account_address?: string;
   witness_merkle_proof?: string[];
-  signature?: string  | SignatureData;
+  signature?: string  | SignatureData | any;
   signature_public_key?: string;
   signature_wallet_address?: string;
   signature_type?: string;

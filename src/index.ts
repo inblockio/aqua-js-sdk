@@ -23,8 +23,8 @@ export default class AquaTree {
         return createGenesisRevision(fileObject, isForm, enableContent, enableScalar)
     }
 
-    verifyAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
-        return verifyAquaObjectUtil(aquaObject)
+    verifyAquaObject = async (aquaObject: AquaObject, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
+        return verifyAquaObjectUtil(aquaObject, fileObject)
     }
 
     // Wittness

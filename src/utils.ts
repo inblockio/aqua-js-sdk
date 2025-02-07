@@ -3,6 +3,7 @@ import { AnObject, AquaObject, CredentialsData, GasEstimateResult, RevisionTree,
 import { ethers, HDNodeWallet } from "ethers";
 import { Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
+import MerkleTree from 'merkletreejs';
 
 
 
@@ -172,3 +173,49 @@ export const estimateWitnessGas = async (wallet_address: string, witness_event_v
 
 
 
+export function verifyMerkleIntegrity(merkleBranch : string[], merkleRoot: string) :  boolean {
+  if (merkleBranch.length === 0) {
+    return false
+  }
+  
+  //
+  // let prevSuccessor = null
+  // for (const idx in merkleBranch) {
+  //   const node = merkleBranch[idx]
+  //   const leaves = [node.left_leaf, node.right_leaf]
+  //   if (prevSuccessor) {
+  //     if (!leaves.includes(prevSuccessor)) {
+  //       return false
+  //     }
+  //   } else {
+  //     // This means we are at the beginning of the loop.
+  //     if (!leaves.includes(verificationHash)) {
+  //       // In the beginning, either the left or right leaf must match the
+  //       // verification hash.
+  //       return false
+  //     }
+  //   }
+
+  //   let calculatedSuccessor: string
+  //   if (!node.left_leaf) {
+  //     calculatedSuccessor = node.right_leaf
+  //   } else if (!node.right_leaf) {
+  //     calculatedSuccessor = node.left_leaf
+  //   } else {
+  //     calculatedSuccessor = getHashSum(node.left_leaf + node.right_leaf)
+  //   }
+  //   if (calculatedSuccessor !== node.successor) {
+  //     return false
+  //   }
+  //   prevSuccessor = node.successor
+  // }
+
+  let witnessMerkleProofLeaves = merkleBranch
+  const tree = new MerkleTree(witnessMerkleProofLeaves, getHashSum, {
+    duplicateOdd: false,
+  })
+  const hexRoot = tree.getHexRoot()
+  let merkleRootOk = hexRoot === merkleRoot
+
+  return merkleRootOk
+}

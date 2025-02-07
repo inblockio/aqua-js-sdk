@@ -7,6 +7,7 @@ import { dict2Leaves, formatMwTimestamp, getHashSum, getWallet } from "../utils"
 import { DIDSigner } from "../signature/sign_did";
 import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
+import { ethers } from "ethers";
 
 
 
@@ -128,3 +129,54 @@ export async function signMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper
 
     return Err(logs)
 }
+
+
+
+export async function verifySignature  (data: Revision, verificationHash: string) :Promise<[boolean, LogData[]]> {
+
+    let logs: Array<LogData> = [];
+
+   
+    // TODO enforce that the verificationHash is a correct SHA3 sum string
+    // Specify signature correctness
+    let signatureOk = false
+    if (verificationHash === "") {
+      // The verificationHash MUST NOT be empty. This also implies that a genesis revision cannot
+      // contain a signature.
+
+      logs.push({
+        log:`The verificationHash MUST NOT be empty`,
+        logType:LogType.ERROR, 
+      })
+
+      return [signatureOk, logs]
+    }
+  
+    console.log("did:key == " + data.signature_type);
+    let signerDID =  new DIDSigner();
+    // Signature verification
+    switch (data.signature_type) {
+      case "did:key":
+        signatureOk = await signerDID.verify(data.signature, data.signature_public_key!!, verificationHash)
+        break
+      case "ethereum:eip-191":
+        throw new Error("Need to be verified")
+        // The padded message is required
+        const paddedMessage = `I sign this revision: [${verificationHash}]`
+        try {
+            
+          const recoveredAddress = ethers.recoverAddress(
+            ethers.hashMessage(paddedMessage),
+            data.signature,
+          )
+          signatureOk =
+            recoveredAddress.toLowerCase() ===
+            data.signature_wallet_address!!.toLowerCase()
+        } catch (e) {
+          // continue regardless of error
+        }
+        break
+    }
+  
+    return [signatureOk, logs]
+  }
