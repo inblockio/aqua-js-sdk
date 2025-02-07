@@ -1,6 +1,6 @@
 import { Result, Err, Option, Ok } from "rustic";
 import { AquaObject, AquaOperationData, LogData, RevisionType, FileObject, Revision, LogType } from "../types";
-import { checkFileHashAlreadyNotarized, createNewAquaObject, dict2Leaves, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
+import { checkFileHashAlreadyNotarized, createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
 import { log } from "console";
@@ -58,9 +58,18 @@ export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOpera
 }
 
 // improve this function t work with form as genesis
-export async function createGenesisRevision(timestamp: string, revisionType: RevisionType, fileObject: FileObject, enableContent: boolean, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+export async function createGenesisRevision(fileObject: FileObject, isForm: boolean , enableContent: boolean, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+    //timestamp: string, revisionType: RevisionType,
     let logs: Array<LogData> = [];
 
+
+    const now = new Date().toISOString()
+    const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+    let revisionType = "file";
+
+    if (isForm) {
+        revisionType = "form"
+    }
 
     let verificationData: any = {
         previous_verification_hash: "",

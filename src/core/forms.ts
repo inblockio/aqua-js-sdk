@@ -11,3 +11,10 @@ export async function LinkAquaObjectToFormUtil(aquaObject: AquaObject): Promise<
     let logs: Array<LogData> = [];
     return Err(logs)
 }
+
+
+
+export async function hideFormElements(aquaObject: AquaObject, elementsToHide: Array<string>): Promise<Result<AquaOperationData, LogData[]>>  {
+    let logs: Array<LogData> = [];
+    return Err(logs)
+}

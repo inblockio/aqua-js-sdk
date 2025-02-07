@@ -7,7 +7,7 @@ import { verifyWitnessUtil, witnessAquaObjectUtil, witnessMultipleAquaObjectsUti
 import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, RevisionType, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
 import { Result, Err, Ok, isOk, Option } from 'rustic';
 
-class AquaTree {
+export default class AquaTree {
 
     removeLastRevision = (aquaObject: AquaObject): Result<AquaOperationData, LogData[]> => {
         return removeLastRevisionUtil(aquaObject)
@@ -18,8 +18,8 @@ class AquaTree {
         return createContentRevisionUtil(aquaObject, enableScalar)
     }
 
-    createGenesisRevision = async (timestamp: string, revisionType: RevisionType, fileObject: FileObject, enableContent :  boolean,enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-        return createGenesisRevision(timestamp, revisionType, fileObject, enableContent, enableScalar)
+    createGenesisRevision = async (fileObject: FileObject, isForm : boolean =false,  enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createGenesisRevision(fileObject, isForm ,enableContent, enableScalar)
     }
 
     verifyAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
@@ -76,14 +76,18 @@ class AquaTree {
         return LinkAquaObjectToFormUtil(aquaObject)
     }
 
+    hideFormElements = async (aquaObject: AquaObject, elementsToHide: Array<string>): Promise<Result<AquaOperationData, LogData[]>> => {
+        return hideFormElementsUtil(aquaObject, elementsToHide)
+    }
+
 
     // Revisions
-    getRevisionByHash =  (aquaObject: AquaObject, hash : string): Result<Revision, LogData[]> => {
+    getRevisionByHash = (aquaObject: AquaObject, hash: string): Result<Revision, LogData[]> => {
         return getRevisionByHashUtil(aquaObject, hash)
     }
 
     // Revisions
-    getLastRevision =  (aquaObject: AquaObject): Result<Revision, LogData[]>=> {
+    getLastRevision = (aquaObject: AquaObject): Result<Revision, LogData[]> => {
         return getLastRevisionUtil(aquaObject)
     }
 
@@ -92,4 +96,8 @@ class AquaTree {
         return getFileByHashUtil(hash)
     }
 
+}
+
+function hideFormElementsUtil(aquaObject: AquaObject, elementsToHide: string[]): Result<AquaOperationData, LogData[]> | PromiseLike<Result<AquaOperationData, LogData[]>> {
+    throw new Error("Function not implemented.");
 }
