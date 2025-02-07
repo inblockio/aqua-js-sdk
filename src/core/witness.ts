@@ -112,7 +112,7 @@ export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrap
     const revisionType = "witness";
 
     let aquaObjectsResult: AquaObject[] = [];
-    let index = 0;
+    // let index = 0;
     for (let item of aquaObjects) {
         let latestOrSpecifiedRevisionKey = "";
         if (item.revision != null && item.revision != undefined && item.revision.length > 0) {

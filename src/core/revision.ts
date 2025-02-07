@@ -43,7 +43,7 @@ export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOpera
             logType: LogType.HINT
         })
         result.aquaObject = null
-
+ 
         return Ok(result)
     } else {
 

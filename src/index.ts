@@ -14,8 +14,8 @@ export default class AquaTree {
     }
 
     // Content
-    createContentRevision = async (aquaObject: AquaObjectWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-        return createContentRevisionUtil(aquaObject, enableScalar)
+    createContentRevision = async (aquaObject: AquaObjectWrapper, fileObject: FileObject,  enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createContentRevisionUtil(aquaObject, fileObject, enableScalar)
     }
 
     createGenesisRevision = async (fileObject: FileObject, isForm : boolean =false,  enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
