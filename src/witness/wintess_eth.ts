@@ -273,11 +273,13 @@ export class WitnessEth {
     transactionHash: string,
     expectedMR: string,
     expectedTimestamp?: number
-  ): Promise<string> {
+  ): Promise<[boolean,string]> {
     const provider = ethers.getDefaultProvider(WitnessNetwork);
 
     const tx = await provider.getTransaction(transactionHash);
-    if (!tx) return 'NOT FOUND';
+    if (!tx) {
+      return [false,'Transaction not found']
+    };
 
     let actual = tx.data.split('0x9cef4ea1')[1];
     actual = actual.slice(0, 128);
@@ -285,6 +287,6 @@ export class WitnessEth {
     await this.sleep(200); // prevent overloading free endpoint
 
     const mrSans0x = expectedMR.startsWith('0x') ? expectedMR.slice(2) : expectedMR;
-    return `${actual === mrSans0x}`;
+    return [actual === mrSans0x, `${actual === mrSans0x ? 'Transaction found' : ' Transaction not valid'}`];
   }
 }
