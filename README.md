@@ -16,8 +16,7 @@ npm install aqua-verifier
 ## Usage
 
 ```typescript
-import AquaTree from 'aqua-verifier';
-import {FileObject} from 'aqua-verifier/types'
+import AquaTree, {FileObject} from 'aqua-verifier';
 import { Result, isErr } from "rustic";
 
 let aquaTree = new AquaTree();

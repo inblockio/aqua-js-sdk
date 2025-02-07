@@ -136,7 +136,6 @@ export async function verifySignature  (data: Revision, verificationHash: string
 
     let logs: Array<LogData> = [];
 
-   
     // TODO enforce that the verificationHash is a correct SHA3 sum string
     // Specify signature correctness
     let signatureOk = false

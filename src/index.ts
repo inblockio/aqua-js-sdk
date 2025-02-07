@@ -8,6 +8,9 @@ import { verifyWitnessUtil, witnessAquaObjectUtil, witnessMultipleAquaObjectsUti
 import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, RevisionType, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
 import { Result, Err, Ok, isOk, Option } from 'rustic';
 
+export * from "./types";
+// export * from "./utils";
+
 export default class AquaTree {
 
     removeLastRevision = (aquaObject: AquaObject): Result<AquaOperationData, LogData[]> => {
