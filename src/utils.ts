@@ -63,10 +63,18 @@ export function createNewAquaObject(): AquaObject {
   };
 }
 
-export function checkFileHashAlreadyNotarized(fileHash: string, aquaObject: AquaObject): void {
-  if (fileHash in aquaObject.file_index) {
-    throw new Error(`File hash ${fileHash} has already been notarized`);
+export function checkFileHashAlreadyNotarized(fileHash: string, aquaObject: AquaObject): boolean {
+
+  // Check if this file hash already exists in any revision
+  const existingRevision = Object.values(aquaObject.revisions).find(
+    (revision) => revision.file_hash && revision.file_hash === fileHash,
+  );
+  if (existingRevision) {
+    return true;
+  } else {
+    return false;
   }
+
 }
 
 export function prepareNonce(): string {

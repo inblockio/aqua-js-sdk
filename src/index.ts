@@ -1,8 +1,9 @@
 import { createContentRevisionUtil, getFileByHashUtil } from "./core/content";
-import { LinkAquaObjectToFormUtil, verifyFormUtil } from "./core/forms";
+import { hideFormElementsUtil, LinkAquaObjectToFormUtil, verifyFormUtil } from "./core/forms";
 import { linkAquaObjectUtil, linkMultipleAquaObjectsUtil, verifyLinkUtil } from "./core/link";
 import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
 import { signAquaObjectUtil, signMultipleAquaObjectsUtil, verifySignatureUtil } from "./core/signature";
+import { verifyAquaObjectUtil } from "./core/verify";
 import { verifyWitnessUtil, witnessAquaObjectUtil, witnessMultipleAquaObjectsUtil } from "./core/witness";
 import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, RevisionType, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
 import { Result, Err, Ok, isOk, Option } from 'rustic';
@@ -14,8 +15,8 @@ export default class AquaTree {
     }
 
     // Content
-    createContentRevision = async (aquaObject: AquaObjectWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-        return createContentRevisionUtil(aquaObject, enableScalar)
+    createContentRevision = async (aquaObject: AquaObjectWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createContentRevisionUtil(aquaObject, fileObject, enableScalar)
     }
 
     createGenesisRevision = async (fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
@@ -23,8 +24,7 @@ export default class AquaTree {
     }
 
     verifyAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
-        let logs: Array<LogData> = [];
-        return Err(logs)
+        return verifyAquaObjectUtil(aquaObject)
     }
 
     // Wittness
@@ -92,12 +92,8 @@ export default class AquaTree {
     }
 
     // get file
-    getFileByHash = async (hash: String): Promise<Result<AquaOperationData, LogData[]>> => {
-        return getFileByHashUtil(hash)
+    getFileByHash = async (aquaObject: AquaObject, hash: string): Promise<Result<string, LogData[]>> => {
+        return getFileByHashUtil(aquaObject, hash)
     }
 
-}
-
-function hideFormElementsUtil(aquaObject: AquaObject, elementsToHide: string[]): Result<AquaOperationData, LogData[]> | PromiseLike<Result<AquaOperationData, LogData[]>> {
-    throw new Error("Function not implemented.");
 }
