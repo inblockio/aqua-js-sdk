@@ -1,5 +1,5 @@
 import { Result, Err, Ok } from "rustic";
-import { AquaObjectWrapper, AquaOperationData, FileObject, LogData, LogType } from "../types";
+import { AquaObject, AquaObjectWrapper, AquaOperationData, FileObject, LogData, LogType } from "../types";
 import { checkFileHashAlreadyNotarized, dict2Leaves, formatMwTimestamp, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
@@ -56,9 +56,8 @@ export async function createContentRevisionUtil(aquaObjectWrapper: AquaObjectWra
     const revisions = aquaObjectWrapper.aquaObject.revisions
     revisions[verification_hash] = verificationData
 
-
     maybeUpdateFileIndex(aquaObjectWrapper.aquaObject, verificationData, revisionType, fileObject.fileName, "");
-    
+
     let aquaObjectWithTree = createAquaTree(aquaObjectWrapper.aquaObject)
 
     let result: AquaOperationData = {
@@ -69,9 +68,24 @@ export async function createContentRevisionUtil(aquaObjectWrapper: AquaObjectWra
     return Ok(result)
 }
 
-export async function getFileByHashUtil(hash: String): Promise<Result<AquaOperationData, LogData[]>> {
+export async function getFileByHashUtil(aquaObject: AquaObject, hash: string): Promise<Result<string, LogData[]>> {
     let logs: Array<LogData> = [];
 
+    let res = aquaObject.file_index[hash]
 
-    return Err(logs)
+    if (res) {
+        logs.push({
+            log: `File with hash  found`,
+            logType: LogType.SUCCESS
+        });
+        return Ok(res)
+    } else {
+        logs.push({
+            log: `File with hash ot found`,
+            logType: LogType.ERROR
+        });
+        return Err(logs)
+    }
+
 }
+
