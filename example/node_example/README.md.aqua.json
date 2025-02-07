@@ -1,0 +1,14 @@
+{
+    "revisions": {
+      "0xa590347a48c63f33154c935b0931e98418bc7114e5bfcc96bf6ca0e29290047d": {
+        "previous_verification_hash": "",
+        "local_timestamp": "20250207090212",
+        "revision_type": "file",
+        "file_hash": "7b35d9099d0b770818d9bd7ae7a36d400b3887916648738b1a911edca198ef08",
+        "file_nonce": "zxFzOfiLHfqBlD_WgS3LXVfVhCuZEBMp7V8imsWNY2Q"
+      }
+    },
+    "file_index": {
+      "0xa590347a48c63f33154c935b0931e98418bc7114e5bfcc96bf6ca0e29290047d": "package.json"
+    }
+  }
