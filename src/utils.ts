@@ -170,9 +170,6 @@ export const estimateWitnessGas = async (wallet_address: string, witness_event_v
   }
 };
 
-
-
-
 export function verifyMerkleIntegrity(merkleBranch : string[], merkleRoot: string) :  boolean {
   if (merkleBranch.length === 0) {
     return false
@@ -218,4 +215,15 @@ export function verifyMerkleIntegrity(merkleBranch : string[], merkleRoot: strin
   let merkleRootOk = hexRoot === merkleRoot
 
   return merkleRootOk
+}
+export const getLatestVH = (aquaObject: AquaObject) => {
+  const verificationHashes = Object.keys(aquaObject.revisions)
+  return verificationHashes[verificationHashes.length - 1]
+}
+
+
+export const getTimestamp = () => {
+  const now = new Date().toISOString()
+  const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+  return timestamp
 }
