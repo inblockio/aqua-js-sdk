@@ -124,7 +124,7 @@ export function formatMwTimestamp(ts: string) {
     .replace("Z", "")
 }
 
-export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, providerUrl: string): Promise<GasEstimateResult> => {
+export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, _providerUrl: string): Promise<GasEstimateResult> => {
   try {
     // Connect to Ethereum provider
     // const provider = new ethers.JsonRpcProvider(providerUrl);

@@ -1,4 +1,4 @@
-import { HDNodeWallet, Wallet } from "ethers"
+import { HDNodeWallet } from "ethers"
 
 
 

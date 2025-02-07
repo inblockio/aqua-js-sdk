@@ -5,8 +5,8 @@ import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, remo
 import { signAquaObjectUtil, signMultipleAquaObjectsUtil, verifySignatureUtil } from "./core/signature";
 import { verifyAquaObjectUtil } from "./core/verify";
 import { verifyWitnessUtil, witnessAquaObjectUtil, witnessMultipleAquaObjectsUtil } from "./core/witness";
-import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, RevisionType, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
-import { Result, Err, Ok, isOk, Option } from 'rustic';
+import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision,  SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
+import { Result, Option } from 'rustic';
 
 export * from "./types";
 // export * from "./utils";

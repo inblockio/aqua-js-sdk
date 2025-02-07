@@ -2,8 +2,8 @@
   "name": "aqua_tree_example",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "tsc && node ./dist/index.js"
   },

@@ -272,7 +272,7 @@ export class WitnessEth {
     WitnessNetwork: WitnessNetwork,
     transactionHash: string,
     expectedMR: string,
-    expectedTimestamp?: number
+    _expectedTimestamp?: number
   ): Promise<[boolean,string]> {
     const provider = ethers.getDefaultProvider(WitnessNetwork);
 

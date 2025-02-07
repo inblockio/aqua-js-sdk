@@ -1,4 +1,4 @@
-import * as fs from "fs"
+// import * as fs from "fs"
 import * as asn1js from "asn1js"
 import * as pkijs from "pkijs"
 import { createHash } from "node:crypto"

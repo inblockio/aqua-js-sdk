@@ -1,5 +1,5 @@
 import { Result, Err, Option, Ok, isErr } from "rustic";
-import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData, IWitnessConfig, WitnessEthResponse, LogType, WitnessConfig, TransactionResult } from "../types";
+import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData,   LogType, WitnessConfig, TransactionResult } from "../types";
 import MerkleTree from "merkletreejs";
 import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getWallet, maybeUpdateFileIndex, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
@@ -8,7 +8,7 @@ import { WitnessNostr } from "../witness/witness_nostr";
 import { createAquaTree } from "../aquavhtree";
 
 
-export async function verifyWitnessUtil(witness: Revision): Promise<Result<AquaOperationData, LogData[]>> {
+export async function verifyWitnessUtil(_witness: Revision): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     return Err(logs)
 }
@@ -225,7 +225,7 @@ const prepareWitness = async (
                 if (credentials == null || credentials == undefined) {
                     return Err(logs)
                 }
-                let [wallet, walletAddress, publicKey] = getWallet(credentials.mnemonic);
+                let [_wallet, walletAddress, _publicKey] = getWallet(credentials.mnemonic);
 
                 console.log("Wallet address: ", walletAddress);
 

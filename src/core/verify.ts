@@ -1,4 +1,4 @@
-import { Result, Err, Ok, Option, isErr } from "rustic";
+import { Result, Err, Ok,  isErr } from "rustic";
 import { Revision, AquaOperationData, LogData, AquaObject, FileObject, LogType } from "../types";
 import { getHashSum } from "../utils";
 import MerkleTree from "merkletreejs";
@@ -121,7 +121,7 @@ async function verifyRevision(aquaObject: AquaObject, revision: Revision, verifi
             break
         case "link":
             let linkOk: boolean = true
-            for (const [idx, vh] of revision.link_verification_hashes.entries()) {
+            for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
                 // const fileUri = getUnixPathFromAquaPath(aquaObject.file_index[fileHash])
                 const fileUri = aquaObject.file_index[vh];
                 const aquaFileUri = `${fileUri}.aqua.json`
@@ -133,7 +133,7 @@ async function verifyRevision(aquaObject: AquaObject, revision: Revision, verifi
                 }
                 const linkAquaObject = JSON.parse(fileObj?.fileContent)
 
-                let linkStatus: string
+                // let _linkStatus: string
 
                 let linkVerificationResult = await verifyAquaObjectUtil(linkAquaObject, fileObjects)
 
@@ -147,7 +147,7 @@ async function verifyRevision(aquaObject: AquaObject, revision: Revision, verifi
                 // const actualVH = linkVerificationHashes[linkVerificationHashes.length - 1]
 
                 // linkOk = linkOk && (linkStatus === VERIFIED_VERIFICATION_STATUS) && (expectedVH == actualVH)
-                isSuccess = true
+                // isSuccess = true
           
             }
             isSuccess = linkOk

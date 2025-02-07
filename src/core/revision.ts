@@ -1,9 +1,9 @@
-import { Result, Err, Option, Ok } from "rustic";
-import { AquaObject, AquaOperationData, LogData, RevisionType, FileObject, Revision, LogType } from "../types";
-import { checkFileHashAlreadyNotarized, createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
+import { Result, Err,  Ok } from "rustic";
+import { AquaObject, AquaOperationData, LogData,  FileObject, Revision, LogType } from "../types";
+import {  createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
-import { log } from "console";
+
 
 
 export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOperationData, LogData[]> {

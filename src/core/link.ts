@@ -1,15 +1,15 @@
 import { Result, Err, Ok, isOk } from "rustic";
-import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, RevisionTree, TreeMapping } from "../types";
-import { dict2Leaves, formatMwTimestamp, getFileHashSum, getHashSum, getLatestVH, getTimestamp } from "../utils";
+import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper } from "../types";
+import { dict2Leaves,  getHashSum, getLatestVH, getTimestamp } from "../utils";
 import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
 
 
 
-export async function verifyLinkUtil(revision: Revision): Promise<Result<AquaOperationData, LogData[]>> {
+export async function verifyLinkUtil(_revision: Revision): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
-    let linkOk: boolean = true
+    // let _linkOk: boolean = true
     // for (const [idx, vh] of revision.link_verification_hashes.entries()) {
     //     // const fileUri = getUnixPathFromAquaPath(aquaObject.file_index[fileHash])
     //     const fileUri = revision.file_index[vh];

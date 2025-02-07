@@ -1,6 +1,5 @@
 import { Result, Err, Option, Ok } from "rustic";
-import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, CredentialsData, LogType } from "../types";
-import { SignType } from "../types";
+import { Revision, AquaOperationData, LogData, SignType, AquaObjectWrapper, CredentialsData, LogType } from "../types";
 import { MetaMaskSigner } from "../signature/sign_metamask";
 import { CLISigner } from "../signature/sign_cli";
 import { dict2Leaves, formatMwTimestamp, getHashSum, getWallet } from "../utils";
@@ -11,13 +10,13 @@ import { ethers } from "ethers";
 
 
 
-export async function verifySignatureUtil(signature: Revision): Promise<Result<AquaOperationData, LogData[]>> {
+export async function verifySignatureUtil(_signature: Revision): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     return Err(logs)
 }
 
 
-export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, hash: string, signType: SignType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, _hash: string, signType: SignType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let aquaObject = aquaObjectWrapper.aquaObject
     let logs: Array<LogData> = [];
     let targetRevisionHash = "";
@@ -120,7 +119,7 @@ export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, h
     return Ok(result)
 }
 
-export async function signMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[], signType: SignType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signMultipleAquaObjectsUtil(_aquaObjects: AquaObjectWrapper[], _signType: SignType, _credentials: Option<CredentialsData>, _enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     logs.push({
         log: "unimplmented need to be fixes",
