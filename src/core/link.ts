@@ -1,4 +1,4 @@
-import { Result, Err, Ok } from "rustic";
+import { Result, Err, Ok, isOk } from "rustic";
 import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, RevisionTree, TreeMapping } from "../types";
 import { dict2Leaves, formatMwTimestamp, getFileHashSum, getHashSum, getLatestVH, getTimestamp } from "../utils";
 import MerkleTree from "merkletreejs";
@@ -29,10 +29,14 @@ export async function verifyLinkUtil(revision: Revision): Promise<Result<AquaOpe
 }
 
 
-export async function linkAquaObjectUtil( aquaObject: AquaObject, linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+export async function linkAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     const timestamp = getTimestamp()
-    const previous_verification_hash = getLatestVH(aquaObject)
+    let previous_verification_hash = aquaObjectWrapper.revision
+
+    if(!aquaObjectWrapper.revision || aquaObjectWrapper.revision === ""){
+        previous_verification_hash = getLatestVH(aquaObjectWrapper.aquaObject)
+    }
 
     let newRevision: Revision = {
         previous_verification_hash: previous_verification_hash, //previousVerificationHash,
@@ -79,15 +83,14 @@ export async function linkAquaObjectUtil( aquaObject: AquaObject, linkAquaObject
 
     let updatedAquaObject: AquaObject = {
         revisions: {
-            ...aquaObject.revisions,
+            ...aquaObjectWrapper.aquaObject.revisions,
             [currentVerificationHash]: newRevision
         },
         file_index: {
-            ...aquaObject.file_index,
+            ...aquaObjectWrapper.aquaObject.file_index,
             [currentVerificationHash]: currentVerificationHash
         }
     }
-
 
     // Tree creation
     let aquaObjectWithTree = createAquaTree(updatedAquaObject)
@@ -98,13 +101,28 @@ export async function linkAquaObjectUtil( aquaObject: AquaObject, linkAquaObject
         aquaObjects: []
     };
 
-
-
-
     return Ok(resutData)
 }
 
-export async function linkMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[]): Promise<Result<AquaOperationData, LogData[]>> {
+export async function linkMultipleAquaObjectsUtil(aquaObjectWrappers: AquaObjectWrapper[], linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean): Promise<Result<AquaOperationData[], LogData[]>> {
+    // let logs: Array<LogData> = [];
+
     let logs: Array<LogData> = [];
-    return Err(logs)
+    let aquaOperationResults: AquaOperationData[] = [];
+
+    for (const aquaObject of aquaObjectWrappers) {
+        const result = await linkAquaObjectUtil(aquaObject, linkAquaObjectWrapper, enableScalar); // Assuming enableScalar is false by default
+
+        if (isOk(result)) {
+            aquaOperationResults.push(result.data);
+        } else {
+            logs.push(...result.data);
+        }
+    }
+
+    if (logs.length > 0) {
+        return Err(logs);
+    }
+
+    return Ok(aquaOperationResults);
 }

@@ -59,12 +59,12 @@ export default class AquaTree {
         return verifyLinkUtil(linkRevision)
     }
 
-    linkAquaObject = async (aquaObject: AquaObject, linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-        return linkAquaObjectUtil(aquaObject, linkAquaObjectWrapper, enableScalar)
+    linkAquaObject = async (aquaObjectWrapper: AquaObjectWrapper, linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return linkAquaObjectUtil(aquaObjectWrapper, linkAquaObjectWrapper, enableScalar)
     }
 
-    linkMultipleAquaObjects = async (aquaObjects: AquaObjectWrapper[]): Promise<Result<AquaOperationData, LogData[]>> => {
-        return linkMultipleAquaObjectsUtil(aquaObjects)
+    linkMultipleAquaObjects = async (aquaObjectWrappers: AquaObjectWrapper[], linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData[], LogData[]>> => {
+        return linkMultipleAquaObjectsUtil(aquaObjectWrappers, linkAquaObjectWrapper, enableScalar)
     }
 
     // Forms -- also and form key ,remove form key
