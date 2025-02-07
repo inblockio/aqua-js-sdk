@@ -101,8 +101,8 @@ export interface AquaObjectWrapper {
 export interface AquaObject {
   revisions: Revisions;
   file_index: FileIndex;
-  tree: RevisionTree;
-  treeMapping: TreeMapping;
+  tree?: RevisionTree;
+  treeMapping?: TreeMapping;
 }
 
 

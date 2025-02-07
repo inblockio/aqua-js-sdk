@@ -18,8 +18,8 @@ export default class AquaTree {
         return createContentRevisionUtil(aquaObject, enableScalar)
     }
 
-    createGenesisRevision = async (fileObject: FileObject, isForm : boolean =false,  enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-        return createGenesisRevision(fileObject, isForm ,enableContent, enableScalar)
+    createGenesisRevision = async (fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createGenesisRevision(fileObject, isForm, enableContent, enableScalar)
     }
 
     verifyAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
@@ -59,8 +59,8 @@ export default class AquaTree {
         return verifyLinkUtil(linkRevision)
     }
 
-    linkAquaObject = async (aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> => {
-        return linkAquaObjectUtil(aquaObject)
+    linkAquaObject = async (aquaObject: AquaObject, linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return linkAquaObjectUtil(aquaObject, linkAquaObjectWrapper, enableScalar)
     }
 
     linkMultipleAquaObjects = async (aquaObjects: AquaObjectWrapper[]): Promise<Result<AquaOperationData, LogData[]>> => {
