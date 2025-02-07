@@ -1,4 +1,4 @@
-import { Result, Err, Ok, Option } from "rustic";
+import { Result, Err, Ok, Option, isErr } from "rustic";
 import { Revision, AquaOperationData, LogData, AquaObject, FileObject, LogType } from "../types";
 import { getHashSum } from "../utils";
 import MerkleTree from "merkletreejs";
@@ -39,7 +39,7 @@ export async function verifyAquaObjectUtil(aquaObject: AquaObject, fileObject: A
     return Ok(data);
 }
 
-async function verifyRevision(aquaObject: AquaObject, revision: Revision, verificationHash: string, fileObject: Array<FileObject>, isScalar: boolean): Promise<[boolean, Array<LogData>]> {
+async function verifyRevision(aquaObject: AquaObject, revision: Revision, verificationHash: string, fileObjects: Array<FileObject>, isScalar: boolean): Promise<[boolean, Array<LogData>]> {
     let logs: Array<LogData> = [];
     let doVerifyMerkleProof = false; // to be improved rather than hard coded
     let isSuccess = true;
@@ -85,7 +85,7 @@ async function verifyRevision(aquaObject: AquaObject, revision: Revision, verifi
                 console.log("File index", JSON.stringify(aquaObject.file_index));
                 console.log("Has needed  ", verificationHash);
                 let fileName = aquaObject.file_index[verificationHash]
-                let fileObjectItem = fileObject.find((e) => e.fileName == fileName);
+                let fileObjectItem = fileObjects.find((e) => e.fileName == fileName);
                 if (fileObjectItem == undefined) {
                     logs.push({
                         log: `file not found in file objects`,
@@ -125,14 +125,29 @@ async function verifyRevision(aquaObject: AquaObject, revision: Revision, verifi
                 // const fileUri = getUnixPathFromAquaPath(aquaObject.file_index[fileHash])
                 const fileUri = aquaObject.file_index[vh];
                 const aquaFileUri = `${fileUri}.aqua.json`
-                const linkAquaObject = await readExportFile(aquaFileUri)
+
+                let fileObj = fileObjects.find(fileObj => fileObj.fileName === aquaFileUri)
+                // const linkAquaObject = await readExportFile(aquaFileUri)
+                if(!fileObj){
+                    return [false, logs]
+                }
+                const linkAquaObject = JSON.parse(fileObj?.fileContent)
+
                 let linkStatus: string
-                [linkStatus, _] = await verifyPage(linkAquaObject, false, doVerifyMerkleProof)
-                const expectedVH = revision.link_verification_hashes[idx]
-                const linkVerificationHashes = Object.keys(linkAquaObject.revisions)
-                const actualVH = linkVerificationHashes[linkVerificationHashes.length - 1]
-                linkOk = linkOk && (linkStatus === VERIFIED_VERIFICATION_STATUS) && (expectedVH == actualVH)
-          
+
+                let linkVerificationResult = await verifyAquaObjectUtil(linkAquaObject, fileObjects)
+
+                if(isErr(linkVerificationResult)){
+                    logs.concat(linkVerificationResult.data)
+                    return [false, logs]
+                }
+                logs.concat(linkVerificationResult.data.logData)
+                // const expectedVH = revision.link_verification_hashes[idx]
+                // const linkVerificationHashes = Object.keys(linkAquaObject.revisions)
+                // const actualVH = linkVerificationHashes[linkVerificationHashes.length - 1]
+
+                // linkOk = linkOk && (linkStatus === VERIFIED_VERIFICATION_STATUS) && (expectedVH == actualVH)
+                isSuccess = true
           
             }
             isSuccess = linkOk
