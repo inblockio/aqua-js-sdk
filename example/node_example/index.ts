@@ -37,7 +37,7 @@ function readFile(aquaFilePath: string): string | null {
 
 let aquaTree = new AquaTree()
 
-let aquaObject = readAquaFile("./README.md.aqua.json")
+// let aquaObject = readAquaFile("./README.md.aqua.json")
 let testFileContent = readFile("./test.txt")
 
 let aquaFileObject: FileObject = {
@@ -46,6 +46,6 @@ let aquaFileObject: FileObject = {
     path: "./text.txt"
 }
 
-let newAquaObject = aquaTree.createGenesisRevision(aquaFileObject)
+// let newAquaObject = aquaTree.createGenesisRevision(aquaFileObject)
 
-console.log(newAquaObject)
+// console.log(newAquaObject)
