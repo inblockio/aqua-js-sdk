@@ -1,4 +1,3 @@
-import { Result, Err, Option, Ok, isErr } from "rustic";
 import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData,   LogType, WitnessConfig, TransactionResult } from "../types";
 import MerkleTree from "merkletreejs";
 import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getWallet, maybeUpdateFileIndex, verifyMerkleIntegrity } from "../utils";
@@ -6,6 +5,7 @@ import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
 import { createAquaTree } from "../aquavhtree";
+import { Err, isErr, Ok, Result } from "../type_guards";
 
 
 export async function verifyWitnessUtil(_witness: Revision): Promise<Result<AquaOperationData, LogData[]>> {
@@ -13,7 +13,7 @@ export async function verifyWitnessUtil(_witness: Revision): Promise<Result<Aqua
     return Err(logs)
 }
 
-export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
 
@@ -69,7 +69,7 @@ export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType:
     return Ok(result)
 }
 
-export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     let lastRevisionOrSpecifiedHashes = [];
 

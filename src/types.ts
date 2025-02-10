@@ -1,4 +1,3 @@
-import { Option } from "rustic";
 
 export interface CredentialsData {
   mnemonic: string;
@@ -10,8 +9,8 @@ export interface CredentialsData {
 }
 
 export interface AquaOperationData {
-  aquaObjects:  Option<AquaObject[]>
-  aquaObject: Option<AquaObject>
+  aquaObjects:  AquaObject[]
+  aquaObject: AquaObject
   logData: Array<LogData>
 }
 

@@ -1,4 +1,5 @@
-import { Result, Err } from "rustic";
+
+import { Err, Result } from "../type_guards";
 import { Revision, AquaOperationData, LogData, AquaObject } from "../types";
 
 

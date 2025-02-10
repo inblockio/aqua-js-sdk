@@ -1,8 +1,9 @@
-import { Result, Err,  Ok } from "rustic";
+
 import { AquaObject, AquaOperationData, LogData,  FileObject, Revision, LogType } from "../types";
 import {  createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
+import { Err, Ok, Result } from "../type_guards";
 
 
 

@@ -1,8 +1,9 @@
-import { Result, Err, Ok } from "rustic";
+
 import { AquaObject, AquaObjectWrapper, AquaOperationData, FileObject, LogData, LogType } from "../types";
 import { checkFileHashAlreadyNotarized, dict2Leaves, formatMwTimestamp, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
+import { Err, Ok, Result } from "../type_guards";
 
 
 export async function createContentRevisionUtil(aquaObjectWrapper: AquaObjectWrapper, fileObject: FileObject, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {

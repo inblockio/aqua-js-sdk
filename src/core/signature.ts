@@ -1,4 +1,4 @@
-import { Result, Err, Option, Ok } from "rustic";
+
 import { Revision, AquaOperationData, LogData, SignType, AquaObjectWrapper, CredentialsData, LogType } from "../types";
 import { MetaMaskSigner } from "../signature/sign_metamask";
 import { CLISigner } from "../signature/sign_cli";
@@ -7,6 +7,7 @@ import { DIDSigner } from "../signature/sign_did";
 import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
+import { Err, Ok, Result } from "../type_guards";
 
 
 
@@ -16,7 +17,7 @@ export async function verifySignatureUtil(_signature: Revision): Promise<Result<
 }
 
 
-export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, _hash: string, signType: SignType, credentials: Option<CredentialsData>, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, _hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let aquaObject = aquaObjectWrapper.aquaObject
     let logs: Array<LogData> = [];
     let targetRevisionHash = "";
@@ -119,7 +120,7 @@ export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, _
     return Ok(result)
 }
 
-export async function signMultipleAquaObjectsUtil(_aquaObjects: AquaObjectWrapper[], _signType: SignType, _credentials: Option<CredentialsData>, _enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signMultipleAquaObjectsUtil(_aquaObjects: AquaObjectWrapper[], _signType: SignType, _credentials: CredentialsData, _enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     logs.push({
         log: "unimplmented need to be fixes",

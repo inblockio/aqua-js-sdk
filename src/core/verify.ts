@@ -1,9 +1,9 @@
-import { Result, Err, Ok,  isErr } from "rustic";
 import { Revision, AquaOperationData, LogData, AquaObject, FileObject, LogType } from "../types";
 import { getHashSum } from "../utils";
 import MerkleTree from "merkletreejs";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
+import { Err, isErr, Ok, Result } from "../type_guards";
 
 
 export async function verifyAquaObjectUtil(aquaObject: AquaObject, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
