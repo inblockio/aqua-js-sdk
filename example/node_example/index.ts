@@ -2,7 +2,7 @@
 
 import * as fs from "fs"
 
-import AquaTree, { AquaObject, FileObject } from "aqua-protocol"
+import AquaTree, { AquaObject, FileObject, greet } from "aqua-protocol"
 
 function readAquaFile(aquaFilePath: string): AquaObject | null {
     try {
@@ -36,6 +36,9 @@ function readFile(aquaFilePath: string): string | null {
     }
 }
 
+console.log(greet('Kenn'));
+
+
 let aquaTree = new AquaTree()
 
 // let aquaObject = readAquaFile("./README.md.aqua.json")
@@ -47,9 +50,9 @@ let aquaFileObject: FileObject = {
     path: "./text.txt"
 }
 
-// let newAquaObject = aquaTree.createGenesisRevision(aquaFileObject)
+let newAquaObject = aquaTree.createGenesisRevision(aquaFileObject)
 
-// console.log(newAquaObject)
+console.log(newAquaObject)
 
 
 
@@ -65,4 +68,3 @@ let aquaFileObject: FileObject = {
 //     witness_eth_platform:""
 // }
 // console.log(`data is ${JSON.stringify(cred)}`);
-// console.log(greet('Kenn'));
