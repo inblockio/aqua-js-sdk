@@ -30,8 +30,10 @@ export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOpera
         logType: LogType.INFO
     })
 
+    let newAquaObject = createAquaTree(aquaObject)
+
     let result: AquaOperationData = {
-        aquaObject: aquaObject,
+        aquaObject: newAquaObject,
         aquaObjects: null,
         logData: logs
     }

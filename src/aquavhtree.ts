@@ -19,7 +19,7 @@ function findNode(tree: RevisionTree, hash: string): RevisionTree | null {
 function findPaths(tree: RevisionTree, path: string[]): { [key: string]: string[] } {
     let paths: { [key: string]: string[] } = {};
     path.push(tree.hash);
-    if (tree.children.length === 0) {
+    if (tree.children?.length === 0) {
         paths[tree.hash] = path;
     } else {
         for (let i = 0; i < tree.children.length; i++) {
@@ -76,7 +76,12 @@ export function createAquaObjectTree(aquaObject: any) {
 
 }
 
-export function createAquaTree(aquaObject: any) : AquaObject {
+export function createAquaTree(aquaObject: any): AquaObject | null {
+    if (!aquaObject.revisions || aquaObject.revisions === null || Object.keys(aquaObject.revisions).length === 0) {
+        console.log("Breaking off: -------")
+        return null
+    }
+    console.log("continueeed: -------", aquaObject)
     let tree = createAquaObjectTree(aquaObject)
     let pathResult = findHashWithLongestPath(tree)
 
