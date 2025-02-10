@@ -11,6 +11,9 @@ import { Result, Option } from 'rustic';
 export * from "./types";
 // export * from "./utils";
 
+export function greet(name: string): string {
+    return `Hello, ${name}!`;
+}
 export default class AquaTree {
 
     removeLastRevision = (aquaObject: AquaObject): Result<AquaOperationData, LogData[]> => {
