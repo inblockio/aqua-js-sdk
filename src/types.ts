@@ -29,18 +29,19 @@ export interface FileObject {
 }
 
 export enum LogType {
-  SUCCESS,
-  INFO,
-  ERROR,
-  WARNING,
-  HINT,
-  file,
-  link,
-  signature,
-  witness,
-  form,
-  scalar
+  SUCCESS="success",
+  INFO="info",
+  ERROR="error",
+  WARNING="warning",
+  HINT="hint",
+  file="file",
+  link="link",
+  signature="signature",
+  witness="witness",
+  form="form",
+  scalar="scalar"
 }
+
 export interface LogData {
   logType: LogType,
   log: string
