@@ -147,15 +147,10 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     const aquaObject = createNewAquaObject();
     aquaObject.revisions[verificationHash] = verificationData;
 
-    console.log("REvisions now 1: ", verificationData)
-    console.log("Aqua object now 1: ", aquaObject)
-
-
     let aquaObjectUpdated = maybeUpdateFileIndex(aquaObject, verificationHash, revisionType, fileObject.fileName, "")
-    console.log("Aqua object after update 2: ", aquaObjectUpdated)
 
     // Tree creation
-    let aquaObjectWithTree = createAquaTree(aquaObject)
+    let aquaObjectWithTree = createAquaTree(aquaObjectUpdated)
 
     let result: AquaOperationData = {
         aquaObject: aquaObjectWithTree, //aquaObjectWithTree,
