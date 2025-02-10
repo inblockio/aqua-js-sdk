@@ -137,10 +137,11 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     // })
     let verificationHash = "";
     if (enableScalar) {
-        verificationHash = "0x" + getHashSum(JSON.stringify(verificationData));
-
-        verificationData.leaves = leaves
+        let stringifiedData = JSON.stringify(verificationData)
+        console.log("Result of s-----", stringifiedData)
+        verificationHash = "0x" + getHashSum(stringifiedData);
     } else {
+        verificationData.leaves = leaves
         verificationHash = getMerkleRoot(leaves); // tree.getHexRoot();
     }
 
