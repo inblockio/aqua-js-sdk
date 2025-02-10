@@ -5,6 +5,7 @@ import { AquaObject, AquaObjectWrapper, AquaOperationData, FileObject, LogData, 
 
 
 export * from "./types";
+export * from "./type_guards"
 // // export * from "./utils";
 
 export function greet(name: string): string {
