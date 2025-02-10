@@ -3,7 +3,7 @@ import { AnObject, AquaObject, CredentialsData, GasEstimateResult, RevisionTree,
 import { ethers, HDNodeWallet } from "ethers";
 import { Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
-import MerkleTree from 'merkletreejs';
+import {MerkleTree} from 'merkletreejs';
 
 
 

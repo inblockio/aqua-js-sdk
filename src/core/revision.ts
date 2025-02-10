@@ -150,10 +150,10 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     maybeUpdateFileIndex(aquaObject, verificationData, revisionType, fileObject.fileName, "")
 
     // Tree creation
-    let aquaObjectWithTree = createAquaTree(aquaObject)
+    // let aquaObjectWithTree = createAquaTree(aquaObject)
 
     let result: AquaOperationData = {
-        aquaObject: aquaObjectWithTree,
+        aquaObject: aquaObject, //aquaObjectWithTree,
         aquaObjects: null,
         logData: logs
     }
