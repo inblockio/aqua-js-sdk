@@ -8,7 +8,7 @@
 // import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision,  SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
 // import { Result, Option } from 'rustic';
 
-// export * from "./types";
+export * from "./types";
 // // export * from "./utils";
 
 export function greet(name: string): string {
