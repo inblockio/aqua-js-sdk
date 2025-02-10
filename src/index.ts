@@ -1,7 +1,8 @@
 import { createContentRevisionUtil, getFileByHashUtil } from "./core/content";
 import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
+import { signAquaObjectUtil } from "./core/signature";
 import { Result } from "./type_guards";
-import { AquaObject, AquaObjectWrapper, AquaOperationData, FileObject, LogData, Revision } from "./types"
+import { AquaObject, AquaObjectWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType } from "./types"
 
 
 export * from "./types";
@@ -49,9 +50,9 @@ export default class AquaTree {
 //         return verifySignatureUtil(signature)
 //     }
 
-//     signAquaObject = async (aquaObject: AquaObjectWrapper, hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-//         return signAquaObjectUtil(aquaObject, hash, signType, credentials, enableScalar)
-//     }
+    signAquaObject = async (aquaObject: AquaObjectWrapper, hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return signAquaObjectUtil(aquaObject, hash, signType, credentials, enableScalar)
+    }
 
 //     signMultipleAquaObjects = async (aquaObjects: AquaObjectWrapper[], signType: SignType, credentials: CredentialsData): Promise<Result<AquaOperationData, LogData[]>> => {
 //         return signMultipleAquaObjectsUtil(aquaObjects, signType, credentials)

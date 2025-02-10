@@ -1,6 +1,6 @@
 
-import { AquaObject, AquaOperationData, LogData,  FileObject, Revision, LogType } from "../types";
-import {  createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, maybeUpdateFileIndex, prepareNonce } from "../utils";
+import { AquaObject, AquaOperationData, LogData, FileObject, Revision, LogType } from "../types";
+import { createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import { createAquaTree } from "../aquavhtree";
 import { Err, Ok, Result } from "../type_guards";
 
@@ -45,7 +45,7 @@ export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOpera
             logType: LogType.HINT
         })
         result.aquaObject = null
- 
+
         return Ok(result)
     } else {
 
@@ -60,7 +60,7 @@ export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOpera
 }
 
 // improve this function t work with form as genesis
-export async function createGenesisRevision(fileObject: FileObject, isForm: boolean , enableContent: boolean, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+export async function createGenesisRevision(fileObject: FileObject, isForm: boolean, enableContent: boolean, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     //timestamp: string, revisionType: RevisionType,
     let logs: Array<LogData> = [];
 
@@ -145,17 +145,20 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     }
 
     const aquaObject = createNewAquaObject();
-    const revisions = aquaObject.revisions
-    revisions[verificationHash] = verificationData.feeData
+    aquaObject.revisions[verificationHash] = verificationData;
+
+    console.log("REvisions now 1: ", verificationData)
+    console.log("Aqua object now 1: ", aquaObject)
 
 
-    maybeUpdateFileIndex(aquaObject, verificationData, revisionType, fileObject.fileName, "")
+    let aquaObjectUpdated = maybeUpdateFileIndex(aquaObject, verificationHash, revisionType, fileObject.fileName, "")
+    console.log("Aqua object after update 2: ", aquaObjectUpdated)
 
     // Tree creation
-    // let aquaObjectWithTree = createAquaTree(aquaObject)
+    let aquaObjectWithTree = createAquaTree(aquaObject)
 
     let result: AquaOperationData = {
-        aquaObject: aquaObject, //aquaObjectWithTree,
+        aquaObject: aquaObjectWithTree, //aquaObjectWithTree,
         aquaObjects: null,
         logData: logs
     }

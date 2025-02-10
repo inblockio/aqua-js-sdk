@@ -8,23 +8,23 @@ import {MerkleTree} from 'merkletreejs';
 
 
 
-export function maybeUpdateFileIndex(aquaObject: AquaObject, verificationData: any, revisionType: string, aquaFileName: string, formFileName: string): AquaObject {
+export function maybeUpdateFileIndex(aquaObject: AquaObject, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string): AquaObject {
   const validRevisionTypes = ["file", "form", "link"];
   if (!validRevisionTypes.includes(revisionType)) {
     console.error(`Invalid revision type for file index: ${revisionType}`);
     process.exit(1)
     return aquaObject;
   }
-  let verificationHash = "";
+  // let verificationHash = "";
 
   switch (revisionType) {
     case "form":
-      verificationHash = verificationData.verification_hash
+      // verificationHash = verificationData.verification_hash
       // fileHash = verificationData.data.file_hash
       aquaObject.file_index[verificationHash] = formFileName
       break
     case "file":
-      verificationHash = verificationData.verification_hash
+      // verificationHash = verificationData.verification_hash
       // fileHash = verificationData.data.file_hash
       aquaObject.file_index[verificationHash] = aquaFileName //filename
       break

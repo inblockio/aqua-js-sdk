@@ -78,10 +78,8 @@ export function createAquaObjectTree(aquaObject: any) {
 
 export function createAquaTree(aquaObject: any): AquaObject | null {
     if (!aquaObject.revisions || aquaObject.revisions === null || Object.keys(aquaObject.revisions).length === 0) {
-        console.log("Breaking off: -------")
         return null
     }
-    console.log("continueeed: -------", aquaObject)
     let tree = createAquaObjectTree(aquaObject)
     let pathResult = findHashWithLongestPath(tree)
 
