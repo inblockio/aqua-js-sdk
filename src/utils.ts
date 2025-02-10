@@ -208,14 +208,22 @@ export function verifyMerkleIntegrity(merkleBranch : string[], merkleRoot: strin
   // }
 
   let witnessMerkleProofLeaves = merkleBranch
-  const tree = new MerkleTree(witnessMerkleProofLeaves, getHashSum, {
-    duplicateOdd: false,
-  })
-  const hexRoot = tree.getHexRoot()
+ 
+  let hexRoot = getMerkleRoot(witnessMerkleProofLeaves)
   let merkleRootOk = hexRoot === merkleRoot
 
   return merkleRootOk
 }
+
+export const getMerkleRoot = (leaves : string[]) =>{
+  const tree = new MerkleTree(leaves, getHashSum, {
+    duplicateOdd: false,
+  })
+  const hexRoot = tree.getHexRoot()
+
+  return hexRoot
+}
+
 export const getLatestVH = (aquaObject: AquaObject) => {
   const verificationHashes = Object.keys(aquaObject.revisions)
   return verificationHashes[verificationHashes.length - 1]

@@ -1,6 +1,5 @@
 import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData,   LogType, WitnessConfig, TransactionResult } from "../types";
-import MerkleTree from "merkletreejs";
-import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getWallet, maybeUpdateFileIndex, verifyMerkleIntegrity } from "../utils";
+import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, maybeUpdateFileIndex, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
@@ -43,9 +42,9 @@ export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType:
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
-    const tree = new MerkleTree(leaves, getHashSum, {
-        duplicateOdd: false,
-    })
+    // const tree = new MerkleTree(leaves, getHashSum, {
+    //     duplicateOdd: false,
+    // })
 
 
     let verification_hash = "";
@@ -53,7 +52,7 @@ export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType:
         verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
         verificationData.leaves = leaves
     } else {
-        verification_hash = tree.getHexRoot()
+        verification_hash =  getMerkleRoot(leaves); //tree.getHexRoot()
     }
 
     const revisions = aquaObject.revisions
@@ -82,19 +81,19 @@ export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrap
         }
     }
 
-    const tree2 = new MerkleTree(lastRevisionOrSpecifiedHashes, getHashSum, {
-        duplicateOdd: false,
-    })
+    // const tree2 = new MerkleTree(lastRevisionOrSpecifiedHashes, getHashSum, {
+    //     duplicateOdd: false,
+    // })
 
-    let merkleRoot = tree2.getHexRoot();
+    let merkleRoot = getMerkleRoot(lastRevisionOrSpecifiedHashes); //tree2.getHexRoot();
     let merkleProofArray: string[][] = [];
 
-    lastRevisionOrSpecifiedHashes.forEach((hash) => {
-        let merkleProof = tree2.getHexProof(hash);
-        merkleProofArray.push(merkleProof);
-    });
+    // lastRevisionOrSpecifiedHashes.forEach((hash) => {
+    //     let merkleProof = tree2.getHexProof(hash);
+    //     merkleProofArray.push(merkleProof);
+    // });
 
-    console.log("Merkle proof: ", merkleProofArray);
+    // console.log("Merkle proof: ", merkleProofArray);
 
 
     let revisionResultData = await prepareWitness(merkleRoot, witnessType, witnessPlatform, credentials!!, witnessNetwork);
@@ -133,10 +132,10 @@ export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrap
         if (!enableScalar) {
             verificationData.leaves = leaves;
         }
-        const tree = new MerkleTree(leaves, getHashSum, {
-            duplicateOdd: false,
-        })
-        const verificationHash = tree.getHexRoot()
+        // const tree = new MerkleTree(leaves, getHashSum, {
+        //     duplicateOdd: false,
+        // })
+        const verificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
         revisions[verificationHash] = verificationData
         // console.log(`\n\n Writing new revision ${verificationHash} to ${current_file} current file current_file_aqua_object ${JSON.stringify(current_file_aqua_object)} \n\n `)
         let res = maybeUpdateFileIndex(item.aquaObject, {

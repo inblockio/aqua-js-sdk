@@ -1,7 +1,7 @@
 
 import { AquaObject, AquaObjectWrapper, AquaOperationData, FileObject, LogData, LogType } from "../types";
-import { checkFileHashAlreadyNotarized, dict2Leaves, formatMwTimestamp, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
-import MerkleTree from "merkletreejs";
+import { checkFileHashAlreadyNotarized, dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, maybeUpdateFileIndex, prepareNonce } from "../utils";
+
 import { createAquaTree } from "../aquavhtree";
 import { Err, Ok, Result } from "../type_guards";
 
@@ -42,16 +42,16 @@ export async function createContentRevisionUtil(aquaObjectWrapper: AquaObjectWra
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
-    const tree = new MerkleTree(leaves, getHashSum, {
-        duplicateOdd: false,
-    })
+    // const tree = new MerkleTree(leaves, getHashSum, {
+    //     duplicateOdd: false,
+    // })
 
     let verification_hash = "";
     if (!enableScalar) {
         verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
         verificationData.leaves = leaves
     } else {
-        verification_hash = tree.getHexRoot()
+        verification_hash =  getMerkleRoot(leaves); // tree.getHexRoot()
     }
 
     const revisions = aquaObjectWrapper.aquaObject.revisions

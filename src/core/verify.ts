@@ -1,6 +1,5 @@
 import { Revision, AquaOperationData, LogData, AquaObject, FileObject, LogType } from "../types";
-import { getHashSum } from "../utils";
-import MerkleTree from "merkletreejs";
+import { getHashSum, getMerkleRoot } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
 import { Err, isErr, Ok, Result } from "../type_guards";
@@ -248,10 +247,10 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
     // For witness, we verify the merkle root
     else if (input.revision_type === "witness" && input.witness_merkle_proof && input.witness_merkle_proof.length > 1) {
         let witnessMerkleProofLeaves = input.witness_merkle_proof
-        const tree = new MerkleTree(witnessMerkleProofLeaves, getHashSum, {
-            duplicateOdd: false,
-        })
-        const hexRoot = tree.getHexRoot()
+        // const tree = new MerkleTree(witnessMerkleProofLeaves, getHashSum, {
+        //     duplicateOdd: false,
+        // })
+        const hexRoot = getMerkleRoot(witnessMerkleProofLeaves);  // tree.getHexRoot()
         vhOk = hexRoot === input.witness_merkle_root
     }
 
@@ -267,11 +266,11 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
         }
 
         // Verify verification hash
-        const tree = new MerkleTree(leaves, getHashSum, {
-            duplicateOdd: false,
-        })
+        // const tree = new MerkleTree(leaves, getHashSum, {
+        //     duplicateOdd: false,
+        // })
 
-        const hexRoot = tree.getHexRoot()
+        const hexRoot =getMerkleRoot(leaves);// tree.getHexRoot()
         vhOk = hexRoot === verificationHash
     }
 

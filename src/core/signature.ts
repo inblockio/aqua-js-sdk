@@ -2,9 +2,8 @@
 import { Revision, AquaOperationData, LogData, SignType, AquaObjectWrapper, CredentialsData, LogType } from "../types";
 import { MetaMaskSigner } from "../signature/sign_metamask";
 import { CLISigner } from "../signature/sign_cli";
-import { dict2Leaves, formatMwTimestamp, getHashSum, getWallet } from "../utils";
+import { dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet } from "../utils";
 import { DIDSigner } from "../signature/sign_did";
-import MerkleTree from "merkletreejs";
 import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
 import { Err, Ok, Result } from "../type_guards";
@@ -93,14 +92,14 @@ export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, _
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
-    const tree = new MerkleTree(leaves, getHashSum, {
-        duplicateOdd: false,
-    })
+    // const tree = new MerkleTree(leaves, getHashSum, {
+    //     duplicateOdd: false,
+    // })
 
     if (!enableScalar) {
         verificationData.leaves = leaves
     }
-    let verification_hash: string = tree.getHexRoot();
+    let verification_hash: string =  getMerkleRoot(leaves); //tree.getHexRoot();
 
     aquaObject.revisions[verification_hash] = verificationData;
 

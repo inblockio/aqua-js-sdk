@@ -1,7 +1,6 @@
 
 import { AquaObject, AquaOperationData, LogData,  FileObject, Revision, LogType } from "../types";
-import {  createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, maybeUpdateFileIndex, prepareNonce } from "../utils";
-import MerkleTree from "merkletreejs";
+import {  createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import { createAquaTree } from "../aquavhtree";
 import { Err, Ok, Result } from "../type_guards";
 
@@ -131,16 +130,16 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     }
 
     const leaves = dict2Leaves(verificationData)
-    const tree = new MerkleTree(leaves, getHashSum, {
-        duplicateOdd: false,
-    })
+    // const tree = new MerkleTree(leaves, getHashSum, {
+    //     duplicateOdd: false,
+    // })
     let verificationHash = "";
     if (enableScalar) {
         verificationHash = "0x" + getHashSum(JSON.stringify(verificationData));
 
         verificationData.leaves = leaves
     } else {
-        verificationHash = tree.getHexRoot();
+        verificationHash = getMerkleRoot(leaves); // tree.getHexRoot();
     }
 
     const aquaObject = createNewAquaObject();

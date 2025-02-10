@@ -1,7 +1,7 @@
 
 import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper } from "../types";
-import { dict2Leaves,  getHashSum, getLatestVH, getTimestamp } from "../utils";
-import MerkleTree from "merkletreejs";
+import { dict2Leaves,  getHashSum, getLatestVH, getMerkleRoot, getTimestamp } from "../utils";
+
 import { createAquaTree } from "../aquavhtree";
 import { Err, isOk, Ok, Result } from "../type_guards";
 
@@ -76,11 +76,11 @@ export async function linkAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, l
     if (!enableScalar) {
         newRevision.leaves = leaves;
     }
-    const tree = new MerkleTree(leaves, getHashSum, {
-        duplicateOdd: false,
-    })
+    // const tree = new MerkleTree(leaves, getHashSum, {
+    //     duplicateOdd: false,
+    // })
 
-    const currentVerificationHash = tree.getHexRoot()
+    const currentVerificationHash =  getMerkleRoot(leaves); //tree.getHexRoot()
 
     let updatedAquaObject: AquaObject = {
         revisions: {
