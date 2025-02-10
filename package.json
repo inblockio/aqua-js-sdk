@@ -20,16 +20,16 @@
   "exports": {
     ".": {
       "types": {
-        "require": "./index.d.cts",
-        "default": "./index.d.ts"
+        "require": "./dist/index.d.cts",
+        "default": "./dist/index.d.ts"
       },
       "browser": {
         "require": "./dist/index.cjs",
-        "default": "./index.js"
+        "default": "./dist/index.js"
       },
       "default": {
         "require": "./dist/index.cjs",
-        "default": "./index.js"
+        "default": "./dist/index.js"
       }
     }
   },
