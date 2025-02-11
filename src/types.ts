@@ -85,6 +85,10 @@ export interface FileIndex {
   [key: string]: string;
 }
 
+export interface FormData {
+  [key: string]: string;
+}
+
 export interface TreeMapping {
   paths: {
     [key: string]: string[];

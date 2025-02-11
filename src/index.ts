@@ -1,8 +1,9 @@
 import { createContentRevisionUtil, getFileByHashUtil } from "./core/content";
+import { createFormRevisionUtil } from "./core/forms";
 import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
 import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
 import { verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
-import {  witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
+import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
 import { Err, Result } from "./type_guards";
 import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
 
@@ -37,7 +38,7 @@ export default class Aquafier {
         return verifyAquaTreeRevisionUtil(revision, fileObject)
     }
 
-//     // Wittness
+    //     // Wittness
     // verifyWitness = async (witnessRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
     //     return verifyWitnessUtil(witnessRevision)
     // }
@@ -51,10 +52,10 @@ export default class Aquafier {
     }
 
 
-//     // Signature
-//     verifySignature = async (signature: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
-//         return verifySignatureUtil(signature)
-//     }
+    //     // Signature
+    //     verifySignature = async (signature: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
+    //         return verifySignatureUtil(signature)
+    //     }
 
     signAquaTree = async (aquaTree: AquaTreeWrapper, hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return signAquaTreeUtil(aquaTree, hash, signType, credentials, enableScalar)
@@ -64,31 +65,34 @@ export default class Aquafier {
         return signMultipleAquaTreesUtil(aquaTrees, signType, credentials)
     }
 
-//     // Link 
-//     verifyLink = async (linkRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
-//         return verifyLinkUtil(linkRevision)
-//     }
+    //     // Link 
+    //     verifyLink = async (linkRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
+    //         return verifyLinkUtil(linkRevision)
+    //     }
 
-//     linkAquaTree = async (aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-//         return linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScalar)
-//     }
+    //     linkAquaTree = async (aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    //         return linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScalar)
+    //     }
 
-//     linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData[], LogData[]>> => {
-//         return linkMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
-//     }
+    //     linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData[], LogData[]>> => {
+    //         return linkMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
+    //     }
 
-//     // Forms -- also and form key ,remove form key
-//     verifyForm = async (formRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
-//         return verifyFormUtil(formRevision)
-//     }
+    createFormRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createFormRevisionUtil(aquaTree, fileObject, enableScalar)
+    }
+    //     // Forms -- also and form key ,remove form key
+    //     verifyForm = async (formRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
+    //         return verifyFormUtil(formRevision)
+    //     }
 
-//     LinkAquaTreeToForm = async (aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> => {
-//         return LinkAquaTreeToFormUtil(aquaTree)
-//     }
+    //     LinkAquaTreeToForm = async (aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> => {
+    //         return LinkAquaTreeToFormUtil(aquaTree)
+    //     }
 
-//     hideFormElements = async (aquaTree: AquaTree, elementsToHide: Array<string>): Promise<Result<AquaOperationData, LogData[]>> => {
-//         return hideFormElementsUtil(aquaTree, elementsToHide)
-//     }
+    //     hideFormElements = async (aquaTree: AquaTree, elementsToHide: Array<string>): Promise<Result<AquaOperationData, LogData[]>> => {
+    //         return hideFormElementsUtil(aquaTree, elementsToHide)
+    //     }
 
 
     // Revisions
@@ -112,18 +116,18 @@ export default class Aquafier {
 /**indepedent function to enable chaining */
 
 export function unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
-    if(result.isErr()){
+    if (result.isErr()) {
         throw Error("an error occured")
     }
     return result.data.aquaTree
 }
 
-export async function sign(_aquaTree:AquaTree): Promise<Result<AquaOperationData, LogData[]>> {
+export async function sign(_aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = []
     return Promise.resolve(Err(logs))
 }
 
-export async function witness(_aquaTree:AquaTree): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witness(_aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = []
     return Promise.resolve(Err(logs))
 }
