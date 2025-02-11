@@ -1,4 +1,4 @@
-import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData,   LogType, WitnessConfig, TransactionResult } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
 import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, maybeUpdateFileIndex, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
@@ -50,7 +50,7 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
         verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
         verificationData.leaves = leaves
     } else {
-        verification_hash =  getMerkleRoot(leaves); //tree.getHexRoot()
+        verification_hash = getMerkleRoot(leaves); //tree.getHexRoot()
     }
 
     const revisions = aquaTree.revisions
@@ -60,8 +60,8 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
 
 
     logs.push({
-        log : `  ✅  aquaTree witnessed succesfully`,
-        logType:  LogType.SUCCESS
+        log: `  ✅  aquaTree witnessed succesfully`,
+        logType: LogType.SUCCESS
     });
 
     let result: AquaOperationData = {
@@ -85,10 +85,10 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
         }
     }
 
-  
+
 
     let merkleRoot = getMerkleRoot(lastRevisionOrSpecifiedHashes);
-  
+
     let revisionResultData = await prepareWitness(merkleRoot, witnessType, witnessPlatform, credentials!!, witnessNetwork);
 
     if (isErr(revisionResultData)) {
@@ -104,6 +104,7 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
     const revisionType = "witness";
 
     let aquaTreesResult: AquaTree[] = [];
+    let hasError = false;
     for (let item of aquaTrees) {
         let latestOrSpecifiedRevisionKey = "";
         if (item.revision != null && item.revision != undefined && item.revision.length > 0) {
@@ -124,18 +125,27 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
         if (!enableScalar) {
             verificationData.leaves = leaves;
         }
-        
+
         const verificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
         revisions[verificationHash] = verificationData
-        let res = maybeUpdateFileIndex(item.aquaTree, verificationHash, revisionType, item.fileObject.fileName, "");
+        let aquaTreeUpdatedResult = maybeUpdateFileIndex(item.aquaTree, verificationHash, revisionType, item.fileObject.fileName, "");
 
+        if (isErr(aquaTreeUpdatedResult)) {
+            logs.push(...aquaTreeUpdatedResult.data);
+            hasError = true;
+            break
+        }
+        let aquaTreeUpdated = aquaTreeUpdatedResult.data
 
-        aquaTreesResult.push(res);
+        aquaTreesResult.push(aquaTreeUpdated);
     }
 
+    if (hasError) {
+        return Err(logs);
+    }
     logs.push({
-        log : `  ✅  all aquaTrees witnessed succesfully`,
-        logType:  LogType.SUCCESS
+        log: `  ✅  all aquaTrees witnessed succesfully`,
+        logType: LogType.SUCCESS
     });
 
     let resutData: AquaOperationData = {
@@ -185,7 +195,7 @@ const prepareWitness = async (
             break;
         }
         case "eth": {
-            
+
             smart_contract_address = "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611";
 
             let network: WitnessNetwork = "sepolia"
@@ -199,8 +209,8 @@ const prepareWitness = async (
 
                 if (credentials == null || credentials == undefined) {
                     logs.push({
-                        log : `  ❌  credentials not found`,
-                        logType:  LogType.SUCCESS
+                        log: `  ❌  credentials not found`,
+                        logType: LogType.SUCCESS
                     });
                     return Err(logs)
                 }
@@ -208,8 +218,8 @@ const prepareWitness = async (
 
 
                 logs.push({
-                    log : ` 🔷  Wallet address: ${walletAddress}`,
-                    logType:  LogType.DEBUGDATA
+                    log: ` 🔷  Wallet address: ${walletAddress}`,
+                    logType: LogType.DEBUGDATA
                 });
                 const gasEstimateResult: GasEstimateResult = await estimateWitnessGas(
                     walletAddress,
@@ -219,10 +229,10 @@ const prepareWitness = async (
                     ""
                 );
 
-              
+
                 logs.push({
-                    log : ` 🔷  Gas estimate result: : ${gasEstimateResult}`,
-                    logType:  LogType.DEBUGDATA
+                    log: ` 🔷  Gas estimate result: : ${gasEstimateResult}`,
+                    logType: LogType.DEBUGDATA
                 });
 
                 if (gasEstimateResult.error !== null) {
@@ -252,7 +262,7 @@ const prepareWitness = async (
 
                     logs.push({
                         logType: LogType.witness,
-                        log: "🔎 cli witness result: \n"+ JSON.stringify(transactionResult)
+                        log: "🔎 cli witness result: \n" + JSON.stringify(transactionResult)
                     });
 
 
@@ -264,7 +274,7 @@ const prepareWitness = async (
                     })
                 }
 
-                if (transactionResult ==null || transactionResult.error != null) {
+                if (transactionResult == null || transactionResult.error != null) {
                     logs.push({
                         logType: LogType.ERROR,
                         log: "❌ an error witnessing using etherium (empty object) "

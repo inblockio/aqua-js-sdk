@@ -2,7 +2,7 @@
 import { AquaTree, AquaOperationData, LogData, FileObject, Revision, LogType } from "../types";
 import { createNewAquaTree, dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import { createAquaTree } from "../aquavhtree";
-import { Err, Ok, Result } from "../type_guards";
+import { Err, isErr, Ok, Result } from "../type_guards";
 
 
 
@@ -153,8 +153,13 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     const aquaTree = createNewAquaTree();
     aquaTree.revisions[verificationHash] = verificationData;
 
-    let aquaTreeUpdated = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, fileObject.fileName, "")
+    let aquaTreeUpdatedResult = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, fileObject.fileName, "")
 
+    if (isErr(aquaTreeUpdatedResult)) {
+        logs.push(...aquaTreeUpdatedResult.data);
+        return Err(logs);
+    }
+    let aquaTreeUpdated = aquaTreeUpdatedResult.data
     // Tree creation
     let aquaTreeWithTree = createAquaTree(aquaTreeUpdated)
 

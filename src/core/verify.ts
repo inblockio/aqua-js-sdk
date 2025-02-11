@@ -148,10 +148,10 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
 
                 if(isErr(linkVerificationResult)){
-                    logs.concat(linkVerificationResult.data)
+                    logs.push(...linkVerificationResult.data)
                     return [false, logs]
                 }
-                logs.concat(linkVerificationResult.data.logData)
+                logs.push(...linkVerificationResult.data.logData)
                 // const expectedVH = revision.link_verification_hashes[idx]
                 // const linkVerificationHashes = Object.keys(linkAquaTree.revisions)
                 // const actualVH = linkVerificationHashes[linkVerificationHashes.length - 1]
@@ -164,7 +164,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             break
     }
 
-    logs.concat(logsResult)
+    logs.push(...logsResult)
 
     return [isSuccess, logs]
 }
