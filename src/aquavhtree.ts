@@ -1,6 +1,6 @@
 // import { RevisionTree } from "./model.js";
 
-import { AquaObject, RevisionTree } from "./types";
+import { AquaTree, RevisionTree } from "./types";
 
 function findNode(tree: RevisionTree, hash: string): RevisionTree | null {
     if (tree.hash === hash) {
@@ -47,8 +47,8 @@ export function findHashWithLongestPath(tree: RevisionTree) {
     };
 }
 
-export function createAquaObjectTree(aquaObject: any) {
-    let obj = aquaObject;
+export function createAquaTreeTree(aquaTree: any) {
+    let obj = aquaTree;
     // Create a tree given such revision data
     let revisionTree: RevisionTree = {} as RevisionTree;
 
@@ -76,15 +76,15 @@ export function createAquaObjectTree(aquaObject: any) {
 
 }
 
-export function createAquaTree(aquaObject: any): AquaObject | null {
-    if (!aquaObject.revisions || aquaObject.revisions === null || Object.keys(aquaObject.revisions).length === 0) {
+export function createAquaTree(aquaTree: any): AquaTree | null {
+    if (!aquaTree.revisions || aquaTree.revisions === null || Object.keys(aquaTree.revisions).length === 0) {
         return null
     }
-    let tree = createAquaObjectTree(aquaObject)
+    let tree = createAquaTreeTree(aquaTree)
     let pathResult = findHashWithLongestPath(tree)
 
     return {
-        ...aquaObject,
+        ...aquaTree,
         tree,
         treeMapping: pathResult
     }

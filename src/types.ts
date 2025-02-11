@@ -9,8 +9,8 @@ export interface CredentialsData {
 }
 
 export interface AquaOperationData {
-  aquaObjects:  AquaObject[]
-  aquaObject: AquaObject
+  aquaTrees:  AquaTree[]
+  aquaTree: AquaTree
   logData: Array<LogData>
 }
 
@@ -92,13 +92,13 @@ export interface TreeMapping {
 }
 
 
-export interface AquaObjectWrapper {
-  aquaObject: AquaObject;
+export interface AquaTreeWrapper {
+  aquaTree: AquaTree;
   fileObject: FileObject;
   revision: string;
 }
 
-export interface AquaObject {
+export interface AquaTree {
   revisions: Revisions;
   file_index: FileIndex;
   tree?: RevisionTree;

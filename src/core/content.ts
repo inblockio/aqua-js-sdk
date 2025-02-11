@@ -1,12 +1,12 @@
 
-import { AquaObject, AquaObjectWrapper, AquaOperationData, FileObject, LogData, LogType } from "../types";
+import { AquaTree, AquaTreeWrapper, AquaOperationData, FileObject, LogData, LogType } from "../types";
 import { checkFileHashAlreadyNotarized, dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, maybeUpdateFileIndex, prepareNonce } from "../utils";
 
 import { createAquaTree } from "../aquavhtree";
 import { Err, Ok, Result } from "../type_guards";
 
 
-export async function createContentRevisionUtil(aquaObjectWrapper: AquaObjectWrapper, fileObject: FileObject, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
     const now = new Date().toISOString()
@@ -14,7 +14,7 @@ export async function createContentRevisionUtil(aquaObjectWrapper: AquaObjectWra
     let revisionType = "file";
 
 
-    const verificationHashes = Object.keys(aquaObjectWrapper.aquaObject.revisions);
+    const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions);
     let lastRevisionHash = verificationHashes[verificationHashes.length - 1];
 
 
@@ -26,7 +26,7 @@ export async function createContentRevisionUtil(aquaObjectWrapper: AquaObjectWra
 
     let fileHash = getHashSum(fileObject.fileContent)
 
-    let alreadyNotarized = checkFileHashAlreadyNotarized(fileHash, aquaObjectWrapper.aquaObject)
+    let alreadyNotarized = checkFileHashAlreadyNotarized(fileHash, aquaTreeWrapper.aquaTree)
 
     if (alreadyNotarized) {
         logs.push({
@@ -54,25 +54,25 @@ export async function createContentRevisionUtil(aquaObjectWrapper: AquaObjectWra
         verification_hash =  getMerkleRoot(leaves); // tree.getHexRoot()
     }
 
-    const revisions = aquaObjectWrapper.aquaObject.revisions
+    const revisions = aquaTreeWrapper.aquaTree.revisions
     revisions[verification_hash] = verificationData
 
-    maybeUpdateFileIndex(aquaObjectWrapper.aquaObject, verificationData, revisionType, fileObject.fileName, "");
+    maybeUpdateFileIndex(aquaTreeWrapper.aquaTree, verificationData, revisionType, fileObject.fileName, "");
 
-    let aquaObjectWithTree = createAquaTree(aquaObjectWrapper.aquaObject)
+    let aquaTreeWithTree = createAquaTree(aquaTreeWrapper.aquaTree)
 
     let result: AquaOperationData = {
-        aquaObject: aquaObjectWithTree,
-        aquaObjects: null,
+        aquaTree: aquaTreeWithTree,
+        aquaTrees: null,
         logData: logs
     }
     return Ok(result)
 }
 
-export async function getFileByHashUtil(aquaObject: AquaObject, hash: string): Promise<Result<string, LogData[]>> {
+export async function getFileByHashUtil(aquaTree: AquaTree, hash: string): Promise<Result<string, LogData[]>> {
     let logs: Array<LogData> = [];
 
-    let res = aquaObject.file_index[hash]
+    let res = aquaTree.file_index[hash]
 
     if (res) {
         logs.push({

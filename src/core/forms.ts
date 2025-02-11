@@ -1,9 +1,9 @@
 
 import { Err, Result } from "../type_guards";
-import { Revision, AquaOperationData, LogData, AquaObject } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree } from "../types";
 
 
-export  function hideFormElementsUtil(_aquaObject: AquaObject, _elementsToHide: string[]): Result<AquaOperationData, LogData[]> {
+export  function hideFormElementsUtil(_aquaTree: AquaTree, _elementsToHide: string[]): Result<AquaOperationData, LogData[]> {
    
     let logs: Array<LogData> = [];
     return Err(logs)
@@ -16,7 +16,7 @@ export async function verifyFormUtil(_formRevision: Revision): Promise<Result<Aq
 }
 
 
-export async function LinkAquaObjectToFormUtil(_aquaObject: AquaObject): Promise<Result<AquaOperationData, LogData[]>> {
+export async function LinkAquaTreeToFormUtil(_aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
     

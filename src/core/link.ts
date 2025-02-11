@@ -1,5 +1,5 @@
 
-import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper } from "../types";
 import { dict2Leaves,  getHashSum, getLatestVH, getMerkleRoot, getTimestamp } from "../utils";
 
 import { createAquaTree } from "../aquavhtree";
@@ -12,14 +12,14 @@ export async function verifyLinkUtil(_revision: Revision): Promise<Result<AquaOp
 
     // let _linkOk: boolean = true
     // for (const [idx, vh] of revision.link_verification_hashes.entries()) {
-    //     // const fileUri = getUnixPathFromAquaPath(aquaObject.file_index[fileHash])
+    //     // const fileUri = getUnixPathFromAquaPath(aquaTree.file_index[fileHash])
     //     const fileUri = revision.file_index[vh];
     //     const aquaFileUri = `${fileUri}.aqua.json`
-    //     const linkAquaObject = await readExportFile(aquaFileUri)
+    //     const linkAquaTree = await readExportFile(aquaFileUri)
     //     let linkStatus: string
-    //     [linkStatus, _] = await verifyPage(linkAquaObject, false, doVerifyMerkleProof)
+    //     [linkStatus, _] = await verifyPage(linkAquaTree, false, doVerifyMerkleProof)
     //     const expectedVH = input.link_verification_hashes[idx]
-    //     const linkVerificationHashes = Object.keys(linkAquaObject.revisions)
+    //     const linkVerificationHashes = Object.keys(linkAquaTree.revisions)
     //     const actualVH = linkVerificationHashes[linkVerificationHashes.length - 1]
     //     linkOk = linkOk && (linkStatus === VERIFIED_VERIFICATION_STATUS) && (expectedVH == actualVH)
     // }
@@ -30,13 +30,13 @@ export async function verifyLinkUtil(_revision: Revision): Promise<Result<AquaOp
 }
 
 
-export async function linkAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     const timestamp = getTimestamp()
-    let previous_verification_hash = aquaObjectWrapper.revision
+    let previous_verification_hash = aquaTreeWrapper.revision
 
-    if(!aquaObjectWrapper.revision || aquaObjectWrapper.revision === ""){
-        previous_verification_hash = getLatestVH(aquaObjectWrapper.aquaObject)
+    if(!aquaTreeWrapper.revision || aquaTreeWrapper.revision === ""){
+        previous_verification_hash = getLatestVH(aquaTreeWrapper.aquaTree)
     }
 
     let newRevision: Revision = {
@@ -45,12 +45,12 @@ export async function linkAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, l
         revision_type: "link",
     }
 
-    const linkVHs = [getLatestVH(linkAquaObjectWrapper.aquaObject)]
+    const linkVHs = [getLatestVH(linkAquaTreeWrapper.aquaTree)]
 
-    const linkFileHashes = [getHashSum(linkAquaObjectWrapper.fileObject.fileContent)]
+    const linkFileHashes = [getHashSum(linkAquaTreeWrapper.fileObject.fileContent)]
     // Validation again
     linkFileHashes.map((fh) => {
-        if (!(fh in linkAquaObjectWrapper.aquaObject.file_index)) {
+        if (!(fh in linkAquaTreeWrapper.aquaTree.file_index)) {
             // Add log here
             return Err(logs)
         }
@@ -82,37 +82,37 @@ export async function linkAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, l
 
     const currentVerificationHash =  getMerkleRoot(leaves); //tree.getHexRoot()
 
-    let updatedAquaObject: AquaObject = {
+    let updatedAquaTree: AquaTree = {
         revisions: {
-            ...aquaObjectWrapper.aquaObject.revisions,
+            ...aquaTreeWrapper.aquaTree.revisions,
             [currentVerificationHash]: newRevision
         },
         file_index: {
-            ...aquaObjectWrapper.aquaObject.file_index,
+            ...aquaTreeWrapper.aquaTree.file_index,
             [currentVerificationHash]: currentVerificationHash
         }
     }
 
     // Tree creation
-    let aquaObjectWithTree = createAquaTree(updatedAquaObject)
+    let aquaTreeWithTree = createAquaTree(updatedAquaTree)
 
     let resutData: AquaOperationData = {
-        aquaObject: aquaObjectWithTree,
+        aquaTree: aquaTreeWithTree,
         logData: logs,
-        aquaObjects: []
+        aquaTrees: []
     };
 
     return Ok(resutData)
 }
 
-export async function linkMultipleAquaObjectsUtil(aquaObjectWrappers: AquaObjectWrapper[], linkAquaObjectWrapper: AquaObjectWrapper, enableScalar: boolean): Promise<Result<AquaOperationData[], LogData[]>> {
+export async function linkMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData[], LogData[]>> {
     // let logs: Array<LogData> = [];
 
     let logs: Array<LogData> = [];
     let aquaOperationResults: AquaOperationData[] = [];
 
-    for (const aquaObject of aquaObjectWrappers) {
-        const result = await linkAquaObjectUtil(aquaObject, linkAquaObjectWrapper, enableScalar); // Assuming enableScalar is false by default
+    for (const aquaTree of aquaTreeWrappers) {
+        const result = await linkAquaTreeUtil(aquaTree, linkAquaTreeWrapper, enableScalar); // Assuming enableScalar is false by default
 
         if (isOk(result)) {
             aquaOperationResults.push(result.data);

@@ -16,10 +16,10 @@ npm install aqua-verifier
 ## Usage
 
 ```typescript
-import AquaTree, {FileObject} from 'aqua-verifier';
+import Aquafier, {FileObject} from 'aqua-verifier';
 
 
-let aquaTree = new AquaTree();
+let aquafier = new Aquafier();
 
 // using node fs module or browser FILE object
 // create an aqua file object 
@@ -28,7 +28,7 @@ let fileObject : FileObject = {
   fileContent: "i am a sampl text",
   path: "/sample.txt" // optional if in browser environment
 }
-let aquaTreeObjectResult = await aquaTree.createGenesisRevision(fileObject);
+let aquaTreeObjectResult = await aquafier.createGenesisRevision(fileObject);
 
 if(isErr(aquaTreeObjectResult)){
     console.err(" ---- An error occured  ---- ");

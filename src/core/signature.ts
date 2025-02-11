@@ -1,5 +1,5 @@
 
-import { Revision, AquaOperationData, LogData, SignType, AquaObjectWrapper, CredentialsData, LogType } from "../types";
+import { Revision, AquaOperationData, LogData, SignType, AquaTreeWrapper, CredentialsData, LogType } from "../types";
 import { MetaMaskSigner } from "../signature/sign_metamask";
 import { CLISigner } from "../signature/sign_cli";
 import { dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet } from "../utils";
@@ -16,16 +16,16 @@ export async function verifySignatureUtil(_signature: Revision): Promise<Result<
 }
 
 
-export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, _hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
-    let aquaObject = aquaObjectWrapper.aquaObject
+export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+    let aquaTree = aquaTreeWrapper.aquaTree
     let logs: Array<LogData> = [];
     let targetRevisionHash = "";
-    if (aquaObjectWrapper.revision == undefined || aquaObjectWrapper.revision == null || aquaObjectWrapper.revision.length == 0) {
-        const verificationHashes = Object.keys(aquaObjectWrapper.aquaObject.revisions)
+    if (aquaTreeWrapper.revision == undefined || aquaTreeWrapper.revision == null || aquaTreeWrapper.revision.length == 0) {
+        const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions)
         const lastRevisionHash = verificationHashes[verificationHashes.length - 1]
         targetRevisionHash = lastRevisionHash
     } else {
-        targetRevisionHash = aquaObjectWrapper.revision
+        targetRevisionHash = aquaTreeWrapper.revision
     }
 
     let signature, walletAddress, publicKey, signature_type
@@ -101,25 +101,25 @@ export async function signAquaObjectUtil(aquaObjectWrapper: AquaObjectWrapper, _
     }
     let verification_hash: string =  getMerkleRoot(leaves); //tree.getHexRoot();
 
-    aquaObject.revisions[verification_hash] = verificationData;
+    aquaTree.revisions[verification_hash] = verificationData;
 
     let data: AquaOperationData = {
-        aquaObjects: null,
-        aquaObject: aquaObject,
+        aquaTrees: null,
+        aquaTree: aquaTree,
         logData: logs
     }
     // Tree creation
-    let aquaObjectWithTree = createAquaTree(data)
+    let aquaTreeWithTree = createAquaTree(data)
 
     let result: AquaOperationData = {
-        aquaObject: aquaObjectWithTree,
-        aquaObjects: null,
+        aquaTree: aquaTreeWithTree,
+        aquaTrees: null,
         logData: logs
     }
     return Ok(result)
 }
 
-export async function signMultipleAquaObjectsUtil(_aquaObjects: AquaObjectWrapper[], _signType: SignType, _credentials: CredentialsData, _enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _signType: SignType, _credentials: CredentialsData, _enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     logs.push({
         log: "unimplmented need to be fixes",

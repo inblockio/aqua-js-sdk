@@ -1,22 +1,26 @@
-import { Revision, AquaOperationData, LogData, AquaObject, FileObject, LogType } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType } from "../types";
 import { getHashSum, getMerkleRoot } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
 import { Err, isErr, Ok, Result } from "../type_guards";
 
 
-export async function verifyAquaObjectUtil(aquaObject: AquaObject, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
+export async function verifyAquaTreeRevisionUtil(_revision: Revision, _fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
+    let logs: Array<LogData> = []
+    return Promise.resolve(Err(logs))
+}
+export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
-    let verificationHashes = Object.keys(aquaObject.revisions)
+    let verificationHashes = Object.keys(aquaTree.revisions)
     console.log("Page Verification Hashes: ", verificationHashes)
     let isSuccess = true
     for (let revisionItemHash in verificationHashes) {
-        let revision: Revision = aquaObject.revisions[revisionItemHash]
+        let revision: Revision = aquaTree.revisions[revisionItemHash]
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
 
-        let result = await verifyRevision(aquaObject, revision, revisionItemHash, fileObject, isScalar);
+        let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
 
         result[1].forEach((e) => logs.push(e));
 
@@ -30,15 +34,15 @@ export async function verifyAquaObjectUtil(aquaObject: AquaObject, fileObject: A
         return Err(logs);
     }
     let data: AquaOperationData = {
-        aquaObject: aquaObject,
-        aquaObjects: null,
+        aquaTree: aquaTree,
+        aquaTrees: null,
         logData: logs
     }
 
     return Ok(data);
 }
 
-async function verifyRevision(aquaObject: AquaObject, revision: Revision, verificationHash: string, fileObjects: Array<FileObject>, isScalar: boolean): Promise<[boolean, Array<LogData>]> {
+async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificationHash: string, fileObjects: Array<FileObject>, isScalar: boolean): Promise<[boolean, Array<LogData>]> {
     let logs: Array<LogData> = [];
     let doVerifyMerkleProof = false; // to be improved rather than hard coded
     let isSuccess = true;
@@ -81,9 +85,9 @@ async function verifyRevision(aquaObject: AquaObject, revision: Revision, verifi
             if (!!revision.content) {
                 fileContent = Buffer.from(revision.content, "utf8")
             } else {
-                console.log("File index", JSON.stringify(aquaObject.file_index));
+                console.log("File index", JSON.stringify(aquaTree.file_index));
                 console.log("Has needed  ", verificationHash);
-                let fileName = aquaObject.file_index[verificationHash]
+                let fileName = aquaTree.file_index[verificationHash]
                 let fileObjectItem = fileObjects.find((e) => e.fileName == fileName);
                 if (fileObjectItem == undefined) {
                     logs.push({
@@ -121,20 +125,20 @@ async function verifyRevision(aquaObject: AquaObject, revision: Revision, verifi
         case "link":
             let linkOk: boolean = true
             for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
-                // const fileUri = getUnixPathFromAquaPath(aquaObject.file_index[fileHash])
-                const fileUri = aquaObject.file_index[vh];
+                // const fileUri = getUnixPathFromAquaPath(aquaTree.file_index[fileHash])
+                const fileUri = aquaTree.file_index[vh];
                 const aquaFileUri = `${fileUri}.aqua.json`
 
                 let fileObj = fileObjects.find(fileObj => fileObj.fileName === aquaFileUri)
-                // const linkAquaObject = await readExportFile(aquaFileUri)
+                // const linkAquaTree = await readExportFile(aquaFileUri)
                 if(!fileObj){
                     return [false, logs]
                 }
-                const linkAquaObject = JSON.parse(fileObj?.fileContent)
+                const linkAquaTree = JSON.parse(fileObj?.fileContent)
 
                 // let _linkStatus: string
 
-                let linkVerificationResult = await verifyAquaObjectUtil(linkAquaObject, fileObjects)
+                let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
 
                 if(isErr(linkVerificationResult)){
                     logs.concat(linkVerificationResult.data)
@@ -142,7 +146,7 @@ async function verifyRevision(aquaObject: AquaObject, revision: Revision, verifi
                 }
                 logs.concat(linkVerificationResult.data.logData)
                 // const expectedVH = revision.link_verification_hashes[idx]
-                // const linkVerificationHashes = Object.keys(linkAquaObject.revisions)
+                // const linkVerificationHashes = Object.keys(linkAquaTree.revisions)
                 // const actualVH = linkVerificationHashes[linkVerificationHashes.length - 1]
 
                 // linkOk = linkOk && (linkStatus === VERIFIED_VERIFICATION_STATUS) && (expectedVH == actualVH)

@@ -1,4 +1,4 @@
-import { Revision, AquaOperationData, LogData, AquaObject, AquaObjectWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData,   LogType, WitnessConfig, TransactionResult } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData,   LogType, WitnessConfig, TransactionResult } from "../types";
 import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, maybeUpdateFileIndex, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
@@ -12,11 +12,11 @@ export async function verifyWitnessUtil(_witness: Revision): Promise<Result<Aqua
     return Err(logs)
 }
 
-export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
 
-    const verificationHashes = Object.keys(aquaObject.revisions);
+    const verificationHashes = Object.keys(aquaTree.revisions);
     let lastRevisionHash = verificationHashes[verificationHashes.length - 1];
 
     const now = new Date().toISOString()
@@ -55,28 +55,28 @@ export async function witnessAquaObjectUtil(aquaObject: AquaObject, witnessType:
         verification_hash =  getMerkleRoot(leaves); //tree.getHexRoot()
     }
 
-    const revisions = aquaObject.revisions
+    const revisions = aquaTree.revisions
     revisions[verification_hash] = verificationData
 
-    let aquaObjectWithTree = createAquaTree(aquaObject)
+    let aquaTreeWithTree = createAquaTree(aquaTree)
 
     let result: AquaOperationData = {
-        aquaObject: aquaObjectWithTree,
-        aquaObjects: null,
+        aquaTree: aquaTreeWithTree,
+        aquaTrees: null,
         logData: logs
     }
     return Ok(result)
 }
 
-export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     let lastRevisionOrSpecifiedHashes = [];
 
-    for (let item of aquaObjects) {
+    for (let item of aquaTrees) {
         if (item.revision != null && item.revision != undefined && item.revision.length > 0) {
             lastRevisionOrSpecifiedHashes.push(item.revision)
         } else {
-            const verificationHashes = Object.keys(item.aquaObject.revisions);
+            const verificationHashes = Object.keys(item.aquaTree.revisions);
             lastRevisionOrSpecifiedHashes.push(verificationHashes[verificationHashes.length - 1]);
         }
     }
@@ -110,14 +110,14 @@ export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrap
     const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
     const revisionType = "witness";
 
-    let aquaObjectsResult: AquaObject[] = [];
+    let aquaTreesResult: AquaTree[] = [];
     // let index = 0;
-    for (let item of aquaObjects) {
+    for (let item of aquaTrees) {
         let latestOrSpecifiedRevisionKey = "";
         if (item.revision != null && item.revision != undefined && item.revision.length > 0) {
             latestOrSpecifiedRevisionKey = item.revision
         } else {
-            const verificationHashes = Object.keys(item.aquaObject.revisions);
+            const verificationHashes = Object.keys(item.aquaTree.revisions);
             latestOrSpecifiedRevisionKey = verificationHashes[verificationHashes.length - 1];
         }
         let verificationData: any = {
@@ -126,7 +126,7 @@ export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrap
             revision_type: revisionType,
             ...revisionResult
         }
-        const revisions = item.aquaObject.revisions
+        const revisions = item.aquaTree.revisions
 
         const leaves = dict2Leaves(verificationData)
         if (!enableScalar) {
@@ -136,21 +136,21 @@ export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrap
         const verificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
         revisions[verificationHash] = verificationData
         // console.log(`\n\n Writing new revision ${verificationHash} to ${current_file} current file current_file_aqua_object ${JSON.stringify(current_file_aqua_object)} \n\n `)
-        // let res = maybeUpdateFileIndex(item.aquaObject, {
+        // let res = maybeUpdateFileIndex(item.aquaTree, {
         //     verification_hash: verificationHash,
         //     data: verificationData
         // }, revisionType, item.fileObject.fileName, "");
 
-        let res = maybeUpdateFileIndex(item.aquaObject, verificationHash, revisionType, item.fileObject.fileName, "");
+        let res = maybeUpdateFileIndex(item.aquaTree, verificationHash, revisionType, item.fileObject.fileName, "");
 
 
-        aquaObjectsResult.push(res);
+        aquaTreesResult.push(res);
     }
 
     let resutData: AquaOperationData = {
-        aquaObject: null,
+        aquaTree: null,
         logData: logs,
-        aquaObjects: aquaObjectsResult
+        aquaTrees: aquaTreesResult
     };
 
 

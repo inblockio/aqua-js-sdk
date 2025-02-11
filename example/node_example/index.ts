@@ -2,18 +2,18 @@
 
 import * as fs from "fs"
 
-import AquaTree, { AquaObject, FileObject, greet } from "aqua-protocol"
+import Aquafier, { AquaTree, FileObject, greet } from "aqua-protocol"
 
-function readAquaFile(aquaFilePath: string): AquaObject | null {
+function readAquaFile(aquaFilePath: string): AquaTree | null {
     try {
         // Read the file synchronously
         const fileContent = fs.readFileSync(aquaFilePath, { encoding: "utf-8" });
 
         // Parse the file content as JSON
-        const aquaObject: AquaObject = JSON.parse(fileContent);
+        const aquaTree: AquaTree = JSON.parse(fileContent);
 
         // Return the parsed object
-        return aquaObject;
+        return aquaTree;
     } catch (error) {
         // Handle errors (e.g., file not found, invalid JSON)
         console.error(`Error reading or parsing the file at ${aquaFilePath}:`, error);
@@ -39,9 +39,9 @@ function readFile(aquaFilePath: string): string | null {
 console.log(greet('Kenn'));
 
 
-let aquaTree = new AquaTree()
+let aquafier = new Aquafier()
 
-// let aquaObject = readAquaFile("./README.md.aqua.json")
+// let aquaTree = readAquaFile("./README.md.aqua.json")
 let testFileContent = readFile("./test.txt")
 
 let aquaFileObject: FileObject = {
@@ -50,9 +50,9 @@ let aquaFileObject: FileObject = {
     path: "./text.txt"
 }
 
-let newAquaObject = aquaTree.createGenesisRevision(aquaFileObject)
+let newAquaTree = aquafier.createGenesisRevision(aquaFileObject)
 
-console.log(newAquaObject)
+console.log(newAquaTree)
 
 
 

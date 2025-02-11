@@ -1,50 +1,50 @@
 
-import { AquaObject, AquaOperationData, LogData, FileObject, Revision, LogType } from "../types";
-import { createNewAquaObject, dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, maybeUpdateFileIndex, prepareNonce } from "../utils";
+import { AquaTree, AquaOperationData, LogData, FileObject, Revision, LogType } from "../types";
+import { createNewAquaTree, dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, maybeUpdateFileIndex, prepareNonce } from "../utils";
 import { createAquaTree } from "../aquavhtree";
 import { Err, Ok, Result } from "../type_guards";
 
 
 
-export function removeLastRevisionUtil(aquaObject: AquaObject): Result<AquaOperationData, LogData[]> {
+export function removeLastRevisionUtil(aquaTree: AquaTree): Result<AquaOperationData, LogData[]> {
     let logs: Array<LogData> = [];
 
-    const revisions = aquaObject.revisions
+    const revisions = aquaTree.revisions
     const verificationHashes = Object.keys(revisions)
     const lastRevisionHash = verificationHashes[verificationHashes.length - 1]
 
-    const lastRevision = aquaObject.revisions[lastRevisionHash]
+    const lastRevision = aquaTree.revisions[lastRevisionHash]
     switch (lastRevision.revision_type) {
         case "file":
-            delete aquaObject.file_index[lastRevision.file_hash!!]
+            delete aquaTree.file_index[lastRevision.file_hash!!]
             break
         case "link":
             for (const vh of lastRevision.link_verification_hashes) {
-                delete aquaObject.file_index[vh]
+                delete aquaTree.file_index[vh]
             }
     }
 
-    delete aquaObject.revisions[lastRevisionHash]
+    delete aquaTree.revisions[lastRevisionHash]
     logs.push({
         log: `Most recent revision ${lastRevisionHash} has been removed`,
         logType: LogType.INFO
     })
 
-    let newAquaObject = createAquaTree(aquaObject)
+    let newAquaTree = createAquaTree(aquaTree)
 
     let result: AquaOperationData = {
-        aquaObject: newAquaObject,
-        aquaObjects: null,
+        aquaTree: newAquaTree,
+        aquaTrees: null,
         logData: logs
     }
     // file can be deleted
-    if (Object.keys(aquaObject.revisions).length === 0) {
+    if (Object.keys(aquaTree.revisions).length === 0) {
 
         logs.push({
             log: `The last  revision has been deleted  there are no revisions left.`,
             logType: LogType.HINT
         })
-        result.aquaObject = null
+        result.aquaTree = null
 
         return Ok(result)
     } else {
@@ -145,17 +145,17 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
         verificationHash = getMerkleRoot(leaves); // tree.getHexRoot();
     }
 
-    const aquaObject = createNewAquaObject();
-    aquaObject.revisions[verificationHash] = verificationData;
+    const aquaTree = createNewAquaTree();
+    aquaTree.revisions[verificationHash] = verificationData;
 
-    let aquaObjectUpdated = maybeUpdateFileIndex(aquaObject, verificationHash, revisionType, fileObject.fileName, "")
+    let aquaTreeUpdated = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, fileObject.fileName, "")
 
     // Tree creation
-    let aquaObjectWithTree = createAquaTree(aquaObjectUpdated)
+    let aquaTreeWithTree = createAquaTree(aquaTreeUpdated)
 
     let result: AquaOperationData = {
-        aquaObject: aquaObjectWithTree, //aquaObjectWithTree,
-        aquaObjects: null,
+        aquaTree: aquaTreeWithTree, //aquaTreeWithTree,
+        aquaTrees: null,
         logData: logs
     }
 
@@ -165,13 +165,13 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
 }
 
 
-export function getRevisionByHashUtil(aquaObject: AquaObject, revisionHash: string): Result<Revision, LogData[]> {
+export function getRevisionByHashUtil(aquaTree: AquaTree, revisionHash: string): Result<Revision, LogData[]> {
     let logs: Array<LogData> = [];
 
-    const verificationHashes = Object.keys(aquaObject.revisions)
+    const verificationHashes = Object.keys(aquaTree.revisions)
 
     if (verificationHashes.includes(revisionHash)) {
-        return Ok(aquaObject.revisions[revisionHash]);
+        return Ok(aquaTree.revisions[revisionHash]);
     } else {
         logs.push({
             log: `Revision with hash : ${revisionHash} not found`,
@@ -182,10 +182,10 @@ export function getRevisionByHashUtil(aquaObject: AquaObject, revisionHash: stri
 
 }
 
-export function getLastRevisionUtil(aquaObject: AquaObject): Result<Revision, LogData[]> {
+export function getLastRevisionUtil(aquaTree: AquaTree): Result<Revision, LogData[]> {
     let logs: Array<LogData> = [];
 
-    const verificationHashes = Object.keys(aquaObject.revisions);
+    const verificationHashes = Object.keys(aquaTree.revisions);
 
     if (verificationHashes.length == 0) {
         logs.push({
@@ -195,7 +195,7 @@ export function getLastRevisionUtil(aquaObject: AquaObject): Result<Revision, Lo
         return Err(logs);
     }
     const lastRevisionHash = verificationHashes[verificationHashes.length - 1]
-    return Ok(aquaObject.revisions[lastRevisionHash]);
+    return Ok(aquaTree.revisions[lastRevisionHash]);
 
 
 }

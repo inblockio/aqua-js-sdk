@@ -1,5 +1,5 @@
 {
-  "name": "aqua-protocol",
+  "name": "aquafier-js-sdk",
   "version": "1.3.2",
   "description": "A TypeScript library for managing revision trees",
   "type": "module",

@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { AnObject, AquaObject, CredentialsData, GasEstimateResult, RevisionTree, TreeMapping } from './types';
+import { AnObject, AquaTree, CredentialsData, GasEstimateResult, RevisionTree, TreeMapping } from './types';
 import { ethers, HDNodeWallet } from "ethers";
 import { Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
@@ -8,12 +8,12 @@ import {MerkleTree} from 'merkletreejs';
 
 
 
-export function maybeUpdateFileIndex(aquaObject: AquaObject, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string): AquaObject {
+export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string): AquaTree {
   const validRevisionTypes = ["file", "form", "link"];
   if (!validRevisionTypes.includes(revisionType)) {
     console.error(`Invalid revision type for file index: ${revisionType}`);
     process.exit(1)
-    return aquaObject;
+    return aquaTree;
   }
   // let verificationHash = "";
 
@@ -21,12 +21,12 @@ export function maybeUpdateFileIndex(aquaObject: AquaObject, verificationHash: s
     case "form":
       // verificationHash = verificationData.verification_hash
       // fileHash = verificationData.data.file_hash
-      aquaObject.file_index[verificationHash] = formFileName
+      aquaTree.file_index[verificationHash] = formFileName
       break
     case "file":
       // verificationHash = verificationData.verification_hash
       // fileHash = verificationData.data.file_hash
-      aquaObject.file_index[verificationHash] = aquaFileName //filename
+      aquaTree.file_index[verificationHash] = aquaFileName //filename
       break
     case "link":
       console.log("FIX ME.....")
@@ -34,11 +34,11 @@ export function maybeUpdateFileIndex(aquaObject: AquaObject, verificationHash: s
     // const linkURIsArray = linkURIs.split(",")
     // const linkVHs = verificationData.data.link_verification_hashes
     // for (const [idx, vh] of linkVHs.entries()) {
-    //   aquaObject.file_index[vh] = `${linkURIsArray[idx]}`
+    //   aquaTree.file_index[vh] = `${linkURIsArray[idx]}`
     // }
   }
 
-  return aquaObject
+  return aquaTree
 }
 
 export function dict2Leaves(obj: AnObject): string[] {
@@ -55,7 +55,7 @@ export function getHashSum(data: string | Buffer): string {
   return createHash('sha256').update(data).digest('hex');
 }
 
-export function createNewAquaObject(): AquaObject {
+export function createNewAquaTree(): AquaTree {
   return {
     revisions: {},
     file_index: {},
@@ -64,10 +64,10 @@ export function createNewAquaObject(): AquaObject {
   };
 }
 
-export function checkFileHashAlreadyNotarized(fileHash: string, aquaObject: AquaObject): boolean {
+export function checkFileHashAlreadyNotarized(fileHash: string, aquaTree: AquaTree): boolean {
 
   // Check if this file hash already exists in any revision
-  const existingRevision = Object.values(aquaObject.revisions).find(
+  const existingRevision = Object.values(aquaTree.revisions).find(
     (revision) => revision.file_hash && revision.file_hash === fileHash,
   );
   if (existingRevision) {
@@ -224,8 +224,8 @@ export const getMerkleRoot = (leaves : string[]) =>{
   return hexRoot
 }
 
-export const getLatestVH = (aquaObject: AquaObject) => {
-  const verificationHashes = Object.keys(aquaObject.revisions)
+export const getLatestVH = (aquaTree: AquaTree) => {
+  const verificationHashes = Object.keys(aquaTree.revisions)
   return verificationHashes[verificationHashes.length - 1]
 }
 
