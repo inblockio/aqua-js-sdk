@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { TransactionResult, WitnessConfig, WitnessEnvironment, WitnessNetwork, WitnessTransactionData } from '../types';
+import http from "http";
 
 export class WitnessEth {
   // Internal Configuration Maps
@@ -40,6 +41,34 @@ export class WitnessEth {
     }
   };
 
+  static async commonPrepareListener (htmlContent : string)  {
+    let output = "{}"
+    const requestListener = async (req, res) => {
+      if (req.method == "POST") {
+        let data = ""
+        req.on("data", (chunk) => {
+          data += chunk
+        })
+        await new Promise((resolve) => {
+          req.on("end", resolve)
+        })
+        output = data
+        res.writeHead(200)
+        res.end()
+      } else {
+        if (req.url === "/result") {
+          res.writeHead(200)
+          res.end(output)
+          return
+        }
+        res.setHeader("Content-Type", "text/html")
+        res.writeHead(200)
+        res.end(htmlContent)
+      }
+    }
+    return requestListener
+  }
+
   // Metamask Witness Method
   static async nodeWitnessMetamask(
     config: WitnessConfig,
@@ -49,55 +78,80 @@ export class WitnessEth {
     const serverUrl = `http://${host}:${port}`;
     const html = this.generateWitnessHtml(config);
 
-    const server = require('http').createServer((req: any, res: any) => {
-      let output: any = '{}';
 
-      if (req.method === 'POST') {
-        let data = '';
-        req.on('data', (chunk: string) => {
-          data += chunk;
-        });
-        req.on('end', () => {
-          output = JSON.parse(data);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(output));
-        });
-      } else if (req.url === '/result') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(output));
-      } else {
-        res.setHeader('Content-Type', 'text/html');
-        res.writeHead(200);
-        res.end(html);
-      }
-    });
-
-    return new Promise((resolve, reject) => {
-      server.listen(port, host, async () => {
-        try {
-          while (true) {
-            const response = await fetch(`${serverUrl}/result`);
-            const content: WitnessTransactionData = await response.json();
-
-            if (content.transaction_hash) {
-              server.close();
-              resolve(content);
-              break;
-            }
-
-            console.log('Waiting for the witness...');
-            await this.sleep(10000);
-          }
-        } catch (error) {
-          server.close();
-          reject(error);
+    const requestListener = await  this.commonPrepareListener(html)
+    const server = http.createServer(requestListener)
+    server.listen(port, host, () => {
+      console.log(`✨ Server is running on ${serverUrl}`)
+    })
+    let response, content
+    while (true) {
+      response = await fetch(serverUrl + "/result")
+      content = await response.json()
+      if (content.transaction_hash) {
+        const transactionHash = content.transaction_hash
+        const walletAddress = content.wallet_address
+        console.log(`The witness tx hash has been retrieved: ${transactionHash}`)
+        server.close();
+        let data : WitnessTransactionData = {
+          transaction_hash: transactionHash,
+          wallet_address: walletAddress
         }
-      });
-    });
+        return  Promise.resolve(data); 
+      }
+      console.log("Waiting for the witness...")
+      await this.sleep(10000)
+    }
+    // const server = http.createServer((req: any, res: any) => {
+    //   let output: any = '{}';
+
+    //   if (req.method === 'POST') {
+    //     let data = '';
+    //     req.on('data', (chunk: string) => {
+    //       data += chunk;
+    //     });
+    //     req.on('end', () => {
+    //       output = JSON.parse(data);
+    //       res.writeHead(200, { 'Content-Type': 'application/json' });
+    //       res.end(JSON.stringify(output));
+    //     });
+    //   } else if (req.url === '/result') {
+    //     res.writeHead(200, { 'Content-Type': 'application/json' });
+    //     res.end(JSON.stringify(output));
+    //   } else {
+    //     res.setHeader('Content-Type', 'text/html');
+    //     res.writeHead(200);
+    //     res.end(html);
+    //   }
+    // });
+
+    // return new Promise((resolve, reject) => {
+    //   server.listen(port, host, async () => {
+    //     console.log(` Server is running on ${serverUrl}`)
+    //     try {
+    //       while (true) {
+    //         const response = await fetch(`${serverUrl}/result`);
+    //         const content: WitnessTransactionData = await response.json();
+
+    //         if (content.transaction_hash) {
+    //           server.close();
+    //           resolve(content);
+    //           break;
+    //         }
+
+    //         console.log('Waiting for the witness...');
+    //         await this.sleep(10000);
+    //       }
+    //     } catch (error) {
+    //       server.close();
+    //       reject(error);
+    //     }
+    //   });
+    // });
   }
 
   // Browser-specific implementation
-  static async browserWitness(config: WitnessConfig) : Promise<WitnessTransactionData> {
+  static async browserWitness(config: WitnessConfig): Promise<WitnessTransactionData> {
     const ethChainIdMap: Record<string, string> = {
       'mainnet': '0x1',
       'sepolia': '0xaa36a7',
@@ -142,8 +196,8 @@ export class WitnessEth {
     });
 
     return {
-     transaction_hash : transactionHash,
-     wallet_address :  walletAddress
+      transaction_hash: transactionHash,
+      wallet_address: walletAddress
     };
   };
 
@@ -273,12 +327,12 @@ export class WitnessEth {
     transactionHash: string,
     expectedMR: string,
     _expectedTimestamp?: number
-  ): Promise<[boolean,string]> {
+  ): Promise<[boolean, string]> {
     const provider = ethers.getDefaultProvider(WitnessNetwork);
 
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {
-      return [false,'Transaction not found']
+      return [false, 'Transaction not found']
     };
 
     let actual = tx.data.split('0x9cef4ea1')[1];

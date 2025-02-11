@@ -132,16 +132,17 @@ export async function witnessMultipleAquaObjectsUtil(aquaObjects: AquaObjectWrap
         if (!enableScalar) {
             verificationData.leaves = leaves;
         }
-        // const tree = new MerkleTree(leaves, getHashSum, {
-        //     duplicateOdd: false,
-        // })
+        
         const verificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
         revisions[verificationHash] = verificationData
         // console.log(`\n\n Writing new revision ${verificationHash} to ${current_file} current file current_file_aqua_object ${JSON.stringify(current_file_aqua_object)} \n\n `)
-        let res = maybeUpdateFileIndex(item.aquaObject, {
-            verification_hash: verificationHash,
-            data: verificationData
-        }, revisionType, item.fileObject.fileName, "");
+        // let res = maybeUpdateFileIndex(item.aquaObject, {
+        //     verification_hash: verificationHash,
+        //     data: verificationData
+        // }, revisionType, item.fileObject.fileName, "");
+
+        let res = maybeUpdateFileIndex(item.aquaObject, verificationHash, revisionType, item.fileObject.fileName, "");
+
 
         aquaObjectsResult.push(res);
     }
