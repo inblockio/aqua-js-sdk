@@ -33,6 +33,13 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
     if (!isSuccess) {
         return Err(logs);
     }
+
+
+    logs.push({
+        log : `  ✅  aquaTree verified succesfully`,
+        logType:  LogType.SUCCESS
+    });
+
     let data: AquaOperationData = {
         aquaTree: aquaTree,
         aquaTrees: null,

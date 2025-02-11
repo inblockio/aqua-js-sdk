@@ -76,9 +76,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
     if (!enableScalar) {
         newRevision.leaves = leaves;
     }
-    // const tree = new MerkleTree(leaves, getHashSum, {
-    //     duplicateOdd: false,
-    // })
+
 
     const currentVerificationHash =  getMerkleRoot(leaves); //tree.getHexRoot()
 

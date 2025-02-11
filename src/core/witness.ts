@@ -42,9 +42,7 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
-    // const tree = new MerkleTree(leaves, getHashSum, {
-    //     duplicateOdd: false,
-    // })
+
 
 
     let verification_hash = "";
@@ -59,6 +57,12 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
     revisions[verification_hash] = verificationData
 
     let aquaTreeWithTree = createAquaTree(aquaTree)
+
+
+    logs.push({
+        log : `  ✅  aquaTree witnessed succesfully`,
+        logType:  LogType.SUCCESS
+    });
 
     let result: AquaOperationData = {
         aquaTree: aquaTreeWithTree,
@@ -81,21 +85,10 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
         }
     }
 
-    // const tree2 = new MerkleTree(lastRevisionOrSpecifiedHashes, getHashSum, {
-    //     duplicateOdd: false,
-    // })
+  
 
-    let merkleRoot = getMerkleRoot(lastRevisionOrSpecifiedHashes); //tree2.getHexRoot();
-    let merkleProofArray: string[][] = [];
-
-    // lastRevisionOrSpecifiedHashes.forEach((hash) => {
-    //     let merkleProof = tree2.getHexProof(hash);
-    //     merkleProofArray.push(merkleProof);
-    // });
-
-    // console.log("Merkle proof: ", merkleProofArray);
-
-
+    let merkleRoot = getMerkleRoot(lastRevisionOrSpecifiedHashes);
+  
     let revisionResultData = await prepareWitness(merkleRoot, witnessType, witnessPlatform, credentials!!, witnessNetwork);
 
     if (isErr(revisionResultData)) {
@@ -111,7 +104,6 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
     const revisionType = "witness";
 
     let aquaTreesResult: AquaTree[] = [];
-    // let index = 0;
     for (let item of aquaTrees) {
         let latestOrSpecifiedRevisionKey = "";
         if (item.revision != null && item.revision != undefined && item.revision.length > 0) {
@@ -135,17 +127,16 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
         
         const verificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
         revisions[verificationHash] = verificationData
-        // console.log(`\n\n Writing new revision ${verificationHash} to ${current_file} current file current_file_aqua_object ${JSON.stringify(current_file_aqua_object)} \n\n `)
-        // let res = maybeUpdateFileIndex(item.aquaTree, {
-        //     verification_hash: verificationHash,
-        //     data: verificationData
-        // }, revisionType, item.fileObject.fileName, "");
-
         let res = maybeUpdateFileIndex(item.aquaTree, verificationHash, revisionType, item.fileObject.fileName, "");
 
 
         aquaTreesResult.push(res);
     }
+
+    logs.push({
+        log : `  ✅  all aquaTrees witnessed succesfully`,
+        logType:  LogType.SUCCESS
+    });
 
     let resutData: AquaOperationData = {
         aquaTree: null,
@@ -167,17 +158,6 @@ const prepareWitness = async (
     witness_network: string = 'sepolia',
 ): Promise<Result<WitnessResult, LogData[]>> => {
     let logs: Array<LogData> = [];
-
-    // if (!witnessMethod) {
-    //   console.error("Witness method must be specified");
-    //   process.exit(1);
-    // }
-
-    // const options_array: WitnessMethod[] = ["nostr", "tsa", "eth"];
-    // if (!options_array.includes(witnessMethod)) {
-    //   console.log(`❌ An invalid witness method provided ${witnessMethod}.\n💡 Hint use one of ${options_array.join(",")}`);
-    //   process.exit(1);
-    // }
 
     const merkle_root: string = verificationHash;
     let witness_type: string = "";
@@ -205,11 +185,7 @@ const prepareWitness = async (
             break;
         }
         case "eth": {
-            // let useNetwork = "sepolia";
-            // if (network === "mainnet") {
-            //     useNetwork = "mainnet";
-            // }
-            // witness_network = useNetwork;
+            
             smart_contract_address = "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611";
 
             let network: WitnessNetwork = "sepolia"
@@ -220,15 +196,21 @@ const prepareWitness = async (
             }
 
             if (WitnessPlatformType === "cli") {
-                //   const creds: Credentials = readCredentials();
 
                 if (credentials == null || credentials == undefined) {
+                    logs.push({
+                        log : `  ❌  credentials not found`,
+                        logType:  LogType.SUCCESS
+                    });
                     return Err(logs)
                 }
                 let [_wallet, walletAddress, _publicKey] = getWallet(credentials.mnemonic);
 
-                console.log("Wallet address: ", walletAddress);
 
+                logs.push({
+                    log : ` 🔷  Wallet address: ${walletAddress}`,
+                    logType:  LogType.DEBUGDATA
+                });
                 const gasEstimateResult: GasEstimateResult = await estimateWitnessGas(
                     walletAddress,
                     merkle_root,
@@ -237,7 +219,11 @@ const prepareWitness = async (
                     ""
                 );
 
-                console.log("Gas estimate result: ", gasEstimateResult);
+              
+                logs.push({
+                    log : ` 🔷  Gas estimate result: : ${gasEstimateResult}`,
+                    logType:  LogType.DEBUGDATA
+                });
 
                 if (gasEstimateResult.error !== null) {
                     console.log(`Unable to Estimate gas fee: ${gasEstimateResult?.error}`);
@@ -264,22 +250,29 @@ const prepareWitness = async (
 
                     );
 
-                    console.log("cli signing result: ", JSON.stringify(transactionResult));
+                    logs.push({
+                        logType: LogType.witness,
+                        log: "🔎 cli witness result: \n"+ JSON.stringify(transactionResult)
+                    });
 
 
                 } catch (e) {
 
                     logs.push({
                         logType: LogType.ERROR,
-                        log: "an error witnessing using etherium "
+                        log: "❌ an error witnessing using etherium "
                     })
                 }
 
-                if (transactionResult?.error != null) {
+                if (transactionResult ==null || transactionResult.error != null) {
+                    logs.push({
+                        logType: LogType.ERROR,
+                        log: "❌ an error witnessing using etherium (empty object) "
+                    })
                     return Err(logs);
                 }
 
-                transactionHash = transactionResult?.transactionHash ?? "--error--";
+                transactionHash = transactionResult!!.transactionHash ?? "--error--";
                 publisher = walletAddress;
             } else {
                 /**

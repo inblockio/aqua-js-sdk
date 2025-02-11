@@ -34,6 +34,7 @@ export enum LogType {
   ERROR="error",
   WARNING="warning",
   HINT="hint",
+  DEBUGDATA="debug_data",
   file="file",
   link="link",
   signature="signature",

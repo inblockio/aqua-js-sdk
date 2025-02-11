@@ -40,9 +40,9 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: 
             try {
                 // const credentials = readCredentials()
 
-                if (credentials == null) {
+                if (credentials == null || credentials == undefined ||) {
                     logs.push({
-                        log: "credentials not found ",
+                        log: "❌ credentials not found ",
                         logType: LogType.ERROR
                     })
                     return Err(logs);
@@ -51,8 +51,12 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: 
                 let sign = new CLISigner();
                 signature = await sign.doSign(wallet, targetRevisionHash)
             } catch (error) {
-                console.error("Failed to read mnemonic:", error)
-                process.exit(1)
+                logs.push({
+                    log:"❌ Failed to read mnemonic:" +  error,
+                    logType: LogType.ERROR
+                })
+                return Err(logs);
+                
             }
             signature_type = "ethereum:eip-191"
             break
@@ -60,9 +64,12 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: 
             // const credentials = readCredentials()
             if (credentials == null || credentials == undefined || credentials['did:key'].length === 0 || !credentials['did:key']) {
 
-                console.log("DID key is required.  Please get a key from https://hub.ebsi.eu/tools/did-generator")
-
-                process.exit(1)
+                logs.push({
+                    log: "❌ DID key is required.  Please get a key from https://hub.ebsi.eu/tools/did-generator",
+                    logType: LogType.ERROR
+                });
+                return Err(logs);
+              
             }
 
             let did = new DIDSigner();
@@ -92,14 +99,12 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: 
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
-    // const tree = new MerkleTree(leaves, getHashSum, {
-    //     duplicateOdd: false,
-    // })
+
 
     if (!enableScalar) {
         verificationData.leaves = leaves
     }
-    let verification_hash: string =  getMerkleRoot(leaves); //tree.getHexRoot();
+    let verification_hash: string = getMerkleRoot(leaves); //tree.getHexRoot();
 
     aquaTree.revisions[verification_hash] = verificationData;
 
@@ -110,6 +115,11 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: 
     }
     // Tree creation
     let aquaTreeWithTree = createAquaTree(data)
+
+    logs.push({
+        log: `  ✅  aquaTree signed succesfully`,
+        logType: LogType.SUCCESS
+    });
 
     let result: AquaOperationData = {
         aquaTree: aquaTreeWithTree,
@@ -131,7 +141,7 @@ export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _
 
 
 
-export async function verifySignature  (data: Revision, verificationHash: string) :Promise<[boolean, LogData[]]> {
+export async function verifySignature(data: Revision, verificationHash: string): Promise<[boolean, LogData[]]> {
 
     let logs: Array<LogData> = [];
 
@@ -139,42 +149,42 @@ export async function verifySignature  (data: Revision, verificationHash: string
     // Specify signature correctness
     let signatureOk = false
     if (verificationHash === "") {
-      // The verificationHash MUST NOT be empty. This also implies that a genesis revision cannot
-      // contain a signature.
+        // The verificationHash MUST NOT be empty. This also implies that a genesis revision cannot
+        // contain a signature.
 
-      logs.push({
-        log:`The verificationHash MUST NOT be empty`,
-        logType:LogType.ERROR, 
-      })
+        logs.push({
+            log: `The verificationHash MUST NOT be empty`,
+            logType: LogType.ERROR,
+        })
 
-      return [signatureOk, logs]
+        return [signatureOk, logs]
     }
-  
+
     console.log("did:key == " + data.signature_type);
-    let signerDID =  new DIDSigner();
+    let signerDID = new DIDSigner();
     // Signature verification
     switch (data.signature_type) {
-      case "did:key":
-        signatureOk = await signerDID.verify(data.signature, data.signature_public_key!!, verificationHash)
-        break
-      case "ethereum:eip-191":
-        throw new Error("Need to be verified")
-        // The padded message is required
-        const paddedMessage = `I sign this revision: [${verificationHash}]`
-        try {
-            
-          const recoveredAddress = ethers.recoverAddress(
-            ethers.hashMessage(paddedMessage),
-            data.signature,
-          )
-          signatureOk =
-            recoveredAddress.toLowerCase() ===
-            data.signature_wallet_address!!.toLowerCase()
-        } catch (e) {
-          // continue regardless of error
-        }
-        break
+        case "did:key":
+            signatureOk = await signerDID.verify(data.signature, data.signature_public_key!!, verificationHash)
+            break
+        case "ethereum:eip-191":
+            throw new Error("Need to be verified")
+            // The padded message is required
+            const paddedMessage = `I sign this revision: [${verificationHash}]`
+            try {
+
+                const recoveredAddress = ethers.recoverAddress(
+                    ethers.hashMessage(paddedMessage),
+                    data.signature,
+                )
+                signatureOk =
+                    recoveredAddress.toLowerCase() ===
+                    data.signature_wallet_address!!.toLowerCase()
+            } catch (e) {
+                // continue regardless of error
+            }
+            break
     }
-  
+
     return [signatureOk, logs]
-  }
+}

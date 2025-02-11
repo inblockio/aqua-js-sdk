@@ -29,8 +29,9 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
     let alreadyNotarized = checkFileHashAlreadyNotarized(fileHash, aquaTreeWrapper.aquaTree)
 
     if (alreadyNotarized) {
+       
         logs.push({
-            log: `file ${fileObject.fileName} has already been notarized.`,
+            log: `❌  file ${fileObject.fileName} has already been notarized.`,
             logType: LogType.ERROR
         })
         return Err(logs)
@@ -42,9 +43,7 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
-    // const tree = new MerkleTree(leaves, getHashSum, {
-    //     duplicateOdd: false,
-    // })
+
 
     let verification_hash = "";
     if (!enableScalar) {
@@ -61,11 +60,19 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
 
     let aquaTreeWithTree = createAquaTree(aquaTreeWrapper.aquaTree)
 
+    logs.push({
+        log : `  ✅  content revision created succesfully`,
+        logType:  LogType.SUCCESS
+    });
+
     let result: AquaOperationData = {
         aquaTree: aquaTreeWithTree,
         aquaTrees: null,
         logData: logs
     }
+
+    
+
     return Ok(result)
 }
 
@@ -76,13 +83,14 @@ export async function getFileByHashUtil(aquaTree: AquaTree, hash: string): Promi
 
     if (res) {
         logs.push({
-            log: `File with hash  found`,
+            log: `✅ File with hash  found`,
             logType: LogType.SUCCESS
         });
         return Ok(res)
     } else {
+        
         logs.push({
-            log: `File with hash ot found`,
+            log: `❌ File with hash ot found`,
             logType: LogType.ERROR
         });
         return Err(logs)

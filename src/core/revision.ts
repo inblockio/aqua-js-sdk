@@ -98,32 +98,34 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
         case "form":
 
 
-            let form_data_json: any = {}
+            let formDataJson: any = {}
             try {
                 // Attempt to parse the JSON data
-                form_data_json = JSON.parse(fileObject.fileContent)
+                formDataJson = JSON.parse(fileObject.fileContent)
             } catch (parseError) {
-                // Handle invalid JSON data
-                console.error("Error: The file does not contain valid JSON data.")
-                process.exit(1)
+                logs.push({
+                    log: `❌  Error: The file ${fileObject.fileName} does not contain valid JSON data.`,
+                    logType: LogType.ERROR
+                });
+                return Err(logs);
             }
 
             // Sort the keys
-            let form_data_sorted_keys = Object.keys(form_data_json)
-            let form_data_sorted_with_prefix: any = {}
-            for (let key of form_data_sorted_keys) {
-                form_data_sorted_with_prefix[`forms_${key}`] = form_data_json[key]
+            let formDataSortedKeys = Object.keys(formDataJson)
+            let formDataSortedWithPrefix: any = {}
+            for (let key of formDataSortedKeys) {
+                formDataSortedWithPrefix[`forms_${key}`] = formDataJson[key]
             }
 
             verificationData = {
                 ...verificationData,
-                ...form_data_sorted_with_prefix,
+                ...formDataSortedWithPrefix,
             }
             break
 
         default:
             logs.push({
-                log: `Genesis revision can either be form  or file.`,
+                log: `❌ Genesis revision can either be form  or file.`,
                 logType: LogType.ERROR
             })
             return Err(logs);
@@ -132,13 +134,16 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     }
 
     const leaves = dict2Leaves(verificationData)
-    // const tree = new MerkleTree(leaves, getHashSum, {
-    //     duplicateOdd: false,
-    // })
+
     let verificationHash = "";
     if (enableScalar) {
+
+        logs.push({
+            log: `  ⏺️  Scalar enabled`,
+            logType: LogType.INFO
+        });
         let stringifiedData = JSON.stringify(verificationData)
-        console.log("Result of s-----", stringifiedData)
+
         verificationHash = "0x" + getHashSum(stringifiedData);
     } else {
         verificationData.leaves = leaves
@@ -153,11 +158,17 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     // Tree creation
     let aquaTreeWithTree = createAquaTree(aquaTreeUpdated)
 
+    logs.push({
+        log: `  ✅  Genesis revision created succesfully`,
+        logType: LogType.SUCCESS
+    });
+
     let result: AquaOperationData = {
         aquaTree: aquaTreeWithTree, //aquaTreeWithTree,
         aquaTrees: null,
         logData: logs
     }
+
 
     return Ok(result);
 
@@ -173,8 +184,9 @@ export function getRevisionByHashUtil(aquaTree: AquaTree, revisionHash: string):
     if (verificationHashes.includes(revisionHash)) {
         return Ok(aquaTree.revisions[revisionHash]);
     } else {
+
         logs.push({
-            log: `Revision with hash : ${revisionHash} not found`,
+            log: `❌ Revision with hash : ${revisionHash} not found`,
             logType: LogType.ERROR
         })
         return Err(logs);
@@ -188,8 +200,9 @@ export function getLastRevisionUtil(aquaTree: AquaTree): Result<Revision, LogDat
     const verificationHashes = Object.keys(aquaTree.revisions);
 
     if (verificationHashes.length == 0) {
+
         logs.push({
-            log: `aqua object has no revisions`,
+            log: `❌ aqua object has no revisions`,
             logType: LogType.ERROR
         })
         return Err(logs);

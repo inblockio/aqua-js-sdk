@@ -1,19 +1,24 @@
 import { createHash } from 'crypto';
-import { AnObject, AquaTree, CredentialsData, GasEstimateResult, RevisionTree, TreeMapping } from './types';
+import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, RevisionTree, TreeMapping } from './types';
 import { ethers, HDNodeWallet } from "ethers";
 import { Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
-import {MerkleTree} from 'merkletreejs';
+import { MerkleTree } from 'merkletreejs';
+import { Err, Ok, Result } from './type_guards';
 
 
 
 
-export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string): AquaTree {
+export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string): Result<AquaTree, LogData[]> {
+  let logs: LogData[] = [];
   const validRevisionTypes = ["file", "form", "link"];
   if (!validRevisionTypes.includes(revisionType)) {
-    console.error(`Invalid revision type for file index: ${revisionType}`);
-    process.exit(1)
-    return aquaTree;
+    logs.push({
+      logType: LogType.ERROR,
+      log: `❌ Invalid revision type for file index: ${revisionType}`
+    });
+
+    return Err(logs);
   }
   // let verificationHash = "";
 
@@ -38,7 +43,13 @@ export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: strin
     // }
   }
 
-  return aquaTree
+  logs.push({
+    logType: LogType.SUCCESS,
+    log: `✅ File index of aqua tree updated successfully.`
+  });
+
+
+  return Ok(aquaTree)
 }
 
 export function dict2Leaves(obj: AnObject): string[] {
@@ -109,8 +120,8 @@ export function createCredentials() {
 
     return credentialsObject;
   } catch (error) {
-    console.error("Failed to write mnemonic:", error)
-    process.exit(1)
+    console.error("❌ Failed to write mnemonic:", error)
+   throw Err(error)
 
   }
 }
@@ -170,11 +181,11 @@ export const estimateWitnessGas = async (wallet_address: string, witness_event_v
   }
 };
 
-export function verifyMerkleIntegrity(merkleBranch : string[], merkleRoot: string) :  boolean {
+export function verifyMerkleIntegrity(merkleBranch: string[], merkleRoot: string): boolean {
   if (merkleBranch.length === 0) {
     return false
   }
-  
+
   //
   // let prevSuccessor = null
   // for (const idx in merkleBranch) {
@@ -208,14 +219,14 @@ export function verifyMerkleIntegrity(merkleBranch : string[], merkleRoot: strin
   // }
 
   let witnessMerkleProofLeaves = merkleBranch
- 
+
   let hexRoot = getMerkleRoot(witnessMerkleProofLeaves)
   let merkleRootOk = hexRoot === merkleRoot
 
   return merkleRootOk
 }
 
-export const getMerkleRoot = (leaves : string[]) =>{
+export const getMerkleRoot = (leaves: string[]) => {
   const tree = new MerkleTree(leaves, getHashSum, {
     duplicateOdd: false,
   })
