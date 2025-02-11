@@ -40,7 +40,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: 
             try {
                 // const credentials = readCredentials()
 
-                if (credentials == null || credentials == undefined ||) {
+                if (credentials == null || credentials == undefined ) {
                     logs.push({
                         log: "❌ credentials not found ",
                         logType: LogType.ERROR
