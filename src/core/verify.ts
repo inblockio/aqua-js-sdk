@@ -274,23 +274,23 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
 
     const leaves = input.leaves
     delete input.leaves
-    const actualLeaves = []
-    let fieldsWithPartialVerification: string[] = []
-    let fieldsWithVerification: string[] = []
+    // const actualLeaves = []
+    // let fieldsWithPartialVerification: string[] = []
+    // let fieldsWithVerification: string[] = []
 
     if (input.revision_type === 'form') {
 
+        let [isOk, logsAll] = verifyFormRevision(input, leaves);
 
-        let [isOk, logs] = verifyFormRevision(input, leaves);
+        logs.push(...logsAll)
 
+        vhOk = isOk
 
     }
     // For witness, we verify the merkle root
     else if (input.revision_type === "witness" && input.witness_merkle_proof && input.witness_merkle_proof.length > 1) {
         let witnessMerkleProofLeaves = input.witness_merkle_proof
-        // const tree = new MerkleTree(witnessMerkleProofLeaves, getHashSum, {
-        //     duplicateOdd: false,
-        // })
+      
         const hexRoot = getMerkleRoot(witnessMerkleProofLeaves);  // tree.getHexRoot()
         vhOk = hexRoot === input.witness_merkle_root
     }
@@ -303,14 +303,10 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
             const claimOk = leaves[i] === actual
             // result.status[claim] = claimOk
             ok = ok && claimOk
-            actualLeaves.push(actual)
+            // actualLeaves.push(actual)
         }
 
-        // Verify verification hash
-        // const tree = new MerkleTree(leaves, getHashSum, {
-        //     duplicateOdd: false,
-        // })
-
+        
         const hexRoot = getMerkleRoot(leaves);// tree.getHexRoot()
         vhOk = hexRoot === verificationHash
     }

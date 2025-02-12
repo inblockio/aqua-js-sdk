@@ -1,7 +1,7 @@
 
 import { createAquaTree } from "../aquavhtree";
 import { Err, isErr, Ok, Result } from "../type_guards";
-import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, LogType, FileObject } from "../types";
+import {  AquaOperationData, LogData,  AquaTreeWrapper, LogType, FileObject } from "../types";
 import { checkFileHashAlreadyNotarized, createNewAquaTree, dict2Leaves, findFormKey, getHashSum, getLatestVH, getMerkleRoot, getTimestamp, maybeUpdateFileIndex, prepareNonce } from "../utils";
 
 
@@ -76,7 +76,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
         verificationHash = "0x" + getHashSum(stringifiedData);
     } else {
         verificationData.leaves = leaves
-        verificationHash = getMerkleRoot(leaves); // tree.getHexRoot();
+        verificationHash = getMerkleRoot(leaves); 
     }
 
     const aquaTree = createNewAquaTree();

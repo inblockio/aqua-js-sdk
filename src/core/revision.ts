@@ -16,7 +16,7 @@ export function removeLastRevisionUtil(aquaTree: AquaTree): Result<AquaOperation
     const lastRevision = aquaTree.revisions[lastRevisionHash]
     switch (lastRevision.revision_type) {
         case "file":
-            delete aquaTree.file_index[lastRevision.file_hash!!]
+            delete aquaTree.file_index[lastRevision.file_hash]
             break
         case "link":
             for (const vh of lastRevision.link_verification_hashes) {
@@ -147,7 +147,7 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
         verificationHash = "0x" + getHashSum(stringifiedData);
     } else {
         verificationData.leaves = leaves
-        verificationHash = getMerkleRoot(leaves); // tree.getHexRoot();
+        verificationHash = getMerkleRoot(leaves); 
     }
 
     const aquaTree = createNewAquaTree();

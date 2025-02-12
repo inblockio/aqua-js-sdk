@@ -1,5 +1,5 @@
 
-import { Revision, AquaOperationData, LogData, SignType, AquaTreeWrapper, CredentialsData, LogType } from "../types";
+import { Revision, AquaOperationData, LogData, SignType, AquaTreeWrapper, CredentialsData, LogType, SignatureData } from "../types";
 import { MetaMaskSigner } from "../signature/sign_metamask";
 import { CLISigner } from "../signature/sign_cli";
 import { dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet } from "../utils";
@@ -20,7 +20,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
         targetRevisionHash = aquaTreeWrapper.revision
     }
 
-    let signature, walletAddress, publicKey, signature_type
+    let signature: string | SignatureData, walletAddress: string, publicKey: string, signature_type: string
 
     switch (signType) {
         case "metamask":
@@ -32,7 +32,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
             try {
                 // const credentials = readCredentials()
 
-                if (credentials == null || credentials == undefined ) {
+                if (credentials == null || credentials == undefined) {
                     logs.push({
                         log: "❌ credentials not found ",
                         logType: LogType.ERROR
@@ -44,11 +44,11 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
                 signature = await sign.doSign(wallet, targetRevisionHash)
             } catch (error) {
                 logs.push({
-                    log:"❌ Failed to read mnemonic:" +  error,
+                    log: "❌ Failed to read mnemonic:" + error,
                     logType: LogType.ERROR
                 })
                 return Err(logs);
-                
+
             }
             signature_type = "ethereum:eip-191"
             break
@@ -61,7 +61,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
                     logType: LogType.ERROR
                 });
                 return Err(logs);
-              
+
             }
 
             let did = new DIDSigner();
@@ -152,7 +152,10 @@ export async function verifySignature(data: Revision, verificationHash: string):
         return [signatureOk, logs]
     }
 
-    console.log("did:key == " + data.signature_type);
+    logs.push({
+        log: `did:key ==  ${data.signature_type}`,
+        logType: LogType.INFO,
+    })
     let signerDID = new DIDSigner();
     // Signature verification
     switch (data.signature_type) {
@@ -160,7 +163,7 @@ export async function verifySignature(data: Revision, verificationHash: string):
             signatureOk = await signerDID.verify(data.signature, data.signature_public_key!!, verificationHash)
             break
         case "ethereum:eip-191":
-            throw new Error("Need to be verified")
+            // throw new Error("Need to be verified")
             // The padded message is required
             const paddedMessage = `I sign this revision: [${verificationHash}]`
             try {
@@ -174,6 +177,10 @@ export async function verifySignature(data: Revision, verificationHash: string):
                     data.signature_wallet_address!!.toLowerCase()
             } catch (e) {
                 // continue regardless of error
+                logs.push({
+                    log: `Error  ${e}`,
+                    logType: LogType.ERROR,
+                })
             }
             break
     }

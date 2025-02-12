@@ -5,7 +5,7 @@ import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, remo
 import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
 import { verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
-import { Err, Result } from "./type_guards";
+import { Result } from "./type_guards";
 import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
 
 
