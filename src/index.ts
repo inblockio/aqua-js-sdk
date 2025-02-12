@@ -1,5 +1,6 @@
 import { createContentRevisionUtil, getFileByHashUtil } from "./core/content";
 import { createFormRevisionUtil } from "./core/forms";
+import { linkAquaTreeUtil, linkMultipleAquaTreesUtil } from "./core/link";
 import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
 import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
 import { verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
@@ -9,12 +10,8 @@ import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObje
 
 
 export * from "./types";
-export * from "./type_guards"
-// // export * from "./utils";
+export * from "./type_guards";
 
-export function greet(name: string): string {
-    return `Hello, ${name}!`;
-}
 export default class Aquafier {
 
     removeLastRevision = (aquaTree: AquaTree): Result<AquaOperationData, LogData[]> => {
@@ -34,11 +31,9 @@ export default class Aquafier {
         return verifyAquaTreeUtil(aquaTree, fileObject)
     }
 
-    verifyAquaTreeRevision = async (aquaTree: AquaTree,revision: Revision,revisionItemHash :  string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
-        return verifyAquaTreeRevisionUtil(aquaTree, revision,revisionItemHash, fileObject)
+    verifyAquaTreeRevision = async (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
+        return verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject)
     }
-
-   
 
     witnessAquaTree = async (aquaTree: AquaTree, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
@@ -48,8 +43,6 @@ export default class Aquafier {
         return witnessMultipleAquaTreesUtil(aquaTrees, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
     }
 
-
-
     signAquaTree = async (aquaTree: AquaTreeWrapper, hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return signAquaTreeUtil(aquaTree, hash, signType, credentials, enableScalar)
     }
@@ -58,30 +51,19 @@ export default class Aquafier {
         return signMultipleAquaTreesUtil(aquaTrees, signType, credentials)
     }
 
-    //     // Link 
-    //     verifyLink = async (linkRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
-    //         return verifyLinkUtil(linkRevision)
-    //     }
 
-    //     linkAquaTree = async (aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-    //         return linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScalar)
-    //     }
+    linkAquaTree = async (aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScalar)
+    }
 
-    //     linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData[], LogData[]>> => {
-    //         return linkMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
-    //     }
+        linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData[], LogData[]>> => {
+            return linkMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
+        }
 
     createFormRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return createFormRevisionUtil(aquaTree, fileObject, enableScalar)
     }
-    //     // Forms -- also and form key ,remove form key
-    //     verifyForm = async (formRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
-    //         return verifyFormUtil(formRevision)
-    //     }
 
-    //     LinkAquaTreeToForm = async (aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> => {
-    //         return LinkAquaTreeToFormUtil(aquaTree)
-    //     }
 
     //     hideFormElements = async (aquaTree: AquaTree, elementsToHide: Array<string>): Promise<Result<AquaOperationData, LogData[]>> => {
     //         return hideFormElementsUtil(aquaTree, elementsToHide)

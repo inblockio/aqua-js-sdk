@@ -1,6 +1,6 @@
 
 import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper } from "../types";
-import { dict2Leaves,  getHashSum, getLatestVH, getMerkleRoot, getTimestamp } from "../utils";
+import { dict2Leaves, getHashSum, getLatestVH, getMerkleRoot, getTimestamp } from "../utils";
 
 import { createAquaTree } from "../aquavhtree";
 import { Err, isOk, Ok, Result } from "../type_guards";
@@ -35,12 +35,12 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
     const timestamp = getTimestamp()
     let previous_verification_hash = aquaTreeWrapper.revision
 
-    if(!aquaTreeWrapper.revision || aquaTreeWrapper.revision === ""){
+    if (!aquaTreeWrapper.revision || aquaTreeWrapper.revision === "") {
         previous_verification_hash = getLatestVH(aquaTreeWrapper.aquaTree)
     }
 
     let newRevision: Revision = {
-        previous_verification_hash: previous_verification_hash, //previousVerificationHash,
+        previous_verification_hash: previous_verification_hash,
         local_timestamp: timestamp,
         revision_type: "link",
     }
@@ -49,7 +49,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
 
     const linkFileHashes = [getHashSum(linkAquaTreeWrapper.fileObject.fileContent)]
     // Validation again
-    linkFileHashes.map((fh) => {
+    linkFileHashes.forEach((fh) => {
         if (!(fh in linkAquaTreeWrapper.aquaTree.file_index)) {
             // Add log here
             return Err(logs)
@@ -78,7 +78,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
     }
 
 
-    const currentVerificationHash =  getMerkleRoot(leaves); //tree.getHexRoot()
+    const currentVerificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
 
     let updatedAquaTree: AquaTree = {
         revisions: {
@@ -104,7 +104,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
 }
 
 export async function linkMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData[], LogData[]>> {
-    // let logs: Array<LogData> = [];
+
 
     let logs: Array<LogData> = [];
     let aquaOperationResults: AquaOperationData[] = [];

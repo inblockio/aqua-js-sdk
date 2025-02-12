@@ -1,13 +1,17 @@
 import { createHash } from 'crypto';
 import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, RevisionTree, TreeMapping } from './types';
-import { ethers, HDNodeWallet } from "ethers";
-import { Wallet, Mnemonic } from "ethers";
+import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
 import { MerkleTree } from 'merkletreejs';
 import { Err, Ok, Result } from './type_guards';
 
 
 
+export function findFormKey(aquaTree: AquaTree, key: string) {
+  // Look for exact match or partial match with 'forms-' prefix
+  const keys = Object.keys(aquaTree);
+  return keys.find(k => k === key || k === `forms_${key}` || k.startsWith(`forms_${key}`));
+}
 
 export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string): Result<AquaTree, LogData[]> {
   let logs: LogData[] = [];
@@ -121,7 +125,7 @@ export function createCredentials() {
     return credentialsObject;
   } catch (error) {
     console.error("❌ Failed to write mnemonic:", error)
-   throw Err(error)
+    throw Err(error)
 
   }
 }
