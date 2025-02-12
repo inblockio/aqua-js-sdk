@@ -5,9 +5,28 @@ import { verifyWitness } from "./witness";
 import { Err, isErr, Ok, Result } from "../type_guards";
 
 
-export async function verifyAquaTreeRevisionUtil(_revision: Revision, _fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
+export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = []
-    return Promise.resolve(Err(logs))
+
+    const isScalar = !revision.hasOwnProperty('leaves');
+    let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
+
+    result[1].forEach((e) => logs.push(e));
+    if (!result[0]) {
+        Err(logs)
+    }
+
+    logs.push({
+        log: `  ✅  aquaTree verified succesfully`,
+        logType: LogType.SUCCESS
+    });
+    let data: AquaOperationData = {
+        aquaTree: aquaTree,
+        aquaTrees: null,
+        logData: logs
+    }
+
+    return Ok(data);
 }
 export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
@@ -24,7 +43,7 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
 
         result[1].forEach((e) => logs.push(e));
 
-        if (!result) {
+        if (!result[0]) {
             isSuccess = false;
             break;
         }
@@ -36,8 +55,8 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
 
 
     logs.push({
-        log : `  ✅  aquaTree verified succesfully`,
-        logType:  LogType.SUCCESS
+        log: `  ✅  aquaTree verified succesfully`,
+        logType: LogType.SUCCESS
     });
 
     let data: AquaOperationData = {
@@ -57,7 +76,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     if (isScalar) {
 
         if (revision.witness_merkle_proof && revision.witness_merkle_proof.length > 1) {
-            // console.log("@@@ Verifying merkle proof...");
+         
             let [ok, logs] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
             if (!ok) {
                 return [ok, logs]
@@ -70,9 +89,9 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 return [isSuccess, logs]
             }
         }
-        // console.log("\n Okay is ok " + isSuccess)
+        
     } else {
-        // console.log("###Verifying merkle proof...");
+
         let [ok, result] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
         if (!ok) {
             return [ok, result]
@@ -80,11 +99,10 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     }
 
 
-
-    // let typeOk: boolean;
     let logsResult: Array<LogData> = []
     switch (revision.revision_type) {
         case "form":
+            // verification is already done in verifyRevisionMerkleTreeStructure
             isSuccess = true;
             break
         case "file":
@@ -138,7 +156,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
                 let fileObj = fileObjects.find(fileObj => fileObj.fileName === aquaFileUri)
                 // const linkAquaTree = await readExportFile(aquaFileUri)
-                if(!fileObj){
+                if (!fileObj) {
                     return [false, logs]
                 }
                 const linkAquaTree = JSON.parse(fileObj?.fileContent)
@@ -147,7 +165,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
                 let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
 
-                if(isErr(linkVerificationResult)){
+                if (isErr(linkVerificationResult)) {
                     logs.push(...linkVerificationResult.data)
                     return [false, logs]
                 }
@@ -158,7 +176,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
                 // linkOk = linkOk && (linkStatus === VERIFIED_VERIFICATION_STATUS) && (expectedVH == actualVH)
                 // isSuccess = true
-          
+
             }
             isSuccess = linkOk
             break
@@ -170,6 +188,58 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 }
 
 
+function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] {
+    let logs: Array<LogData> = [];
+    let contains_deleted_fields = false;
+    let fieldsWithVerification = [];
+    let fieldsWithPartialVerification = [];
+    let ok = true;
+
+    Object.keys(input).sort().forEach((field, i: number) => {
+        let new_hash = getHashSum(`${field}:${input[field]}`);
+
+        if (!field.endsWith('.deleted')) {
+            if (field.startsWith('forms_')) {
+                if (new_hash !== leaves[i]) {
+                    ok = false;
+                    fieldsWithVerification.push(`🚫 ${field}: ${input[field]}`);
+                } else {
+                    fieldsWithVerification.push(`✅ ${field}: ${input[field]}`);
+                }
+            }
+        } else {
+            contains_deleted_fields = true;
+            fieldsWithPartialVerification.push(field);
+        }
+    })
+
+    if (contains_deleted_fields) {
+        logs.push({
+            log: `\n  🚨 Warning: The following fields cannot be verified:`,
+            logType: LogType.WARNING
+        });
+        fieldsWithPartialVerification.forEach((field, i: number) => {
+            logs.push({
+                log: `   ${i + 1}. ${field.replace('.deleted', '')}\n`,
+                logType: LogType.WARNING
+            });
+        });
+    }
+
+    logs.push({
+        log: `\n  The following fields were verified:`,
+        logType: LogType.SUCCESS
+    });
+    fieldsWithVerification.forEach(field => {
+        logs.push({
+            log: ` ✅  ${field}}\n`,
+            logType: LogType.SUCCESS
+        });
+    });
+
+    return [ok, logs]
+
+}
 
 function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: string): [boolean, Array<LogData>] {
     console.log("verification hash: ", verificationHash)
@@ -209,50 +279,10 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
     let fieldsWithVerification: string[] = []
 
     if (input.revision_type === 'form') {
-        let contains_deleted_fields = false
 
-        Object.keys(input).sort().forEach((field, i: number) => {
-            let new_hash = getHashSum(`${field}:${input[field]}`)
 
-            if (!field.endsWith('.deleted')) {
-                if (field.startsWith('forms_')) {
-                    fieldsWithVerification.push(`${field}: ${input[field]}`)
-                }
-                if (new_hash !== leaves[i]) {
-                    ok = false
-                    // console.log(`🚫 New hash does not match existing hash ${leaves[i]}:${new_hash} at index: ${i}`)
-                    logs.push({
-                        log: `🚫 New hash does not match existing hash ${leaves[i]}:${new_hash} at index: ${i}`,
-                        logType: LogType.ERROR
-                    })
-                }
-            } else {
-                contains_deleted_fields = true
-                fieldsWithPartialVerification.push(field)
-            }
-        })
+        let [isOk, logs] = verifyFormRevision(input, leaves);
 
-        if (contains_deleted_fields) {
-            // console.warn(`\n  🚨 Warning: The following fields cannot be verified:`)
-            logs.push({
-                log: ` 🚨 Warning: The following fields cannot be verified: `,
-                logType: LogType.WARNING
-            })
-            fieldsWithPartialVerification.forEach((field, i: number) => console.log(`   ${i + 1}. ${field.replace('.deleted', '')}\n`))
-        }
-
-        // console.log("\n  The following fields were verified successfully: ")
-        logs.push({
-            log: ` The following fields were verified successfully: `,
-            logType: LogType.SUCCESS
-        })
-        fieldsWithVerification.forEach(field => {
-            // console.log(`   ✅${field}\n`)
-            logs.push({
-                log: `    ✅${field}: `,
-                logType: LogType.SUCCESS
-            })
-        })
 
     }
     // For witness, we verify the merkle root
@@ -281,7 +311,7 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
         //     duplicateOdd: false,
         // })
 
-        const hexRoot =getMerkleRoot(leaves);// tree.getHexRoot()
+        const hexRoot = getMerkleRoot(leaves);// tree.getHexRoot()
         vhOk = hexRoot === verificationHash
     }
 

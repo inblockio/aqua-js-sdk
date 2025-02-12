@@ -8,14 +8,6 @@ import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
 import { Err, Ok, Result } from "../type_guards";
 
-
-
-export async function verifySignatureUtil(_signature: Revision): Promise<Result<AquaOperationData, LogData[]>> {
-    let logs: Array<LogData> = [];
-    return Err(logs)
-}
-
-
 export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let aquaTree = aquaTreeWrapper.aquaTree
     let logs: Array<LogData> = [];

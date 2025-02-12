@@ -7,10 +7,7 @@ import { createAquaTree } from "../aquavhtree";
 import { Err, isErr, Ok, Result } from "../type_guards";
 
 
-export async function verifyWitnessUtil(_witness: Revision): Promise<Result<AquaOperationData, LogData[]>> {
-    let logs: Array<LogData> = [];
-    return Err(logs)
-}
+
 
 export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];

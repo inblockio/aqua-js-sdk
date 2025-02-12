@@ -34,14 +34,11 @@ export default class Aquafier {
         return verifyAquaTreeUtil(aquaTree, fileObject)
     }
 
-    verifyAquaTreeRevision = async (revision: Revision, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
-        return verifyAquaTreeRevisionUtil(revision, fileObject)
+    verifyAquaTreeRevision = async (aquaTree: AquaTree,revision: Revision,revisionItemHash :  string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
+        return verifyAquaTreeRevisionUtil(aquaTree, revision,revisionItemHash, fileObject)
     }
 
-    //     // Wittness
-    // verifyWitness = async (witnessRevision: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
-    //     return verifyWitnessUtil(witnessRevision)
-    // }
+   
 
     witnessAquaTree = async (aquaTree: AquaTree, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
@@ -52,10 +49,6 @@ export default class Aquafier {
     }
 
 
-    //     // Signature
-    //     verifySignature = async (signature: Revision): Promise<Result<AquaOperationData, LogData[]>> => {
-    //         return verifySignatureUtil(signature)
-    //     }
 
     signAquaTree = async (aquaTree: AquaTreeWrapper, hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return signAquaTreeUtil(aquaTree, hash, signType, credentials, enableScalar)
