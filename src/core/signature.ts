@@ -8,7 +8,7 @@ import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
 import { Err, Ok, Result } from "../type_guards";
 
-export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, _hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let aquaTree = aquaTreeWrapper.aquaTree
     let logs: Array<LogData> = [];
     let targetRevisionHash = "";

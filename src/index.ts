@@ -43,8 +43,8 @@ export default class Aquafier {
         return witnessMultipleAquaTreesUtil(aquaTrees, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
     }
 
-    signAquaTree = async (aquaTree: AquaTreeWrapper, hash: string, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
-        return signAquaTreeUtil(aquaTree, hash, signType, credentials, enableScalar)
+    signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+        return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar)
     }
 
     signMultipleAquaTrees = async (aquaTrees: AquaTreeWrapper[], signType: SignType, credentials: CredentialsData): Promise<Result<AquaOperationData, LogData[]>> => {
@@ -93,6 +93,7 @@ export default class Aquafier {
 
 
 /**indepedent function to enable chaining */
+/** has default values  */
 
 export function unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
     if (result.isErr()) {
@@ -101,12 +102,34 @@ export function unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
     return result.data.aquaTree
 }
 
-export async function sign(_aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> {
-    let logs: Array<LogData> = []
-    return Promise.resolve(Err(logs))
+export async function sign(aquaTree: AquaTree, signType: SignType = "metamask", credentials: CredentialsData = {
+    mnemonic: "",
+    nostr_sk: "",
+    "did:key": "",
+    alchemy_key: "",
+    witness_eth_network: "",
+    witness_eth_platform: ""
+}, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+
+    return signAquaTreeUtil({
+        aquaTree: aquaTree,
+        fileObject: null,
+        revision: ""
+    }, signType, credentials, enableScalar)
 }
 
-export async function witness(_aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> {
-    let logs: Array<LogData> = []
-    return Promise.resolve(Err(logs))
+export async function witness(aquaTree: AquaTree, witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
+    mnemonic: "",
+    nostr_sk: "",
+    "did:key": "",
+    alchemy_key: "",
+    witness_eth_network: "",
+    witness_eth_platform: ""
+}, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+
+    return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
+}
+
+export async function verify(aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
+    return verifyAquaTreeUtil(aquaTree, fileObject)
 }
