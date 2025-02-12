@@ -2,7 +2,7 @@
 import { createAquaTree } from "../aquavhtree";
 import { Err, isErr, Ok, Result } from "../type_guards";
 import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, LogType, FileObject } from "../types";
-import { checkFileHashAlreadyNotarized, createNewAquaTree, dict2Leaves, getHashSum, getMerkleRoot, getTimestamp, maybeUpdateFileIndex, prepareNonce } from "../utils";
+import { checkFileHashAlreadyNotarized, createNewAquaTree, dict2Leaves, findFormKey, getHashSum, getLatestVH, getMerkleRoot, getTimestamp, maybeUpdateFileIndex, prepareNonce } from "../utils";
 
 
 export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
@@ -107,19 +107,134 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     return Ok(result);
 
 }
-export function hideFormElementsUtil(_aquaTree: AquaTree, _elementsToHide: string[]): Result<AquaOperationData, LogData[]> {
-
+export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide: string): Result<AquaOperationData, LogData[]> {
+    
     let logs: Array<LogData> = [];
-    return Err(logs)
+    
+    let targetRevisionHash = "";
+    
+    
+    if (aquaTreeWrapper.revision.length > 1) {
+        targetRevisionHash = aquaTreeWrapper.revision
+    } else {
+        targetRevisionHash = getLatestVH(aquaTreeWrapper.aquaTree)
+    }
+
+    const targetRevision = aquaTreeWrapper.aquaTree.revisions[targetRevisionHash];
+    
+    if (targetRevisionHash == "" || targetRevision == undefined) {
+
+        logs.push({
+            log: `Error: Revision hash not found in file`,
+            logType: LogType.ERROR
+        });
+
+        return Err(logs)
+    }
+    
+    const formKey = findFormKey(targetRevision, keyToHide);
+    
+    if (!formKey) {
+        logs.push({
+            log: `Error: Form key '${formKey}' not found`,
+            logType: LogType.ERROR
+        });
+
+        return Err(logs)
+    }
+    
+    
+    const revisions: any = aquaTreeWrapper.aquaTree.revisions;
+    
+    // Update in place by renaming the key and setting value to empty string
+    const deletedKey = `${formKey}.deleted`;
+    
+    let newRevision = {};
+    for (let key in targetRevision) {
+        if (formKey == key) {
+            newRevision[deletedKey] = null;
+        } else {
+            newRevision[key] = targetRevision[key];
+        }
+    }
+    revisions[targetRevisionHash] = newRevision;
+    
+    
+    let data: AquaOperationData = {
+        aquaTree: aquaTreeWrapper.aquaTree,
+        aquaTrees: [],
+        logData: logs
+    }
+    return Ok(data)
 }
 
 
-export async function LinkAquaTreeToFormUtil(_aquaTree: AquaTree): Promise<Result<AquaOperationData, LogData[]>> {
+
+export function unHideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToUnHide: string, content : string): Result<AquaOperationData, LogData[]> {
+
     let logs: Array<LogData> = [];
+    
+    let targetRevisionHash = "";
+    
+    
+    if (aquaTreeWrapper.revision.length > 1) {
+        targetRevisionHash = aquaTreeWrapper.revision
+    } else {
+        targetRevisionHash = getLatestVH(aquaTreeWrapper.aquaTree)
+    }
 
+    const targetRevision = aquaTreeWrapper.aquaTree.revisions[targetRevisionHash];
+    
+    if (targetRevisionHash == "" || targetRevision == undefined) {
 
-    return Err(logs)
+        logs.push({
+            log: `Error: Revision hash not found in file`,
+            logType: LogType.ERROR
+        });
+
+        return Err(logs)
+    }
+    
+    const formKey = findFormKey(targetRevision, keyToUnHide);
+    
+    if (!formKey) {
+        logs.push({
+            log: `Error: Form key '${formKey}' not found`,
+            logType: LogType.ERROR
+        });
+
+        return Err(logs)
+    }
+    
+    
+    const revisions: any = aquaTreeWrapper.aquaTree.revisions;
+    
+
+    // Update operation
+    if (formKey.endsWith('.deleted')) {
+        // Restore deleted field
+        const originalKey = formKey.replace('.deleted', '');
+  
+        let newRevision = {};
+        for (let key in targetRevision) {
+          if (formKey == key) {
+            newRevision[originalKey] = content;
+          } else {
+            newRevision[key] = targetRevision[key];
+          }
+        }
+        revisions[targetRevisionHash] = newRevision;
+      } else {
+        // Regular update
+        targetRevision[formKey] = content;
+      }
+
+    
+    
+      let data: AquaOperationData = {
+          aquaTree: aquaTreeWrapper.aquaTree,
+          aquaTrees: [],
+          logData: logs
+      }
+      return Ok(data)
 }
-
-
-

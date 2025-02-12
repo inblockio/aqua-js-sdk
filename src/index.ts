@@ -1,5 +1,5 @@
 import { createContentRevisionUtil, getFileByHashUtil } from "./core/content";
-import { createFormRevisionUtil } from "./core/forms";
+import { createFormRevisionUtil, hideFormElementsUtil, unHideFormElementsUtil } from "./core/forms";
 import { linkAquaTreeUtil, linkMultipleAquaTreesUtil } from "./core/link";
 import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
 import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
@@ -56,18 +56,22 @@ export default class Aquafier {
         return linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScalar)
     }
 
-        linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData[], LogData[]>> => {
-            return linkMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
-        }
+    linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData[], LogData[]>> => {
+        return linkMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
+    }
 
     createFormRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return createFormRevisionUtil(aquaTree, fileObject, enableScalar)
     }
 
 
-    //     hideFormElements = async (aquaTree: AquaTree, elementsToHide: Array<string>): Promise<Result<AquaOperationData, LogData[]>> => {
-    //         return hideFormElementsUtil(aquaTree, elementsToHide)
-    //     }
+    hideFormElements = async (aquaTree: AquaTreeWrapper, keyToHide: string): Promise<Result<AquaOperationData, LogData[]>> => {
+        return hideFormElementsUtil(aquaTree, keyToHide)
+    }
+
+    unHideFormElements = async (aquaTree: AquaTreeWrapper, keyToUnHide: string, content: string): Promise<Result<AquaOperationData, LogData[]>> => {
+        return unHideFormElementsUtil(aquaTree, keyToUnHide, content)
+    }
 
 
     // Revisions

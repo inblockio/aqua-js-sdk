@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, RevisionTree, TreeMapping } from './types';
+import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, Revision, RevisionTree, TreeMapping } from './types';
 import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
 import { MerkleTree } from 'merkletreejs';
@@ -7,9 +7,9 @@ import { Err, Ok, Result } from './type_guards';
 
 
 
-export function findFormKey(aquaTree: AquaTree, key: string) {
+export function findFormKey(revision: Revision, key: string) {
   // Look for exact match or partial match with 'forms-' prefix
-  const keys = Object.keys(aquaTree);
+  const keys = Object.keys(revision);
   return keys.find(k => k === key || k === `forms_${key}` || k.startsWith(`forms_${key}`));
 }
 
