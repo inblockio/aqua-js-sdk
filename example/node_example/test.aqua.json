@@ -1,0 +1,89 @@
+{
+    "revisions": {
+        "0xb3fad6351c226108d63699c020873f50b11b140ade7255ed01ca009056453eb8": {
+            "previous_verification_hash": "",
+            "local_timestamp": "20250213135850",
+            "revision_type": "file",
+            "file_hash": "b1ab25c55913c95cc6913f1dbce9bef185ebf00a64553a8ef194193e52ea5015",
+            "file_nonce": "1ad964bd818a783a5d0bc5d9d95ed70350c46381863bfb8310aab89a7f905292",
+            "leaves": [
+                "282ef210687738888fab820cb151c17b34c2723ad631bbf3008a3c0b4d8dddaa",
+                "1d6fc36e426a936a6a4813e702f5c7f891ad084b5d1ae039a0a60c6854f5e773",
+                "0b4a634e8ac716c13653022166795e3e0a2356cd3b9a2eb25b139fdb6e5862ed",
+                "d781acf7ba880ecae581ffd8debcb4f5cb430bc2f237e27a6098471a9f7ffa60",
+                "2175726ef0b595b2ecf770cb8788ed82949efb3b272a05cf96edc1ed3dea08e6"
+            ]
+        },
+        "0x7c74b7e9d5e01cdb84d73d998ae78f4a00b2095dbb0b6156f02e2b88f24216d7": {
+            "previous_verification_hash": "0xb3fad6351c226108d63699c020873f50b11b140ade7255ed01ca009056453eb8",
+            "local_timestamp": "20250213135850",
+            "revision_type": "signature",
+            "signature": "0x70e742557d6eb64b0c196f0551b65c6e8c1a74b5518427da4c74d4ceeee2a2ba28845c65fe4cacf2462a031ac7aef5519ceea503f244ee5cc897e44260878aea1c",
+            "signature_public_key": "0x0380a77a1a6d59be5c10d7ee5e10def79283938bb8a60025d0fe5404e650e8ccc1",
+            "signature_wallet_address": "0x568a94a8f0f3dc0b245b853bef572075c1df5c50",
+            "signature_type": "ethereum:eip-191",
+            "leaves": [
+                "0b4a634e8ac716c13653022166795e3e0a2356cd3b9a2eb25b139fdb6e5862ed",
+                "5e27816938c8a77590d6b2338536368f193b03cb178504dd90b4fbbb41fb40da",
+                "0a6a79f09c2e133a9fd5eda3554c6896f1714e933cece32ba462e3ea0b585ab2",
+                "b4a7628aaaa3515fa0a0e4632a6817dc51c7ccd5f9a7162d85e543b3293aafa9",
+                "9406a98222f1cf464b81e141328d80448dc0d5a9d6e03a0bc736926e4fcdccb2",
+                "b002b9216f19be74d73f30e5c714c27140af54cb75ff7cf85a6cc7178c90a0be",
+                "ad21ac5f7be25b2b08dfddeafadca85202b13abf5c1e76401f941a2f83985e6b"
+            ]
+        },
+        "0xb099c41648bba3329351856f3280802672622d7ae1a7907cbbcc5663770897c8": {
+            "previous_verification_hash": "0x7c74b7e9d5e01cdb84d73d998ae78f4a00b2095dbb0b6156f02e2b88f24216d7",
+            "local_timestamp": "20250213135850",
+            "revision_type": "witness",
+            "witness_merkle_root": "0x7c74b7e9d5e01cdb84d73d998ae78f4a00b2095dbb0b6156f02e2b88f24216d7",
+            "witness_timestamp": 1739455134,
+            "witness_network": "sepolia",
+            "witness_smart_contract_address": "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611",
+            "witness_transaction_hash": "0x5df0d61b6c87628cd671837625899d36c6cee8eb205d2c34cf272e5cd7b06fa3",
+            "witness_sender_account_address": "0x568a94a8f0f3dc0b245b853bef572075c1df5c50",
+            "witness_merkle_proof": [
+                "0x7c74b7e9d5e01cdb84d73d998ae78f4a00b2095dbb0b6156f02e2b88f24216d7"
+            ],
+            "leaves": [
+                "0b4a634e8ac716c13653022166795e3e0a2356cd3b9a2eb25b139fdb6e5862ed",
+                "f746d40c48470e01dfee7e082cbf68ab4fe1e5624b975f5cdbc2bd5365658e86",
+                "5f2bd542312d5563dc0fcc1e84db920de97f5da850cb61c0a4b91df7552107d7",
+                "6149194b4ca7cdb11f4e3c3ecb1402ddd8b7e5705f20dcfa25456605832e473c",
+                "3e78c6d8572710a7504a8912596a161720c4c56b3104fda0ad23515d372c4945",
+                "23c4cad70ac832482ba0f59c1bea74a7af2aea0632c0ce96f2648feea788efea",
+                "f0d0952e34c18ff2ed441812b026a8fcad083377c34fbd295e3739b32bc310dd",
+                "e67624049b6137c2adabdc54291ad7ed20c9d75b70948f416d9bb50e7776168b",
+                "d5f61de4b0dd2958add60a9eadca33ae96381225b10ef7be8b3b8a5902be3b38",
+                "26ef82dac5c08a9834170caad2d9b55f502837e8537561f99d64d817b821c17d"
+            ]
+        }
+    },
+    "file_index": {
+        "0xb3fad6351c226108d63699c020873f50b11b140ade7255ed01ca009056453eb8": "text.txt"
+    },
+    "tree": {
+        "hash": "0xb3fad6351c226108d63699c020873f50b11b140ade7255ed01ca009056453eb8",
+        "children": [
+            {
+                "hash": "0x7c74b7e9d5e01cdb84d73d998ae78f4a00b2095dbb0b6156f02e2b88f24216d7",
+                "children": [
+                    {
+                        "hash": "0xb099c41648bba3329351856f3280802672622d7ae1a7907cbbcc5663770897c8",
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    },
+    "treeMapping": {
+        "paths": {
+            "0xb099c41648bba3329351856f3280802672622d7ae1a7907cbbcc5663770897c8": [
+                "0xb3fad6351c226108d63699c020873f50b11b140ade7255ed01ca009056453eb8",
+                "0x7c74b7e9d5e01cdb84d73d998ae78f4a00b2095dbb0b6156f02e2b88f24216d7",
+                "0xb099c41648bba3329351856f3280802672622d7ae1a7907cbbcc5663770897c8"
+            ]
+        },
+        "latestHash": "0xb099c41648bba3329351856f3280802672622d7ae1a7907cbbcc5663770897c8"
+    }
+}
