@@ -2,7 +2,7 @@
 
 import * as fs from "fs"
 
-import Aquafier, { AquaTree, FileObject, greet } from "aqua-protocol"
+import Aquafier, { AquaTree, FileObject } from "aqua-protocol"
 
 function readAquaFile(aquaFilePath: string): AquaTree | null {
     try {
@@ -35,8 +35,6 @@ function readFile(aquaFilePath: string): string | null {
         return null; // Return null or throw an error, depending on your use case
     }
 }
-
-console.log(greet('Kenn'));
 
 
 let aquafier = new Aquafier()
