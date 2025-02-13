@@ -207,7 +207,7 @@ const prepareWitness = async (
                     });
                     return Err(logs)
                 }
-                
+
                 let [_wallet, walletAddress, _publicKey] = getWallet(credentials.mnemonic);
 
 
@@ -215,7 +215,8 @@ const prepareWitness = async (
                     log: ` 🔷  Wallet address: ${_wallet}`,
                     logType: LogType.DEBUGDATA
                 });
-                const gasEstimateResult: GasEstimateResult = await estimateWitnessGas(
+
+                const [gasEstimateResult, logData] = await estimateWitnessGas(
                     walletAddress,
                     merkle_root,
                     witness_network,
@@ -223,6 +224,7 @@ const prepareWitness = async (
                     ""
                 );
 
+                logs.push(...logData)
 
                 logs.push({
                     log: ` 🔷  Gas estimate result: : ${gasEstimateResult}`,

@@ -139,13 +139,13 @@ export function formatMwTimestamp(ts: string) {
     .replace("Z", "")
 }
 
-export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, _providerUrl: string): Promise<GasEstimateResult> => {
+export const estimateWitnessGas = async (wallet_address: string, witness_event_verification_hash: string, ethNetwork: string, smart_contract_address: string, _providerUrl: string): Promise<[GasEstimateResult, Array<LogData>]> => {
+  let logData: LogData[] = []
+
   try {
     // Connect to Ethereum provider
     // const provider = new ethers.JsonRpcProvider(providerUrl);
     const provider = ethers.getDefaultProvider(ethNetwork)
-
-    console.log("Replace :", witness_event_verification_hash)
 
     // Define the transaction
     const tx = {
@@ -157,31 +157,55 @@ export const estimateWitnessGas = async (wallet_address: string, witness_event_v
     // Get sender's balance
     const balance = await provider.getBalance(wallet_address);
     const balanceInEth = ethers.formatEther(balance);
-    console.log(`Sender Balance: ${balanceInEth} ETH`);
+
+    logData.push({
+      log: `Sender Balance: ${balanceInEth} ETH`,
+      logType: LogType.DEBUGDATA
+    })
 
     // Estimate gas
     const estimatedGas = await provider.estimateGas(tx);
-    console.log(`Estimated Gas: ${estimatedGas.toString()} units`);
+
+    logData.push({
+      log: `Estimated Gas: ${estimatedGas.toString()} units`,
+      logType: LogType.DEBUGDATA
+    })
 
     // Get current gas price
     const feeData = await provider.getFeeData();
-    console.log("Fee data: ", feeData)
-    const gasPrice = feeData.gasPrice ?? BigInt(0); // This replaces getGasPrice()
-    console.log(`Gas Price: ${ethers.formatUnits(gasPrice, "gwei")} Gwei`);
+
+    logData.push({
+      log: `Fee data: ", ${feeData}`,
+      logType: LogType.DEBUGDATA
+    })
+
+    const gasPrice = feeData.gasPrice ?? BigInt(0);
+
+    logData.push({
+      log: `Gas Price: ${ethers.formatUnits(gasPrice, "gwei")} Gwei`,
+      logType: LogType.DEBUGDATA
+    })
 
     // Calculate total gas fee
     const gasCost = estimatedGas * gasPrice;
     const gasCostInEth = ethers.formatEther(gasCost);
-    console.log(`Estimated Gas Fee: ${gasCostInEth} ETH`);
+
+    logData.push({
+      log: `Estimated Gas Fee: ${gasCostInEth} ETH`,
+      logType: LogType.DEBUGDATA
+    })
 
     // Check if balance is sufficient
     const hasEnoughBalance = balance >= gasCost;
 
-    return { error: null, gasEstimate: estimatedGas.toString(), gasFee: gasCostInEth, balance: balanceInEth, hasEnoughBalance };
+    return [{ error: null, gasEstimate: estimatedGas.toString(), gasFee: gasCostInEth, balance: balanceInEth, hasEnoughBalance }, logData];
 
   } catch (error: any) {
-    console.error("Error estimating gas:", error);
-    return { error: error.message, hasEnoughBalance: false };
+    logData.push({
+      log: `Error estimating gas: ", ${error}`,
+      logType: LogType.DEBUGDATA
+    })
+    return [{ error: error.message, hasEnoughBalance: false }, logData];
   }
 };
 
