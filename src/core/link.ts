@@ -79,7 +79,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
 
 
     const currentVerificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
-    console.log("file path: ----f", linkAquaTreeWrapper.fileObject.path)
+    // console.log("file path: ----f", linkAquaTreeWrapper.fileObject.path)
     let updatedAquaTree: AquaTree = {
         revisions: {
             ...aquaTreeWrapper.aquaTree.revisions,
@@ -94,7 +94,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
     // Tree creation
     let aquaTreeWithTree = createAquaTree(updatedAquaTree)
     logs.push({
-        log: "Linking successful",
+        log: " ✅  Linking successful",
         logType: LogType.SUCCESS
     })
 
