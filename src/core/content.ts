@@ -56,7 +56,7 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
     const revisions = aquaTreeWrapper.aquaTree.revisions
     revisions[verification_hash] = verificationData
 
-    maybeUpdateFileIndex(aquaTreeWrapper.aquaTree, verificationData, revisionType, fileObject.fileName, "");
+    maybeUpdateFileIndex(aquaTreeWrapper.aquaTree, verificationData, revisionType, fileObject.fileName, "","","");
 
     let aquaTreeWithTree = createAquaTree(aquaTreeWrapper.aquaTree)
 

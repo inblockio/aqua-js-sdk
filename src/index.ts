@@ -9,6 +9,7 @@ import { Result } from "./type_guards";
 import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
 
 
+export * from "./utils";
 export * from "./types";
 export * from "./type_guards";
 

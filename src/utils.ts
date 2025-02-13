@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, Revision, RevisionTree, TreeMapping } from './types';
+import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, LogTypeEmojis, Revision, RevisionTree, TreeMapping } from './types';
 import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
 import { MerkleTree } from 'merkletreejs';
@@ -13,7 +13,7 @@ export function findFormKey(revision: Revision, key: string) {
   return keys.find(k => k === key || k === `forms_${key}` || k.startsWith(`forms_${key}`));
 }
 
-export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string): Result<AquaTree, LogData[]> {
+export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string, linkVerificationHash ,linkFileName : string): Result<AquaTree, LogData[]> {
   let logs: LogData[] = [];
   const validRevisionTypes = ["file", "form", "link"];
   if (!validRevisionTypes.includes(revisionType)) {
@@ -38,13 +38,8 @@ export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: strin
       aquaTree.file_index[verificationHash] = aquaFileName //filename
       break
     case "link":
-      console.log("FIX ME.....")
-      process.exit(1)
-    // const linkURIsArray = linkURIs.split(",")
-    // const linkVHs = verificationData.data.link_verification_hashes
-    // for (const [idx, vh] of linkVHs.entries()) {
-    //   aquaTree.file_index[vh] = `${linkURIsArray[idx]}`
-    // }
+      aquaTree.file_index[linkVerificationHash] = linkFileName 
+  
   }
 
   logs.push({
@@ -273,4 +268,30 @@ export const getTimestamp = () => {
   const now = new Date().toISOString()
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
   return timestamp
+}
+
+
+
+
+export function printLogs(logs: LogData[], enableVerbose: boolean= true) {
+  if (enableVerbose) {
+    logs.forEach(element => {
+      console.log(`${LogTypeEmojis[element.logType]} ${element.log}`)
+    });
+  } else {
+    let containsError = logs.filter((element) => element.logType == "error");
+    if (containsError.length > 0) {
+      logs.forEach(element => {
+        if (element.logType == "error") {
+          console.log(`${LogTypeEmojis[element.logType]} ${element.log}`)
+        }
+      });
+    } else {
+      if (logs.length > 0) {
+        let lastLog = logs[logs.length - 1];
+        console.log(`${LogTypeEmojis[lastLog.logType]} ${lastLog.log}`)
+      }
+    }
+
+  }
 }

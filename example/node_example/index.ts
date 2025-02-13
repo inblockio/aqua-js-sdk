@@ -2,7 +2,7 @@
 
 import * as fs from "fs"
 
-import Aquafier, { AquaTree, FileObject, AquafierChainable } from "aquafier-js-sdk"
+import Aquafier, { AquaTree, FileObject, AquafierChainable, printLogs } from "aquafier-js-sdk"
 
 
 
@@ -57,14 +57,18 @@ let aquaFileObject: FileObject = {
 async function chainExample() {
 
     const result = await new AquafierChainable(null).notarize(aquaFileObject)
-        .then(chain => chain.sign("metamask"))
+        // .then(chain => chain.sign("metamask"))
         .then(chain => chain.witness())
         .then(chain => chain.verify([aquaFileObject]))
         .then(chain => chain.getVerificationValue())
         .catch(error => console.log(`An error occured ${error}`))
 
     console.log("================= Result ==================")
-    console.table(result)
+    if (result!.isOk()){
+        printLogs(result.data.logData)
+    }else{
+        console.table(result)
+    }
 };
 
 chainExample();

@@ -82,7 +82,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     const aquaTree = createNewAquaTree();
     aquaTree.revisions[verificationHash] = verificationData;
 
-    let aquaTreeUpdatedResult = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, fileObject.fileName, "")
+    let aquaTreeUpdatedResult = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, fileObject.fileName, "","","")
 
     if (isErr(aquaTreeUpdatedResult)) {
         logs.push(...aquaTreeUpdatedResult.data);

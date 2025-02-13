@@ -1,5 +1,5 @@
 import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType } from "../types";
-import { getHashSum, getMerkleRoot } from "../utils";
+import { dict2Leaves, getHashSum, getMerkleRoot } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
 import { Err, isErr, Ok, Result } from "../type_guards";
@@ -31,18 +31,20 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
 export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
-    console.log("Aqua tree: " + JSON.stringify(aquaTree, null, 4));
+    // console.log("Aqua tree: " + JSON.stringify(aquaTree, null, 4));
     let verificationHashes = Object.keys(aquaTree.revisions)
-    console.log("Page Verification Hashes: ", verificationHashes)
+    // console.log("Page Verification Hashes: ", verificationHashes)
     let isSuccess = true
     for (let revisionItemHash of verificationHashes) {
-        console.log("revision hash " + revisionItemHash);
+        // console.log("revision hash " + revisionItemHash);
         let revision: Revision = aquaTree.revisions[revisionItemHash]
-        console.log("Page Verification Hashes: " + revisionItemHash + "  Revision " + JSON.stringify(revision, null, 4))
+        // console.log("Page Verification Hashes: " + revisionItemHash + "  Revision " + JSON.stringify(revision, null, 4))
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
 
         let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
+
+        // console.log("\n\n Result is " + JSON.stringify(result));
 
         result[1].forEach((e) => logs.push(e));
 
@@ -73,7 +75,7 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
 
 async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificationHash: string, fileObjects: Array<FileObject>, isScalar: boolean): Promise<[boolean, Array<LogData>]> {
     let logs: Array<LogData> = [];
-    let doVerifyMerkleProof = false; // to be improved rather than hard coded
+    let doVerifyMerkleProof = false; // todo to be improved rather than hard coded
     let isSuccess = true;
 
     if (isScalar) {
@@ -94,10 +96,11 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         }
 
     } else {
-
-        let [ok, result] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
-        if (!ok) {
-            return [ok, result]
+        if (doVerifyMerkleProof) {
+            let [ok, result] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
+            if (!ok) {
+                return [ok, result]
+            }
         }
     }
 
@@ -113,8 +116,8 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             if (!!revision.content) {
                 fileContent = Buffer.from(revision.content, "utf8")
             } else {
-                console.log("File index", JSON.stringify(aquaTree.file_index));
-                console.log("Has needed  ", verificationHash);
+                // console.log("File index", JSON.stringify(aquaTree.file_index));
+                // console.log("Has needed  ", verificationHash);
                 let fileName = aquaTree.file_index[verificationHash]
                 let fileObjectItem = fileObjects.find((e) => e.fileName == fileName);
                 if (fileObjectItem == undefined) {
@@ -134,21 +137,22 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             [isSuccess, logsResult] = await verifySignature(
                 revision,
                 revision.previous_verification_hash,
-            )
-            
+            );
+
 
             break
         case "witness":
+            // console.log("am being hit by compiler")
             // Verify witness
-            [isSuccess, logsResult] = await verifyWitness(
+            let [isSuccessResult, logsResultData] = await verifyWitness(
                 revision,
                 revision.previous_verification_hash,
                 doVerifyMerkleProof,
-            )
-            // result.witness_result = witnessResult
+            );
+            // console.log(`Witness  result ${isSuccessResult} ---  data ${JSON.stringify(logsResultData)}`)
+            logsResult = logsResultData;
+            isSuccess = isSuccessResult
 
-            // Specify witness correctness
-            // typeOk = (witnessStatus === "VALID")
             break
         case "link":
             let linkOk: boolean = true
@@ -187,6 +191,17 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
     logs.push(...logsResult)
 
+    if (isSuccess) {
+        logs.push({
+            log: `..successfully verified revision ${revision.revision_type}  with hash ${verificationHash} `,
+            logType: LogType.SUCCESS
+        })
+    } else {
+        logs.push({
+            log: ` error verifying revision ${revision.revision_type}  with hash ${verificationHash} `,
+            logType: LogType.ERROR
+        })
+    }
 
 
     return [isSuccess, logs]
@@ -247,7 +262,7 @@ function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] 
 }
 
 function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: string): [boolean, Array<LogData>] {
-    console.log("verification hash: ", verificationHash)
+    // console.log("verification hash: ", verificationHash)
 
     let logs: Array<LogData> = [];
 
@@ -294,26 +309,34 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
     }
     // For witness, we verify the merkle root
     else if (input.revision_type === "witness" && input.witness_merkle_proof && input.witness_merkle_proof.length > 1) {
+
         let witnessMerkleProofLeaves = input.witness_merkle_proof
 
         const hexRoot = getMerkleRoot(witnessMerkleProofLeaves);  // tree.getHexRoot()
-        vhOk = hexRoot === input.witness_merkle_root
-    }
+        vhOk = hexRoot === input.witness_merkle_root;
 
-    else {
+        // console.log(`1. test vh ${vhOk} \n hexRoot  ${hexRoot} \n input.witness_merkle_root ${input.witness_merkle_root} `);
+    } else {
 
+        // console.log(`\n all data ${JSON.stringify(input, null, 4)}`)
         // Verify leaves
         for (const [i, claim] of Object.keys(input).sort().entries()) {
             const actual = getHashSum(`${claim}:${input[claim]}`)
             const claimOk = leaves[i] === actual
             // result.status[claim] = claimOk
+            //todo this can be impoved 
             ok = ok && claimOk
             // actualLeaves.push(actual)
         }
 
+        const leaves2 = dict2Leaves(input)
 
-        const hexRoot = getMerkleRoot(leaves);// tree.getHexRoot()
-        vhOk = hexRoot === verificationHash
+        const hexRoot = getMerkleRoot(leaves2);// tree.getHexRoot()
+        vhOk = hexRoot === verificationHash;
+
+        // console.log(`2. test vh ${vhOk} -- \n new data ${hexRoot} \n  hahaha ${verificationHash} `);
+
+
     }
 
 

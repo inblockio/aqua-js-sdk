@@ -378,6 +378,7 @@ export async function verifyWitness(
             witnessData.witness_merkle_root!,
             witnessData.witness_timestamp,
         )
+        // console.log(`Narrowed down to ${isValid}  nd messae ${logMessage}`)
         logs.push({
             log: logMessage,
             logType: isValid ? LogType.SUCCESS : LogType.ERROR
