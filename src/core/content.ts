@@ -29,9 +29,9 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
     let alreadyNotarized = checkFileHashAlreadyNotarized(fileHash, aquaTreeWrapper.aquaTree)
 
     if (alreadyNotarized) {
-       
+
         logs.push({
-            log: `❌  file ${fileObject.fileName} has already been notarized.`,
+            log: `File ${fileObject.fileName} has already been notarized.`,
             logType: LogType.ERROR
         })
         return Err(logs)
@@ -50,7 +50,7 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
         verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
         verificationData.leaves = leaves
     } else {
-        verification_hash =  getMerkleRoot(leaves); // tree.getHexRoot()
+        verification_hash = getMerkleRoot(leaves); // tree.getHexRoot()
     }
 
     const revisions = aquaTreeWrapper.aquaTree.revisions
@@ -61,8 +61,8 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
     let aquaTreeWithTree = createAquaTree(aquaTreeWrapper.aquaTree)
 
     logs.push({
-        log : `  ✅  content revision created succesfully`,
-        logType:  LogType.SUCCESS
+        log: `content revision created succesfully`,
+        logType: LogType.SUCCESS
     });
 
     let result: AquaOperationData = {
@@ -71,7 +71,7 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
         logData: logs
     }
 
-    
+
 
     return Ok(result)
 }
@@ -83,14 +83,14 @@ export async function getFileByHashUtil(aquaTree: AquaTree, hash: string): Promi
 
     if (res) {
         logs.push({
-            log: `✅ File with hash  found`,
+            log: `File with hash  found`,
             logType: LogType.SUCCESS
         });
         return Ok(res)
     } else {
-        
+
         logs.push({
-            log: `❌ File with hash ot found`,
+            log: `File with hash ot found`,
             logType: LogType.ERROR
         });
         return Err(logs)

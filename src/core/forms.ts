@@ -68,8 +68,8 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     if (enableScalar) {
 
         logs.push({
-            log: `  ⏺️  Scalar enabled`,
-            logType: LogType.INFO
+            log: `Scalar enabled`,
+            logType: LogType.SCALAR
         });
         let stringifiedData = JSON.stringify(verificationData)
 
@@ -93,7 +93,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     let aquaTreeWithTree = createAquaTree(aquaTreeUpdated)
 
     logs.push({
-        log: `  ✅  Form  revision created succesfully`,
+        log: `Form  revision created succesfully`,
         logType: LogType.SUCCESS
     });
 

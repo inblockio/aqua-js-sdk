@@ -2,7 +2,7 @@
 import { Revision, AquaOperationData, LogData, SignType, AquaTreeWrapper, CredentialsData, LogType, SignatureData } from "../types";
 import { MetaMaskSigner } from "../signature/sign_metamask";
 import { CLISigner } from "../signature/sign_cli";
-import { dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet } from "../utils";
+import { dict2Leaves, formatMwTimestamp, getMerkleRoot, getWallet } from "../utils";
 import { DIDSigner } from "../signature/sign_did";
 import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
@@ -34,7 +34,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
 
                 if (credentials == null || credentials == undefined) {
                     logs.push({
-                        log: "❌ credentials not found ",
+                        log: "Credentials not found ",
                         logType: LogType.ERROR
                     })
                     return Err(logs);
@@ -44,7 +44,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
                 signature = await sign.doSign(wallet, targetRevisionHash)
             } catch (error) {
                 logs.push({
-                    log: "❌ Failed to read mnemonic:" + error,
+                    log: "Failed to read mnemonic:" + error,
                     logType: LogType.ERROR
                 })
                 return Err(logs);
@@ -57,7 +57,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
             if (credentials == null || credentials == undefined || credentials['did:key'].length === 0 || !credentials['did:key']) {
 
                 logs.push({
-                    log: "❌ DID key is required.  Please get a key from https://hub.ebsi.eu/tools/did-generator",
+                    log: "DID key is required.  Please get a key from https://hub.ebsi.eu/tools/did-generator",
                     logType: LogType.ERROR
                 });
                 return Err(logs);
@@ -109,7 +109,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
     let aquaTreeWithTree = createAquaTree(data.aquaTree)
 
     logs.push({
-        log: `  ✅  aquaTree signed succesfully`,
+        log: `AquaTree signed succesfully`,
         logType: LogType.SUCCESS
     });
 

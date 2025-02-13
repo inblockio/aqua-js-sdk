@@ -57,7 +57,7 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
 
 
     logs.push({
-        log: `✅  aquaTree witnessed succesfully`,
+        log: `AquaTree witnessed succesfully`,
         logType: LogType.SUCCESS
     });
 
@@ -202,8 +202,8 @@ const prepareWitness = async (
 
                 if (credentials == null || credentials == undefined) {
                     logs.push({
-                        log: `❌  credentials not found`,
-                        logType: LogType.SUCCESS
+                        log: `credentials not found`,
+                        logType: LogType.ERROR
                     });
                     return Err(logs)
                 }
@@ -212,7 +212,7 @@ const prepareWitness = async (
 
 
                 logs.push({
-                    log: ` 🔷  Wallet address: ${_wallet}`,
+                    log: `Wallet address: ${_wallet}`,
                     logType: LogType.DEBUGDATA
                 });
 
@@ -227,7 +227,7 @@ const prepareWitness = async (
                 logs.push(...logData)
 
                 logs.push({
-                    log: ` 🔷  Gas estimate result: : ${gasEstimateResult}`,
+                    log: `Gas estimate result: : ${gasEstimateResult}`,
                     logType: LogType.DEBUGDATA
                 });
 
@@ -266,8 +266,8 @@ const prepareWitness = async (
                     );
 
                     logs.push({
-                        logType: LogType.witness,
-                        log: "🔎 cli witness result: \n" + JSON.stringify(transactionResult)
+                        logType: LogType.WITNESS,
+                        log: "cli witness result: \n" + JSON.stringify(transactionResult)
                     });
 
 
@@ -275,14 +275,14 @@ const prepareWitness = async (
 
                     logs.push({
                         logType: LogType.ERROR,
-                        log: "❌ an error witnessing using etherium "
+                        log: "An error witnessing using etherium "
                     })
                 }
 
                 if (transactionResult == null || transactionResult.error != null) {
                     logs.push({
                         logType: LogType.ERROR,
-                        log: "❌ an error witnessing using etherium (empty object) "
+                        log: "An error witnessing using etherium (empty object) "
                     })
                     return Err(logs);
                 }

@@ -89,8 +89,8 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
                 verificationData["content"] = fileObject.fileContent
 
                 logs.push({
-                    log: `📄 content flag detected.`,
-                    logType: LogType.INFO
+                    log: `Content flag detected.`,
+                    logType: LogType.FILE
                 });
             }
 
@@ -104,7 +104,7 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
                 formDataJson = JSON.parse(fileObject.fileContent)
             } catch (parseError) {
                 logs.push({
-                    log: `❌  Error: The file ${fileObject.fileName} does not contain valid JSON data.`,
+                    log: `Error: The file ${fileObject.fileName} does not contain valid JSON data.`,
                     logType: LogType.ERROR
                 });
                 return Err(logs);
@@ -125,7 +125,7 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
 
         default:
             logs.push({
-                log: `❌ Genesis revision can either be form  or file.`,
+                log: `Genesis revision can either be form  or file.`,
                 logType: LogType.ERROR
             })
             return Err(logs);
@@ -139,8 +139,8 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     if (enableScalar) {
 
         logs.push({
-            log: `  ⏺️  Scalar enabled`,
-            logType: LogType.INFO
+            log: `Scalar enabled`,
+            logType: LogType.SCALAR
         });
         let stringifiedData = JSON.stringify(verificationData)
 
@@ -164,7 +164,7 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     let aquaTreeWithTree = createAquaTree(aquaTreeUpdated)
 
     logs.push({
-        log: `  ✅  Genesis revision created succesfully`,
+        log: `Genesis revision created succesfully`,
         logType: LogType.SUCCESS
     });
 

@@ -94,8 +94,8 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
     // Tree creation
     let aquaTreeWithTree = createAquaTree(updatedAquaTree)
     logs.push({
-        log: " ✅  Linking successful",
-        logType: LogType.SUCCESS
+        log: "Linking successful",
+        logType: LogType.LINK
     })
 
     let resutData: AquaOperationData = {

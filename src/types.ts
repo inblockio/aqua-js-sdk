@@ -9,7 +9,7 @@ export interface CredentialsData {
 }
 
 export interface AquaOperationData {
-  aquaTrees:  AquaTree[]
+  aquaTrees: AquaTree[]
   aquaTree: AquaTree
   logData: Array<LogData>
 }
@@ -20,7 +20,7 @@ export type WitnessPlatformType = 'cli' | 'metamask';
 export type WitnessNetwork = "sepolia" | "mainnet" | "holesky"
 export type SignType = "cli" | "metamask" | "did"
 
-export type WitnessEnvironment =  'node'| 'browser'
+export type WitnessEnvironment = 'node' | 'browser'
 
 export interface FileObject {
   fileName: string,
@@ -28,20 +28,50 @@ export interface FileObject {
   path: string
 }
 
+// export enum LogType {
+//   SUCCESS = "success",
+//   INFO = "info",
+//   ERROR = "error",
+//   WARNING = "warning",
+//   HINT = "hint",
+//   DEBUGDATA = "debug_data",
+//   file = "file",
+//   link = "link",
+//   signature = "signature",
+//   witness = "witness",
+//   form = "form",
+//   scalar = "scalar"
+// }
+
 export enum LogType {
-  SUCCESS="success",
-  INFO="info",
-  ERROR="error",
-  WARNING="warning",
-  HINT="hint",
-  DEBUGDATA="debug_data",
-  file="file",
-  link="link",
-  signature="signature",
-  witness="witness",
-  form="form",
-  scalar="scalar"
+  SUCCESS = "success",
+  INFO = "info",
+  ERROR = "error",
+  WARNING = "warning",
+  HINT = "hint",
+  DEBUGDATA = "debug_data",
+  FILE = "file",
+  LINK = "link",
+  SIGNATURE = "signature",
+  WITNESS = "witness",
+  FORM = "form",
+  SCALAR = "scalar",
 }
+
+export const LogTypeEmojis: Record<LogType, string> = {
+  [LogType.SUCCESS]: "✅",
+  [LogType.INFO]: "✨",
+  [LogType.ERROR]: "❌",
+  [LogType.WARNING]: "🚨",
+  [LogType.HINT]: "💡",
+  [LogType.DEBUGDATA]: "🐞",
+  [LogType.FILE]: "📄",
+  [LogType.LINK]: "🔗",
+  [LogType.SIGNATURE]: "🔏",
+  [LogType.WITNESS]: "👀",
+  [LogType.FORM]: "📝",
+  [LogType.SCALAR]: "⏺️",
+};
 
 export interface LogData {
   logType: LogType,
@@ -69,7 +99,7 @@ export interface Revision {
   witness_transaction_hash?: string;
   witness_sender_account_address?: string;
   witness_merkle_proof?: string[];
-  signature?: string  | SignatureData | any;
+  signature?: string | SignatureData | any;
   signature_public_key?: string;
   signature_wallet_address?: string;
   signature_type?: string;
@@ -143,7 +173,7 @@ export interface IWitnessConfig {
 }
 
 export interface AnObject {
-  [key: string]: string | number | boolean |  any;
+  [key: string]: string | number | boolean | any;
 }
 
 
@@ -167,10 +197,10 @@ export interface WitnessResult {
 
 export interface GasEstimateResult {
   error: string | null;
-  hasEnoughBalance: boolean ;
-  gasEstimate? : string ;
-  gasFee? : string;
-  balance? : string
+  hasEnoughBalance: boolean;
+  gasEstimate?: string;
+  gasFee?: string;
+  balance?: string
 }
 
 export interface WitnessConfig {
@@ -179,41 +209,41 @@ export interface WitnessConfig {
   smartContractAddress: string;
 }
 
-export  interface TransactionResult {
+export interface TransactionResult {
   error: string | null;
   transactionHash?: string;
 }
 
-export  interface WitnessTransactionData {
+export interface WitnessTransactionData {
   transaction_hash: string;
   wallet_address: string;
 }
 
 
-export  interface WitnessTSAResponse {
+export interface WitnessTSAResponse {
   base64Response: string;
   provider: string;
   timestamp: number;
 }
 
-export  interface WitnessEthResponse {
-  transactionHash :string,
-      walletAddress : string
-  
+export interface WitnessEthResponse {
+  transactionHash: string,
+  walletAddress: string
+
 }
 
 export interface WitnessNostrResponse {
-    nevent: string;
-    npub: string;
-    timestamp: number;
+  nevent: string;
+  npub: string;
+  timestamp: number;
 }
 
 export interface WitnessNostrVerifyResult {
   type: string;
   data: {
-      id: string;
-      relays?: string[];
-      author?: string;
+    id: string;
+    relays?: string[];
+    author?: string;
   };
 }
 

@@ -17,7 +17,7 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
     }
 
     logs.push({
-        log: `  ✅  aquaTree verified succesfully`,
+        log: `AquaTree verified succesfully`,
         logType: LogType.SUCCESS
     });
     let data: AquaOperationData = {
@@ -55,7 +55,7 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
 
 
     logs.push({
-        log: `  ✅  aquaTree verified succesfully`,
+        log: `AquaTree verified succesfully`,
         logType: LogType.SUCCESS
     });
 
@@ -215,24 +215,24 @@ function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] 
 
     if (contains_deleted_fields) {
         logs.push({
-            log: `\n  🚨 Warning: The following fields cannot be verified:`,
+            log: `Warning: The following fields cannot be verified:`,
             logType: LogType.WARNING
         });
         fieldsWithPartialVerification.forEach((field, i: number) => {
             logs.push({
-                log: `   ${i + 1}. ${field.replace('.deleted', '')}\n`,
+                log: `${i + 1}. ${field.replace('.deleted', '')}\n`,
                 logType: LogType.WARNING
             });
         });
     }
 
     logs.push({
-        log: `\n  The following fields were verified:`,
+        log: `The following fields were verified:`,
         logType: LogType.SUCCESS
     });
     fieldsWithVerification.forEach(field => {
         logs.push({
-            log: ` ✅  ${field}}\n`,
+            log: `${field}}\n`,
             logType: LogType.SUCCESS
         });
     });
