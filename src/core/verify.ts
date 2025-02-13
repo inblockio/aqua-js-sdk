@@ -31,11 +31,14 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
 export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
+    console.log("Aqua tree: " + JSON.stringify(aquaTree, null, 4));
     let verificationHashes = Object.keys(aquaTree.revisions)
     console.log("Page Verification Hashes: ", verificationHashes)
     let isSuccess = true
-    for (let revisionItemHash in verificationHashes) {
+    for (let revisionItemHash of verificationHashes) {
+        console.log("revision hash " + revisionItemHash);
         let revision: Revision = aquaTree.revisions[revisionItemHash]
+        console.log("Page Verification Hashes: " + revisionItemHash + "  Revision " + JSON.stringify(revision, null, 4))
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
 
@@ -76,7 +79,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     if (isScalar) {
 
         if (revision.witness_merkle_proof && revision.witness_merkle_proof.length > 1) {
-         
+
             let [ok, logs] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
             if (!ok) {
                 return [ok, logs]
@@ -89,7 +92,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 return [isSuccess, logs]
             }
         }
-        
+
     } else {
 
         let [ok, result] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
@@ -132,7 +135,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 revision,
                 revision.previous_verification_hash,
             )
-
+            
 
             break
         case "witness":
@@ -183,6 +186,8 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     }
 
     logs.push(...logsResult)
+
+
 
     return [isSuccess, logs]
 }
@@ -290,7 +295,7 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
     // For witness, we verify the merkle root
     else if (input.revision_type === "witness" && input.witness_merkle_proof && input.witness_merkle_proof.length > 1) {
         let witnessMerkleProofLeaves = input.witness_merkle_proof
-      
+
         const hexRoot = getMerkleRoot(witnessMerkleProofLeaves);  // tree.getHexRoot()
         vhOk = hexRoot === input.witness_merkle_root
     }
@@ -306,7 +311,7 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
             // actualLeaves.push(actual)
         }
 
-        
+
         const hexRoot = getMerkleRoot(leaves);// tree.getHexRoot()
         vhOk = hexRoot === verificationHash
     }

@@ -94,10 +94,12 @@ export default class Aquafier {
 
 export class AquafierChainable {
     private value: AquaTree;
-    private verificationResult : Result<AquaOperationData, LogData[]>;
+    private verificationResult: Result<AquaOperationData, LogData[]>;
 
-    constructor(initialValue: AquaTree) {
-        this.value = initialValue;
+    constructor(initialValue: AquaTree | null) {
+        if (initialValue) {
+            this.value = initialValue;
+        }
     }
 
     unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
@@ -113,7 +115,7 @@ export class AquafierChainable {
         return this;
     }
 
-    async  sign(signType: SignType = "metamask", credentials: CredentialsData = {
+    async sign(signType: SignType = "metamask", credentials: CredentialsData = {
         mnemonic: "",
         nostr_sk: "",
         "did:key": "",
@@ -130,7 +132,7 @@ export class AquafierChainable {
         return this;
     }
 
-    async witness( witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
+    async witness(witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
         mnemonic: "",
         nostr_sk: "",
         "did:key": "",
@@ -138,13 +140,13 @@ export class AquafierChainable {
         witness_eth_network: "",
         witness_eth_platform: ""
     }, enableScalar: boolean = false): Promise<this> {
-        let data = await witnessAquaTreeUtil(this.value, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar) ;
-        this.value =  this.unwrap(data);
+        let data = await witnessAquaTreeUtil(this.value, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
+        this.value = this.unwrap(data);
         return this;
     }
 
-    async verify(linkedFileObject: Array<FileObject>=[]): Promise<this> {
-        let data =await verifyAquaTreeUtil(this.value, linkedFileObject)
+    async verify(linkedFileObject: Array<FileObject> = []): Promise<this> {
+        let data = await verifyAquaTreeUtil(this.value, linkedFileObject)
         this.verificationResult = data;
         return this;
     }

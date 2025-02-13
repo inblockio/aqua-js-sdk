@@ -154,7 +154,7 @@ export async function verifySignature(data: Revision, verificationHash: string):
 
     logs.push({
         log: `did:key ==  ${data.signature_type}`,
-        logType: LogType.INFO,
+        logType: LogType.DEBUGDATA,
     })
     let signerDID = new DIDSigner();
     // Signature verification
@@ -172,13 +172,14 @@ export async function verifySignature(data: Revision, verificationHash: string):
                     ethers.hashMessage(paddedMessage),
                     data.signature,
                 )
+                
                 signatureOk =
                     recoveredAddress.toLowerCase() ===
                     data.signature_wallet_address!!.toLowerCase()
             } catch (e) {
                 // continue regardless of error
                 logs.push({
-                    log: `Error  ${e}`,
+                    log: `A critical error : ${e}`,
                     logType: LogType.ERROR,
                 })
             }
