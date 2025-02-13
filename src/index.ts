@@ -92,95 +92,85 @@ export default class Aquafier {
 }
 
 
-/**indepedent function to enable chaining */
-/** has default values  */
-
-export function unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
-    if (result.isErr()) {
-        throw Error("an error occured")
-    }
-    return result.data.aquaTree
-}
-
-export async function notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
-
-    return createGenesisRevision(fileObject, isForm, enableContent, enableScalar)
-}
-
-export async function sign(aquaTree: AquaTree, signType: SignType = "metamask", credentials: CredentialsData = {
-    mnemonic: "",
-    nostr_sk: "",
-    "did:key": "",
-    alchemy_key: "",
-    witness_eth_network: "",
-    witness_eth_platform: ""
-}, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
-
-    return signAquaTreeUtil({
-        aquaTree: aquaTree,
-        fileObject: null,
-        revision: ""
-    }, signType, credentials, enableScalar)
-}
-
-export async function witness(aquaTree: AquaTree, witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
-    mnemonic: "",
-    nostr_sk: "",
-    "did:key": "",
-    alchemy_key: "",
-    witness_eth_network: "",
-    witness_eth_platform: ""
-}, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
-
-    return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
-}
-
-export async function verify(aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
-    return verifyAquaTreeUtil(aquaTree, fileObject)
-}
-
-
-
 export class AquafierChainable {
     private value: AquaTree;
+    private verificationResult : Result<AquaOperationData, LogData[]>;
 
     constructor(initialValue: AquaTree) {
         this.value = initialValue;
     }
 
-    notarize(): this {
-        this.value += createGenesisRevision().unwrap;
+    unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
+        if (result.isErr()) {
+            throw Error("an error occured")
+        }
+        return result.data.aquaTree
+    }
+
+    async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<this> {
+        let data = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
+        this.value = this.unwrap(data);
         return this;
     }
 
-    sign(n: number): this {
-        this.value -= n;
+    async  sign(signType: SignType = "metamask", credentials: CredentialsData = {
+        mnemonic: "",
+        nostr_sk: "",
+        "did:key": "",
+        alchemy_key: "",
+        witness_eth_network: "",
+        witness_eth_platform: ""
+    }, enableScalar: boolean = false): Promise<this> {
+        let data = await signAquaTreeUtil({
+            aquaTree: this.value,
+            fileObject: null,
+            revision: ""
+        }, signType, credentials, enableScalar)
+        this.value = this.unwrap(data);
         return this;
     }
 
-    witness(n: number): this {
-        this.value *= n;
+    async witness( witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
+        mnemonic: "",
+        nostr_sk: "",
+        "did:key": "",
+        alchemy_key: "",
+        witness_eth_network: "",
+        witness_eth_platform: ""
+    }, enableScalar: boolean = false): Promise<this> {
+        let data = await witnessAquaTreeUtil(this.value, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar) ;
+        this.value =  this.unwrap(data);
         return this;
     }
 
-    content(n: number): this {
-        this.value *= n;
+    async verify(linkedFileObject: Array<FileObject>=[]): Promise<this> {
+        let data =await verifyAquaTreeUtil(this.value, linkedFileObject)
+        this.verificationResult = data;
         return this;
     }
 
-    async link(n: number): Promise<this> {
-        if (n === 0) throw new Error("Cannot divide by zero");
-        this.value /= n;
-        return this;
-    }
 
-    async form(n: number): Promise<this> {
-        await new Promise(resolve => setTimeout(resolve, 100)); // Simulating async operation
-        this.value += n;
-        return this;
-    }
+    // content(n: number): this {
+    //     this.value *= n;
+    //     return this;
+    // }
 
-    getValue(): number {
+    // async link(n: number): Promise<this> {
+    //     if (n === 0) throw new Error("Cannot divide by zero");
+    //     this.value /= n;
+    //     return this;
+    // }
+
+    // async form(n: number): Promise<this> {
+    //     await new Promise(resolve => setTimeout(resolve, 100)); // Simulating async operation
+    //     this.value += n;
+    //     return this;
+    // }
+
+    getValue(): AquaTree {
         return this.value;
+    }
+    getVerificationValue(): Result<AquaOperationData, LogData[]> {
+        return this.verificationResult;
     }
 }
