@@ -2,7 +2,8 @@
 
 import * as fs from "fs"
 
-import Aquafier, { AquaTree, FileObject } from "aqua-protocol"
+import Aquafier, { AquaTree, FileObject, notarize } from "aquafier-js-sdk"
+import { sign } from "crypto";
 
 function readAquaFile(aquaFilePath: string): AquaTree | null {
     try {
@@ -48,9 +49,11 @@ let aquaFileObject: FileObject = {
     path: "./text.txt"
 }
 
-let newAquaTree = aquafier.createGenesisRevision(aquaFileObject)
+// let newAquaTree = aquafier.createGenesisRevision(aquaFileObject)
 
-console.log(newAquaTree)
+let newAquaTree = notarize(aquaFileObject).then((val) => sign(val));
+
+// console.log(newAquaTree)
 
 
 

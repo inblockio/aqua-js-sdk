@@ -102,6 +102,11 @@ export function unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
     return result.data.aquaTree
 }
 
+export async function notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+
+    return createGenesisRevision(fileObject, isForm, enableContent, enableScalar)
+}
+
 export async function sign(aquaTree: AquaTree, signType: SignType = "metamask", credentials: CredentialsData = {
     mnemonic: "",
     nostr_sk: "",

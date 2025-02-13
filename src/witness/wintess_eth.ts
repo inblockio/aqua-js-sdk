@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { TransactionResult, WitnessConfig, WitnessEnvironment, WitnessNetwork, WitnessTransactionData } from '../types';
+import { LogData, LogType, TransactionResult, WitnessConfig, WitnessEnvironment, WitnessNetwork, WitnessTransactionData } from '../types';
 import http from "http";
 
 export class WitnessEth {
@@ -41,7 +41,7 @@ export class WitnessEth {
     }
   };
 
-  static async commonPrepareListener (htmlContent : string)  {
+  static async commonPrepareListener(htmlContent: string) {
     let output = "{}"
     const requestListener = async (req, res) => {
       if (req.method == "POST") {
@@ -79,7 +79,7 @@ export class WitnessEth {
     const html = this.generateWitnessHtml(config);
 
 
-    const requestListener = await  this.commonPrepareListener(html)
+    const requestListener = await this.commonPrepareListener(html)
     const server = http.createServer(requestListener)
     server.listen(port, host, () => {
       console.log(`✨ Server is running on ${serverUrl}`)
@@ -93,11 +93,11 @@ export class WitnessEth {
         const walletAddress = content.wallet_address
         console.log(`The witness tx hash has been retrieved: ${transactionHash}`)
         server.close();
-        let data : WitnessTransactionData = {
+        let data: WitnessTransactionData = {
           transaction_hash: transactionHash,
           wallet_address: walletAddress
         }
-        return  Promise.resolve(data); 
+        return Promise.resolve(data);
       }
       console.log("Waiting for the witness...")
       await this.sleep(10000)
@@ -266,7 +266,8 @@ export class WitnessEth {
     smartContractAddress: string,
     WitnessNetwork: WitnessNetwork,
     providerUrl?: string
-  ): Promise<TransactionResult> {
+  ): Promise<[TransactionResult, Array<LogData>]> {
+    const logData: LogData[] = []
     try {
       const provider = providerUrl
         ? new ethers.JsonRpcProvider(providerUrl)
@@ -289,20 +290,61 @@ export class WitnessEth {
 
       const balance = await provider.getBalance(sender);
       const balanceInEth = ethers.formatEther(balance);
-      console.log(`Sender Balance: ${balanceInEth} ETH`);
+      // console.log(`Sender Balance: ${balanceInEth} ETH`);
 
+      // const estimatedGas = await provider.estimateGas(tx);
+      // console.log(`Estimated Gas: ${estimatedGas.toString()} units`);
+
+      // const feeData = await provider.getFeeData();
+      // const gasPrice = feeData.gasPrice ?? BigInt(0);
+      // console.log(`Gas Price: ${ethers.formatUnits(gasPrice, 'gwei')} Gwei`);
+
+      // const gasCost = estimatedGas * gasPrice;
+      // const gasCostInEth = ethers.formatEther(gasCost);
+      // console.log(`Estimated Gas Fee: ${gasCostInEth} ETH`);
+
+      logData.push({
+        log: `Sender Balance: ${balanceInEth} ETH`,
+        logType: LogType.DEBUGDATA
+      })
+
+      // Estimate gas
       const estimatedGas = await provider.estimateGas(tx);
-      console.log(`Estimated Gas: ${estimatedGas.toString()} units`);
 
+      logData.push({
+        log: `Estimated Gas: ${estimatedGas.toString()} units`,
+        logType: LogType.DEBUGDATA
+      })
+
+      // Get current gas price
       const feeData = await provider.getFeeData();
-      const gasPrice = feeData.gasPrice ?? BigInt(0);
-      console.log(`Gas Price: ${ethers.formatUnits(gasPrice, 'gwei')} Gwei`);
 
+      logData.push({
+        log: `Fee data: ", ${feeData}`,
+        logType: LogType.DEBUGDATA
+      })
+
+      const gasPrice = feeData.gasPrice ?? BigInt(0);
+
+      logData.push({
+        log: `Gas Price: ${ethers.formatUnits(gasPrice, "gwei")} Gwei`,
+        logType: LogType.DEBUGDATA
+      })
+
+      // Calculate total gas fee
       const gasCost = estimatedGas * gasPrice;
       const gasCostInEth = ethers.formatEther(gasCost);
-      console.log(`Estimated Gas Fee: ${gasCostInEth} ETH`);
+
+      logData.push({
+        log: `Estimated Gas Fee: ${gasCostInEth} ETH`,
+        logType: LogType.DEBUGDATA
+      })
 
       if (balance < gasCost) {
+        logData.push({
+          log: `Estimated Gas Fee: ${gasCostInEth} ETH`,
+          logType: LogType.DEBUGDATA
+        })
         throw new Error('Insufficient balance for gas fee.');
       }
 
@@ -312,12 +354,18 @@ export class WitnessEth {
         gasPrice: gasPrice,
       });
 
-      console.log(`Transaction sent! Hash: ${signedTx.hash}`);
+      logData.push({
+        log: `Transaction sent! Hash: ${signedTx.hash}`,
+        logType: LogType.DEBUGDATA
+      })
 
-      return { error: null, transactionHash: signedTx.hash };
+      return [{ error: null, transactionHash: signedTx.hash }, logData];
     } catch (error) {
-      console.error('Error sending transaction:', error);
-      return { error: (error as Error).message };
+      logData.push({
+        log: `Error sending transaction:', ${error}`,
+        logType: LogType.ERROR
+      })
+      return [{ error: (error as Error).message }, logData];
     }
   }
 

@@ -137,7 +137,7 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
         return Err(logs);
     }
     logs.push({
-        log: `  ✅  all aquaTrees witnessed succesfully`,
+        log: `All aquaTrees witnessed succesfully`,
         logType: LogType.SUCCESS
     });
 
@@ -256,14 +256,16 @@ const prepareWitness = async (
                 try {
 
 
-                    transactionResult = await WitnessEth.witnessCli(
+                    let [transactionResultData, resultLogData] = await WitnessEth.witnessCli(
                         _wallet.privateKey,
                         verificationHash,
                         smart_contract_address,
                         network,
                         ""
-
                     );
+
+                    transactionResult = transactionResultData
+                    logs.push(...resultLogData)
 
                     logs.push({
                         logType: LogType.WITNESS,
