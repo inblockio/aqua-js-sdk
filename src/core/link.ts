@@ -1,5 +1,5 @@
 
-import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, LogType } from "../types";
 import { dict2Leaves, getHashSum, getLatestVH, getMerkleRoot, getTimestamp } from "../utils";
 
 import { createAquaTree } from "../aquavhtree";
@@ -79,7 +79,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
 
 
     const currentVerificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
-
+    console.log("file path: ----f", linkAquaTreeWrapper.fileObject.path)
     let updatedAquaTree: AquaTree = {
         revisions: {
             ...aquaTreeWrapper.aquaTree.revisions,
@@ -87,12 +87,16 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
         },
         file_index: {
             ...aquaTreeWrapper.aquaTree.file_index,
-            [currentVerificationHash]: currentVerificationHash
+            [linkVHs[0]]: linkAquaTreeWrapper.fileObject.fileName
         }
     }
 
     // Tree creation
     let aquaTreeWithTree = createAquaTree(updatedAquaTree)
+    logs.push({
+        log: "Linking successful",
+        logType: LogType.SUCCESS
+    })
 
     let resutData: AquaOperationData = {
         aquaTree: aquaTreeWithTree,
@@ -107,13 +111,15 @@ export async function linkMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrappe
 
 
     let logs: Array<LogData> = [];
-    let aquaTrees: AquaTree[]= []
+    let aquaTrees: AquaTree[] = []
 
     for (const aquaTree of aquaTreeWrappers) {
         const result = await linkAquaTreeUtil(aquaTree, linkAquaTreeWrapper, enableScalar); // Assuming enableScalar is false by default
 
         if (isOk(result)) {
-            aquaTrees.push(result.data.aquaTree)
+            const resData = result.data
+            aquaTrees.push(resData.aquaTree)
+            logs.push(...resData.logData)
         } else {
             logs.push(...result.data);
         }
