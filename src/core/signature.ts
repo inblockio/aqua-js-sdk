@@ -40,8 +40,11 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
                     return Err(logs);
                 }
                 let [wallet, _walletAddress, _publicKey] = getWallet(credentials.mnemonic)
+
                 let sign = new CLISigner();
                 signature = await sign.doSign(wallet, targetRevisionHash)
+                walletAddress = _walletAddress
+                publicKey = _publicKey
             } catch (error) {
                 logs.push({
                     log: "Failed to read mnemonic:" + error,
@@ -172,7 +175,7 @@ export async function verifySignature(data: Revision, verificationHash: string):
                     ethers.hashMessage(paddedMessage),
                     data.signature,
                 )
-                
+
                 signatureOk =
                     recoveredAddress.toLowerCase() ===
                     data.signature_wallet_address!!.toLowerCase()

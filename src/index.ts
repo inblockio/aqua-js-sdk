@@ -96,6 +96,7 @@ export default class Aquafier {
 export class AquafierChainable {
     private value: AquaTree;
     private verificationResult: Result<AquaOperationData, LogData[]>;
+    private logs: LogData[] = [];
 
     constructor(initialValue: AquaTree | null) {
         if (initialValue) {
@@ -105,8 +106,10 @@ export class AquafierChainable {
 
     unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
         if (result.isErr()) {
+            this.logs.push(...result.data)
             throw Error("an error occured")
         }
+        this.logs.push(...result.data.logData)
         return result.data.aquaTree
     }
 
@@ -148,6 +151,11 @@ export class AquafierChainable {
 
     async verify(linkedFileObject: Array<FileObject> = []): Promise<this> {
         let data = await verifyAquaTreeUtil(this.value, linkedFileObject)
+        if(data.isOk()){
+            this.logs.push(...data.data.logData)
+        }else{
+            this.logs.push(...data.data)
+        }
         this.verificationResult = data;
         return this;
     }
@@ -175,5 +183,8 @@ export class AquafierChainable {
     }
     getVerificationValue(): Result<AquaOperationData, LogData[]> {
         return this.verificationResult;
+    }
+    getLogs(): LogData[] {
+        return this.logs;
     }
 }

@@ -52,22 +52,40 @@ let aquaFileObject: FileObject = {
     path: "./text.txt"
 }
 
+let creds = {
+    "mnemonic": "mail ignore situate guard glove physical gaze scale they trouble chunk sock",
+    "nostr_sk": "bab92dda770b41ffb8afa623198344f44950b5b9c3e83f6b36ad08977b783d55",
+    "did:key": "2edfed1830e9db59438c65b63a85c73a1aea467e8a84270d242025632e04bb65",
+    "alchemy_key": "ZaQtnup49WhU7fxrujVpkFdRz4JaFRtZ",
+    "witness_eth_network": "sepolia",
+    "witness_eth_platform": "metamask"
+}
+
 // let newAquaTree = aquafier.createGenesisRevision(aquaFileObject)
 
 async function chainExample() {
 
     const result = await new AquafierChainable(null).notarize(aquaFileObject)
-        // .then(chain => chain.sign("metamask"))
-        .then(chain => chain.witness())
+        .then(chain => chain.sign("cli", creds))
+        .then(chain => chain.witness('eth', 'sepolia', 'cli', creds))
         .then(chain => chain.verify([aquaFileObject]))
+        .then(chain => {
+            // printLogs(chain.getLogs())
+            // console.log(JSON.stringify(chain.getValue(), null, 4))
+            return chain
+        })
         .then(chain => chain.getVerificationValue())
         .catch(error => console.log(`An error occured ${error}`))
 
     console.log("================= Result ==================")
-    if (result!.isOk()){
-        printLogs(result.data.logData)
-    }else{
-        console.table(result)
+    console.log(JSON.stringify(result, null, 4))
+    if (result!.isOk()) {
+        printLogs(result.data.logData, true)
+    }
+    else {
+        // console.table(result)
+        // printLogs(result, true)
+        console.log("Some weird error occured!")
     }
 };
 
