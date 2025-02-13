@@ -106,16 +106,27 @@ export class AquafierChainable {
 
     unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
         if (result.isErr()) {
+            console.log(result.data)
             this.logs.push(...result.data)
             throw Error("an error occured")
+
+        }else{
+            this.logs.push(...result.data.logData)
         }
-        this.logs.push(...result.data.logData)
         return result.data.aquaTree
     }
 
     async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<this> {
         let data = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
-        this.value = this.unwrap(data);
+
+        if(data.isOk()){
+            this.value = this.unwrap(data);
+            this.logs.push(...data.data.logData)
+        }else{
+            this.logs.push(...data.data)
+        }
+
+
         return this;
     }
 
@@ -132,7 +143,16 @@ export class AquafierChainable {
             fileObject: null,
             revision: ""
         }, signType, credentials, enableScalar)
-        this.value = this.unwrap(data);
+        
+        // this.value = this.unwrap(data);
+
+        if(data.isOk()){
+            this.value = this.unwrap(data);
+            this.logs.push(...data.data.logData)
+        }else{
+            this.logs.push(...data.data)
+        }
+        
         return this;
     }
 
@@ -145,7 +165,15 @@ export class AquafierChainable {
         witness_eth_platform: ""
     }, enableScalar: boolean = false): Promise<this> {
         let data = await witnessAquaTreeUtil(this.value, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
-        this.value = this.unwrap(data);
+        // this.value = this.unwrap(data);
+
+        if(data.isOk()){
+            this.value = this.unwrap(data);
+            this.logs.push(...data.data.logData)
+        }else{
+            this.logs.push(...data.data)
+        }
+        
         return this;
     }
 
@@ -188,3 +216,46 @@ export class AquafierChainable {
         return this.logs;
     }
 }
+
+
+// export interface AquaTree {
+//     revisions: Revisions;
+//     file_index: FileIndex;
+//     tree?: RevisionTree;
+//     treeMapping?: TreeMapping;
+//     sign(): Promise<string>; // If you want it to be async
+//     // OR
+//     sign(): string; // If you want it to be synchronous
+//   }
+  
+//   export class AquaTreeImpl implements AquaTree {
+//     revisions: Revisions;
+//     file_index: FileIndex;
+//     tree?: RevisionTree;
+//     treeMapping?: TreeMapping;
+  
+//     constructor(
+//       revisions: Revisions,
+//       file_index: FileIndex,
+//       tree?: RevisionTree,
+//       treeMapping?: TreeMapping
+//     ) {
+//       this.revisions = revisions;
+//       this.file_index = file_index;
+//       this.tree = tree;
+//       this.treeMapping = treeMapping;
+//     }
+  
+//     sign(): string {
+//       // Implement your signing logic here
+//       // For example:
+//       const dataToSign = JSON.stringify({
+//         revisions: this.revisions,
+//         file_index: this.file_index,
+//         tree: this.tree,
+//         treeMapping: this.treeMapping
+//       });
+//       // Add your signing implementation
+//       return dataToSign;
+//     }
+//   }
