@@ -103,25 +103,31 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
     return Ok(resutData)
 }
 
-export async function linkMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData[], LogData[]>> {
+export async function linkMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
 
 
     let logs: Array<LogData> = [];
-    let aquaOperationResults: AquaOperationData[] = [];
+    let aquaTrees: AquaTree[]= []
 
     for (const aquaTree of aquaTreeWrappers) {
         const result = await linkAquaTreeUtil(aquaTree, linkAquaTreeWrapper, enableScalar); // Assuming enableScalar is false by default
 
         if (isOk(result)) {
-            aquaOperationResults.push(result.data);
+            aquaTrees.push(result.data.aquaTree)
         } else {
             logs.push(...result.data);
         }
     }
 
-    if (logs.length > 0) {
-        return Err(logs);
-    }
+    // if (logs.length > 0) {
+    //     return Err(logs);
+    // }
 
-    return Ok(aquaOperationResults);
+    let resutData: AquaOperationData = {
+        aquaTree: null,
+        logData: logs,
+        aquaTrees: aquaTrees
+    };
+
+    return Ok(resutData);
 }

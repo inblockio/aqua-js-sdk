@@ -106,7 +106,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
         logData: logs
     }
     // Tree creation
-    let aquaTreeWithTree = createAquaTree(data)
+    let aquaTreeWithTree = createAquaTree(data.aquaTree)
 
     logs.push({
         log: `  ✅  aquaTree signed succesfully`,

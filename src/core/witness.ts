@@ -312,7 +312,7 @@ const prepareWitness = async (
     const witness: WitnessResult = {
         witness_merkle_root: merkle_root,
         witness_timestamp: witnessTimestamp,
-        witness_network: witness_type,
+        witness_network: witness_network,
         witness_smart_contract_address: smart_contract_address,
         witness_transaction_hash: transactionHash,
         witness_sender_account_address: publisher,
