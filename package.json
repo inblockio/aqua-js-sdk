@@ -10,7 +10,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts --dts --format esm,cjs --out-dir dist && npm link",
+    "build": "tsup src/index.ts --dts --format esm,cjs --out-dir dist",
     "prepare": "npm run build", 
     "dev": "tsc",
     "test": "vitest",

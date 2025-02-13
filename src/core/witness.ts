@@ -1,5 +1,5 @@
 import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
-import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, maybeUpdateFileIndex, verifyMerkleIntegrity } from "../utils";
+import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
@@ -57,7 +57,7 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
 
 
     logs.push({
-        log: `  ✅  aquaTree witnessed succesfully`,
+        log: `✅  aquaTree witnessed succesfully`,
         logType: LogType.SUCCESS
     });
 
@@ -123,16 +123,12 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
             verificationData.leaves = leaves;
         }
 
-        const verificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
+        const verificationHash = getMerkleRoot(leaves);
         revisions[verificationHash] = verificationData
-        let aquaTreeUpdatedResult = maybeUpdateFileIndex(item.aquaTree, verificationHash, revisionType, item.fileObject.fileName, "");
 
-        if (isErr(aquaTreeUpdatedResult)) {
-            logs.push(...aquaTreeUpdatedResult.data);
-            hasError = true;
-            break
-        }
-        let aquaTreeUpdated = aquaTreeUpdatedResult.data
+        item.aquaTree.revisions = revisions
+
+        let aquaTreeUpdated = createAquaTree(item.aquaTree)
 
         aquaTreesResult.push(aquaTreeUpdated);
     }
@@ -206,16 +202,17 @@ const prepareWitness = async (
 
                 if (credentials == null || credentials == undefined) {
                     logs.push({
-                        log: `  ❌  credentials not found`,
+                        log: `❌  credentials not found`,
                         logType: LogType.SUCCESS
                     });
                     return Err(logs)
                 }
+                
                 let [_wallet, walletAddress, _publicKey] = getWallet(credentials.mnemonic);
 
 
                 logs.push({
-                    log: ` 🔷  Wallet address: ${walletAddress}`,
+                    log: ` 🔷  Wallet address: ${_wallet}`,
                     logType: LogType.DEBUGDATA
                 });
                 const gasEstimateResult: GasEstimateResult = await estimateWitnessGas(
@@ -233,13 +230,22 @@ const prepareWitness = async (
                 });
 
                 if (gasEstimateResult.error !== null) {
-                    console.log(`Unable to Estimate gas fee: ${gasEstimateResult?.error}`);
+                    logs.push({
+                        log: `Unable to Estimate gas fee: ${gasEstimateResult?.error}`,
+                        logType: LogType.DEBUGDATA
+                    });
                     process.exit(1);
                 }
 
                 if (!gasEstimateResult.hasEnoughBalance) {
-                    console.log(`You do not have enough balance to cater for gas fees`);
-                    console.log(`Add some faucets to this wallet address: ${walletAddress}\n`);
+                    logs.push({
+                        log: `🔷 You do not have enough balance to cater for gas fees : ${gasEstimateResult}`,
+                        logType: LogType.DEBUGDATA
+                    });
+                    logs.push({
+                        log: `Add some faucets to this wallet address: ${walletAddress}\n`,
+                        logType: LogType.DEBUGDATA
+                    });
                     process.exit(1);
                 }
 
@@ -249,7 +255,7 @@ const prepareWitness = async (
 
 
                     transactionResult = await WitnessEth.witnessCli(
-                        walletAddress,
+                        _wallet.privateKey,
                         verificationHash,
                         smart_contract_address,
                         network,
