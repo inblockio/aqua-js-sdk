@@ -138,3 +138,49 @@ export async function witness(aquaTree: AquaTree, witnessType: WitnessType = "et
 export async function verify(aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     return verifyAquaTreeUtil(aquaTree, fileObject)
 }
+
+
+
+export class AquafierChainable {
+    private value: AquaTree;
+
+    constructor(initialValue: AquaTree) {
+        this.value = initialValue;
+    }
+
+    notarize(): this {
+        this.value += createGenesisRevision().unwrap;
+        return this;
+    }
+
+    sign(n: number): this {
+        this.value -= n;
+        return this;
+    }
+
+    witness(n: number): this {
+        this.value *= n;
+        return this;
+    }
+
+    content(n: number): this {
+        this.value *= n;
+        return this;
+    }
+
+    async link(n: number): Promise<this> {
+        if (n === 0) throw new Error("Cannot divide by zero");
+        this.value /= n;
+        return this;
+    }
+
+    async form(n: number): Promise<this> {
+        await new Promise(resolve => setTimeout(resolve, 100)); // Simulating async operation
+        this.value += n;
+        return this;
+    }
+
+    getValue(): number {
+        return this.value;
+    }
+}
