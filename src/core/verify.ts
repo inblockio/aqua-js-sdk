@@ -38,16 +38,17 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
     for (let revisionItemHash of verificationHashes) {
         // console.log("revision hash " + revisionItemHash);
         let revision: Revision = aquaTree.revisions[revisionItemHash]
-        // console.log("Page Verification Hashes: " + revisionItemHash + "  Revision " + JSON.stringify(revision, null, 4))
+        console.log("Page Verification Hashes: " + revisionItemHash + "  Revision " + JSON.stringify(revision, null, 4))
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
 
         let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
 
-        // console.log("\n\n Result is " + JSON.stringify(result));
+        console.log("\n\n Result is " + JSON.stringify(result));
 
-        result[1].forEach((e) => logs.push(e));
-
+        if (result[1].length > 0) {
+            logs.push(...result[1]);
+        }
         if (!result[0]) {
             isSuccess = false;
             break;
@@ -55,9 +56,12 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
     }
 
     if (!isSuccess) {
+        console.log("\n\n result is false "+ JSON.stringify(logs));
         return Err(logs);
     }
 
+
+    console.log("\n\n ------------------ result is false ------------");
 
     logs.push({
         log: `AquaTree verified succesfully`,
