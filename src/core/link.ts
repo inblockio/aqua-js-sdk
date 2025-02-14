@@ -49,18 +49,28 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
         ...linkData
     }
 
+
     const leaves = dict2Leaves(newRevision)
-    if (!enableScalar) {
-        newRevision.leaves = leaves;
+
+    let verificationHash = "";
+    if (enableScalar) {
+
+        logs.push({
+            log: `Scalar enabled`,
+            logType: LogType.SCALAR
+        });
+        let stringifiedData = JSON.stringify(newRevision)
+
+        verificationHash = "0x" + getHashSum(stringifiedData);
+    } else {
+        newRevision.leaves = leaves
+        verificationHash = getMerkleRoot(leaves);
     }
 
-
-    const currentVerificationHash = getMerkleRoot(leaves); //tree.getHexRoot()
-    // console.log("file path: ----f", linkAquaTreeWrapper.fileObject.path)
     let updatedAquaTree: AquaTree = {
         revisions: {
             ...aquaTreeWrapper.aquaTree.revisions,
-            [currentVerificationHash]: newRevision
+            [verificationHash]: newRevision
         },
         file_index: {
             ...aquaTreeWrapper.aquaTree.file_index,

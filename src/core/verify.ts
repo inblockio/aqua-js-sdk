@@ -110,15 +110,20 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         //     }
         // } else {
         // }
-        const actualVH = "0x" + getHashSum(JSON.stringify(revision))
+
+        // const leaves = dict2Leaves(revision)
+        // const actualVH = getMerkleRoot(leaves);
+
+        const actualVH = "0x" + getHashSum(JSON.stringify(revision)) 
         isScalarSuccess = actualVH === verificationHash
 
+        // console.log("\n  revision data "+JSON.stringify(revision)+"\n actualVH  "+actualVH+" \n leaves " + JSON.stringify(leaves) + "\n")
+    
         if (!isScalarSuccess) {
             logs.push({
                 logType: LogType.ERROR,
                 log: `Scalar revision verification failed.\n\tcalculated  hash ${actualVH} \n\t expected hash ${verificationHash} `
-            })
-            // return [isSuccess, logs]
+            });
         } else {
             logs.push({
                 logType: LogType.SUCCESS,
@@ -250,15 +255,13 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
     logs.push(...logsResult)
 
-    console.log(` isSuccess ${isSuccess} &&  isScalarSuccess ${isScalarSuccess}`)
     if (isSuccess && isScalarSuccess) {
-        console.log("one...")
+       
         logs.push({
             log: `Successfully verified revision ${revision.revision_type}  with hash ${verificationHash} \n`,
             logType: LogType.SUCCESS
         })
     } else {
-        console.log("two...")
         logs.push({
             log: `Error verifying revision ${revision.revision_type}  with hash ${verificationHash} \n\n`,
             logType: LogType.ERROR
