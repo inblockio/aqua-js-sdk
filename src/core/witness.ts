@@ -171,6 +171,7 @@ const prepareWitness = async (
 
     switch (witnessType) {
         case "nostr": {
+            
             let witnessNostr = new WitnessNostr();
             [transactionHash, publisher, witnessTimestamp] = await witnessNostr.witness(merkle_root, credentials);
 

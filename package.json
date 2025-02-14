@@ -11,7 +11,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --dts --format esm,cjs --out-dir dist",
-    "prepare": "npm run build", 
+    "prepare": "npm run build",
     "dev": "tsc",
     "test": "vitest",
     "lint": "eslint src --ext .ts",
@@ -48,12 +48,14 @@
     "open": "^10.1.0",
     "openid-client": "^5.7.0",
     "pkijs": "^3.2.4",
-    "sigstore": "^3.0.0"
+    "sigstore": "^3.0.0",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/asn1js": "^3.0.11",
     "@types/node": "^20.11.24",
     "@types/pkijs": "^3.0.1",
+    "@types/ws": "^8.5.14",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",

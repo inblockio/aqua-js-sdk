@@ -1,14 +1,15 @@
-import { finalizeEvent, Event, EventTemplate , getPublicKey} from 'nostr-tools/pure'
-import { Relay} from 'nostr-tools/relay'
+import { finalizeEvent, Event, EventTemplate, getPublicKey, VerifiedEvent, verifiedSymbol } from 'nostr-tools/pure'
+import { AbstractRelay, Relay } from 'nostr-tools/relay'
 import { hexToBytes } from '@noble/hashes/utils'
 import * as nip19 from 'nostr-tools/nip19'
 import { CredentialsData, WitnessNostrVerifyResult } from '../types'
-
+import { useWebSocketImplementation } from "nostr-tools/relay";
+import * as ws from 'ws';
 
 
 
 export class WitnessNostr {
-     waitForEventAuthor = async (relay: Relay, pk: string): Promise<Event> => {
+    waitForEventAuthor = async (relay: Relay, pk: string): Promise<Event> => {
         return new Promise((resolve) => {
             relay.subscribe([
                 {
@@ -23,7 +24,7 @@ export class WitnessNostr {
         })
     }
 
-     waitForEventId = async (relay: Relay, id: string): Promise<Event> => {
+    waitForEventId = async (relay: Relay, id: string): Promise<Event> => {
         return new Promise((resolve) => {
             relay.subscribe([
                 {
@@ -37,7 +38,9 @@ export class WitnessNostr {
         })
     }
 
-     witness = async (witnessEventVerificationHash: string, credentials: CredentialsData): Promise<[string, string, number]> => {
+    witness = async (witnessEventVerificationHash: string, credentials: CredentialsData): Promise<[string, string, number]> => {
+
+
 
         // if (credentials.nostr_sk == undefined || credentials.nostr_sk == null || credentials.nostr_sk.length == 0) {
         //     return Err("nostr_sk in credntial is missing or empty")
@@ -66,7 +69,30 @@ export class WitnessNostr {
 
         const event = finalizeEvent(eventTemplate, sk)
 
-        const relay = await Relay.connect(relayUrl)
+        // Check if we're in Node.js environment
+        const isNode = typeof window === 'undefined';
+
+        let websocket: typeof WebSocket
+        // Set WebSocket implementation based on environment
+        // node does not have native wbsocket 
+        if (isNode) {
+            //    .then(WebSocket => {
+            // useWebSocketImplementation(WebSocket.default);
+            useWebSocketImplementation(ws);
+            global.WebSocket = ws as unknown as typeof WebSocket;
+            websocket = ws as unknown as typeof WebSocket;
+            // });
+
+        }
+
+        // const relay = await Relay.connect(relayUrl)
+        // const relay = await AbstractRelay.connect(relayUrl,{websocketImplementation : websocket})
+
+        // Correct way to pass options to Relay.connect()
+        const relay = isNode
+            ? await AbstractRelay.connect(relayUrl, { websocketImplementation: WebSocket, verifyEvent: (event: Event): event is VerifiedEvent => (event as VerifiedEvent)[verifiedSymbol] === true })
+            : await Relay.connect(relayUrl);
+
         console.log(`connected to ${relay.url}`)
 
         await relay.publish(event)
@@ -86,7 +112,7 @@ export class WitnessNostr {
 
 
 
-     verify = async (
+    verify = async (
         transactionHash: string,
         expectedMR: string,
         expectedTimestamp: number
