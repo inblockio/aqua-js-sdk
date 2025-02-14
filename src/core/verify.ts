@@ -3,6 +3,7 @@ import { dict2Leaves, getHashSum, getMerkleRoot } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
 import { Err, isErr, Ok, Result } from "../type_guards";
+import { log } from "node:console";
 
 
 export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
@@ -16,10 +17,10 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
         Err(logs)
     }
 
-    logs.push({
-        log: `AquaTree verified succesfully`,
-        logType: LogType.SUCCESS
-    });
+    // logs.push({
+    //     log: `AquaTree verified succesfully`,
+    //     logType: LogType.SUCCESS
+    // });
     let data: AquaOperationData = {
         aquaTree: aquaTree,
         aquaTrees: null,
@@ -28,45 +29,57 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
 
     return Ok(data);
 }
+
+
+
+
 export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
-    // console.log("Aqua tree: " + JSON.stringify(aquaTree, null, 4));
     let verificationHashes = Object.keys(aquaTree.revisions)
-    // console.log("Page Verification Hashes: ", verificationHashes)
     let isSuccess = true
     for (let revisionItemHash of verificationHashes) {
-        // console.log("revision hash " + revisionItemHash);
+        logs.push({
+            logType: LogType.EMPTY,
+            log: "\n"
+        })
+
         let revision: Revision = aquaTree.revisions[revisionItemHash]
-        console.log("Page Verification Hashes: " + revisionItemHash + "  Revision " + JSON.stringify(revision, null, 4))
+        logs.push({
+            logType: LogType.DEBUGDATA,
+            log: "Revision Hashes: " + revisionItemHash
+        })
+        logs.push({
+            logType: LogType.DEBUGDATA,
+            log: "Revision data \n " + JSON.stringify(revision, null, 4)
+        })
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
 
         let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
 
-        console.log("\n\n Result is " + JSON.stringify(result));
 
         if (result[1].length > 0) {
             logs.push(...result[1]);
         }
         if (!result[0]) {
             isSuccess = false;
-            break;
         }
+
+        logs.push({
+            logType: LogType.EMPTY,
+            log: "==============================================================="
+        })
+        logs.push({
+            logType: LogType.EMPTY,
+            log: "\n"
+        })
     }
 
-    if (!isSuccess) {
-        console.log("\n\n result is false "+ JSON.stringify(logs));
+
+    if (!isSuccess) { 
         return Err(logs);
     }
-
-
-    console.log("\n\n ------------------ result is false ------------");
-
-    logs.push({
-        log: `AquaTree verified succesfully`,
-        logType: LogType.SUCCESS
-    });
 
     let data: AquaOperationData = {
         aquaTree: aquaTree,
@@ -81,26 +94,45 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     let logs: Array<LogData> = [];
     let doVerifyMerkleProof = false; // todo to be improved rather than hard coded
     let isSuccess = true;
+    let isScalarSuccess = true;
 
     if (isScalar) {
+        logs.push({
+            logType: LogType.SCALAR,
+            log: "Scalar revision detected."
+        })
+        // todo fix verifyRevisionMerkleTreeStructure
+        // if (revision.witness_merkle_proof && revision.witness_merkle_proof.length > 1) {
 
-        if (revision.witness_merkle_proof && revision.witness_merkle_proof.length > 1) {
+        //     let [ok, logs] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
+        //     if (!ok) {
+        //         return [ok, logs]
+        //     }
+        // } else {
+        // }
+        const actualVH = "0x" + getHashSum(JSON.stringify(revision))
+        isScalarSuccess = actualVH === verificationHash
 
-            let [ok, logs] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
-            if (!ok) {
-                return [ok, logs]
-            }
+        if (!isScalarSuccess) {
+            logs.push({
+                logType: LogType.ERROR,
+                log: `Scalar revision verification failed.\n\tcalculated  hash ${actualVH} \n\t expected hash ${verificationHash} `
+            })
+            // return [isSuccess, logs]
         } else {
-            const actualVH = "0x" + getHashSum(JSON.stringify(revision))
-            isSuccess = actualVH === verificationHash
-
-            if (!isSuccess) {
-                return [isSuccess, logs]
-            }
+            logs.push({
+                logType: LogType.SUCCESS,
+                log: "Scalar revision hash verified succeessully."
+            })
         }
+
 
     } else {
         if (doVerifyMerkleProof) {
+            logs.push({
+                logType: LogType.INFO,
+                log: "Verifying revision merkle tree ."
+            })
             let [ok, result] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
             if (!ok) {
                 return [ok, result]
@@ -112,10 +144,18 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     let logsResult: Array<LogData> = []
     switch (revision.revision_type) {
         case "form":
+            logs.push({
+                logType: LogType.FORM,
+                log: "Verifying form revision. \n"
+            })
             // verification is already done in verifyRevisionMerkleTreeStructure
             isSuccess = true;
             break
         case "file":
+            logs.push({
+                logType: LogType.FILE,
+                log: "Verifying file revision.\n"
+            })
             let fileContent: Buffer
             if (!!revision.content) {
                 fileContent = Buffer.from(revision.content, "utf8")
@@ -137,6 +177,10 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             isSuccess = fileHash === revision.file_hash
             break
         case "signature":
+            logs.push({
+                logType: LogType.SIGNATURE,
+                log: "Verifying signature revision.\n"
+            });
             // Verify signature
             [isSuccess, logsResult] = await verifySignature(
                 revision,
@@ -146,7 +190,10 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
             break
         case "witness":
-            // console.log("am being hit by compiler")
+            logs.push({
+                logType: LogType.WITNESS,
+                log: "Verifying witness revision.\n"
+            });
             // Verify witness
             let [isSuccessResult, logsResultData] = await verifyWitness(
                 revision,
@@ -159,35 +206,43 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
             break
         case "link":
+            logs.push({
+                logType: LogType.LINK,
+                log: "Verifying link revision.\n"
+            });
             let linkOk: boolean = true
             for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
-                // const fileUri = getUnixPathFromAquaPath(aquaTree.file_index[fileHash])
                 const fileUri = aquaTree.file_index[vh];
                 const aquaFileUri = `${fileUri}.aqua.json`
 
                 let fileObj = fileObjects.find(fileObj => fileObj.fileName === aquaFileUri)
-                // const linkAquaTree = await readExportFile(aquaFileUri)
+
                 if (!fileObj) {
-                    return [false, logs]
+                    linkOk = false;
+                    logs.push({
+                        log: `File ${fileUri} not found in file objects`,
+                        logType: LogType.ERROR
+                    })
+                } else {
+                    const linkAquaTree = JSON.parse(fileObj?.fileContent)
+
+                    let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
+
+                    if (isErr(linkVerificationResult)) {
+                        linkOk=false
+                        // logs.push(...linkVerificationResult.data)
+                        logs.push({
+                            log: `\t  verification of ${fileUri}.aqua.json failed `,
+                            logType: LogType.ERROR
+                        })
+                    } else {
+                        // logs.push(...linkVerificationResult.data.logData)
+                        logs.push({
+                            log: `\t successfully verified ${fileUri}.aqua.json `,
+                            logType: LogType.SUCCESS
+                        })
+                    }
                 }
-                const linkAquaTree = JSON.parse(fileObj?.fileContent)
-
-                // let _linkStatus: string
-
-                let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
-
-                if (isErr(linkVerificationResult)) {
-                    logs.push(...linkVerificationResult.data)
-                    return [false, logs]
-                }
-                logs.push(...linkVerificationResult.data.logData)
-                // const expectedVH = revision.link_verification_hashes[idx]
-                // const linkVerificationHashes = Object.keys(linkAquaTree.revisions)
-                // const actualVH = linkVerificationHashes[linkVerificationHashes.length - 1]
-
-                // linkOk = linkOk && (linkStatus === VERIFIED_VERIFICATION_STATUS) && (expectedVH == actualVH)
-                // isSuccess = true
-
             }
             isSuccess = linkOk
             break
@@ -195,20 +250,22 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
     logs.push(...logsResult)
 
-    if (isSuccess) {
+    console.log(` isSuccess ${isSuccess} &&  isScalarSuccess ${isScalarSuccess}`)
+    if (isSuccess && isScalarSuccess) {
+        console.log("one...")
         logs.push({
-            log: `..successfully verified revision ${revision.revision_type}  with hash ${verificationHash} `,
+            log: `Successfully verified revision ${revision.revision_type}  with hash ${verificationHash} \n`,
             logType: LogType.SUCCESS
         })
     } else {
+        console.log("two...")
         logs.push({
-            log: ` error verifying revision ${revision.revision_type}  with hash ${verificationHash} `,
+            log: `Error verifying revision ${revision.revision_type}  with hash ${verificationHash} \n\n`,
             logType: LogType.ERROR
         })
     }
 
-
-    return [isSuccess, logs]
+    return [isSuccess && isScalarSuccess , logs]
 }
 
 

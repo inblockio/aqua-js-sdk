@@ -5,6 +5,30 @@ import { createAquaTree } from "../aquavhtree";
 import { Err, isErr, Ok, Result } from "../type_guards";
 
 
+export function checkIfFileAlreadyNotarizedUtil(aquaTree: AquaTree, fileObject : FileObject): boolean {
+
+    let keys = Object.keys(aquaTree.revisions);
+    let firstRevision : Revision = aquaTree.revisions[keys[0]];
+
+    let fileHash = getHashSum(fileObject.fileContent)
+    return  firstRevision.file_hash == fileHash
+
+
+
+}
+export function fetchFilesToBeReadUtil(aquaTree: AquaTree): string[] {
+
+    let files: Array<string> = []
+
+    let keys = Object.keys(aquaTree.file_index);
+
+    keys.forEach((item) => {
+        files.push(aquaTree.file_index[item])
+    })
+
+    return files;
+
+}
 
 export function removeLastRevisionUtil(aquaTree: AquaTree): Result<AquaOperationData, LogData[]> {
     let logs: Array<LogData> = [];
@@ -147,13 +171,13 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
         verificationHash = "0x" + getHashSum(stringifiedData);
     } else {
         verificationData.leaves = leaves
-        verificationHash = getMerkleRoot(leaves); 
+        verificationHash = getMerkleRoot(leaves);
     }
 
     const aquaTree = createNewAquaTree();
     aquaTree.revisions[verificationHash] = verificationData;
 
-    let aquaTreeUpdatedResult = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, fileObject.fileName, "","","")
+    let aquaTreeUpdatedResult = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, fileObject.fileName, "", "", "")
 
     if (isErr(aquaTreeUpdatedResult)) {
         logs.push(...aquaTreeUpdatedResult.data);

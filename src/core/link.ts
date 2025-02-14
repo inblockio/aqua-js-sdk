@@ -7,29 +7,6 @@ import { Err, isOk, Ok, Result } from "../type_guards";
 
 
 
-export async function verifyLinkUtil(_revision: Revision): Promise<Result<AquaOperationData, LogData[]>> {
-    let logs: Array<LogData> = [];
-
-    // let _linkOk: boolean = true
-    // for (const [idx, vh] of revision.link_verification_hashes.entries()) {
-    //     // const fileUri = getUnixPathFromAquaPath(aquaTree.file_index[fileHash])
-    //     const fileUri = revision.file_index[vh];
-    //     const aquaFileUri = `${fileUri}.aqua.json`
-    //     const linkAquaTree = await readExportFile(aquaFileUri)
-    //     let linkStatus: string
-    //     [linkStatus, _] = await verifyPage(linkAquaTree, false, doVerifyMerkleProof)
-    //     const expectedVH = input.link_verification_hashes[idx]
-    //     const linkVerificationHashes = Object.keys(linkAquaTree.revisions)
-    //     const actualVH = linkVerificationHashes[linkVerificationHashes.length - 1]
-    //     linkOk = linkOk && (linkStatus === VERIFIED_VERIFICATION_STATUS) && (expectedVH == actualVH)
-    // }
-    // typeOk = linkOk
-    // break
-
-    return Err(logs)
-}
-
-
 export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     const timestamp = getTimestamp()

@@ -1,7 +1,7 @@
 import { createContentRevisionUtil, getFileByHashUtil } from "./core/content";
 import { createFormRevisionUtil, hideFormElementsUtil, unHideFormElementsUtil } from "./core/forms";
 import { linkAquaTreesToMultipleAquaTreesUtil, linkAquaTreeUtil, linkMultipleAquaTreesUtil } from "./core/link";
-import { createGenesisRevision, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
+import { checkIfFileAlreadyNotarizedUtil, createGenesisRevision, fetchFilesToBeReadUtil, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
 import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
 import { verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
@@ -76,6 +76,15 @@ export default class Aquafier {
 
     unHideFormElements = async (aquaTree: AquaTreeWrapper, keyToUnHide: string, content: string): Promise<Result<AquaOperationData, LogData[]>> => {
         return unHideFormElementsUtil(aquaTree, keyToUnHide, content)
+    }
+
+    //get files to be read to file objects 
+    fetchFilesToBeRead = (aquaTree: AquaTree) : string[] => {
+        return fetchFilesToBeReadUtil(aquaTree)
+    }
+
+    checkIfFileAlreadyNotarized=(aquaTree: AquaTree, fileObject : FileObject): boolean =>{
+     return   checkIfFileAlreadyNotarizedUtil(aquaTree,fileObject)
     }
 
 

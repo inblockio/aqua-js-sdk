@@ -47,6 +47,7 @@ export enum LogType {
   SUCCESS = "success",
   INFO = "info",
   ERROR = "error",
+  FINAL_ERROR = "final_error",
   WARNING = "warning",
   HINT = "hint",
   DEBUGDATA = "debug_data",
@@ -56,12 +57,14 @@ export enum LogType {
   WITNESS = "witness",
   FORM = "form",
   SCALAR = "scalar",
+  EMPTY = "empty",
 }
 
 export const LogTypeEmojis: Record<LogType, string> = {
   [LogType.SUCCESS]: "✅",
   [LogType.INFO]: "✨",
   [LogType.ERROR]: "❌",
+  [LogType.FINAL_ERROR]: "🚫",
   [LogType.WARNING]: "🚨",
   [LogType.HINT]: "💡",
   [LogType.DEBUGDATA]: "🐞",
@@ -70,7 +73,8 @@ export const LogTypeEmojis: Record<LogType, string> = {
   [LogType.SIGNATURE]: "🔏",
   [LogType.WITNESS]: "👀",
   [LogType.FORM]: "📝",
-  [LogType.SCALAR]: "⏺️",
+  [LogType.SCALAR]: "⏺️ ",
+  [LogType.EMPTY]: "",
 };
 
 export interface LogData {
