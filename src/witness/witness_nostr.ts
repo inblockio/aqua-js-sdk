@@ -76,27 +76,13 @@ export class WitnessNostr {
         // Set WebSocket implementation based on environment
         // node does not have native wbsocket 
         if (isNode) {
-            //    .then(WebSocket => {
-            // useWebSocketImplementation(WebSocket.default);
-            // useWebSocketImplementation(ws);
-            // global.WebSocket = ws as unknown as typeof WebSocket;
-            // websocket = ws as unknown as typeof WebSocket;
-            // });
+
             websocket = ws as unknown as typeof WebSocket;
             global.WebSocket = websocket;
         }
 
         console.log("Is node: ", isNode)
 
-        // const relay = await Relay.connect(relayUrl)
-        // const relay = await AbstractRelay.connect(relayUrl,{websocketImplementation : websocket})
-
-        
-        // console.table(new websocket(relayUrl))
-        // Correct way to pass options to Relay.connect()
-        // const relay = isNode
-        //     ? await AbstractRelay.connect(relayUrl, { websocketImplementation: websocket, verifyEvent: (event: Event): event is VerifiedEvent => (event as VerifiedEvent)[verifiedSymbol] === true })
-        //     : await Relay.connect(relayUrl);
 
         const relay = await Relay.connect(relayUrl);
 
@@ -125,12 +111,30 @@ export class WitnessNostr {
         expectedTimestamp: number
     ): Promise<boolean> => {
         const decoded = nip19.decode(transactionHash) as WitnessNostrVerifyResult
+        const relayUrl = 'wss://relay.damus.io'
 
         if (decoded.type !== "nevent") {
             return false
         }
 
-        const relay = await Relay.connect('wss://relay.damus.io')
+        // const relay = await Relay.connect('wss://relay.damus.io')
+        // Check if we're in Node.js environment
+        const isNode = typeof window === 'undefined';
+
+        let websocket: typeof WebSocket;
+        // Set WebSocket implementation based on environment
+        // node does not have native wbsocket 
+        if (isNode) {
+
+            websocket = ws as unknown as typeof WebSocket;
+            global.WebSocket = websocket;
+        }
+
+        console.log("Is node: ", isNode)
+
+
+        const relay = await Relay.connect(relayUrl);
+
         const publishEvent = await this.waitForEventId(relay, decoded.data.id)
         relay.close()
 
