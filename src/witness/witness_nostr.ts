@@ -4,7 +4,7 @@ import { hexToBytes } from '@noble/hashes/utils'
 import * as nip19 from 'nostr-tools/nip19'
 import { CredentialsData, WitnessNostrVerifyResult } from '../types'
 import { useWebSocketImplementation } from "nostr-tools/relay";
-import * as ws from 'ws';
+import ws from 'ws';
 
 
 
@@ -72,26 +72,31 @@ export class WitnessNostr {
         // Check if we're in Node.js environment
         const isNode = typeof window === 'undefined';
 
-        let websocket: typeof WebSocket
+        let websocket: typeof WebSocket;
         // Set WebSocket implementation based on environment
         // node does not have native wbsocket 
         if (isNode) {
             //    .then(WebSocket => {
             // useWebSocketImplementation(WebSocket.default);
-            useWebSocketImplementation(ws);
-            global.WebSocket = ws as unknown as typeof WebSocket;
-            websocket = ws as unknown as typeof WebSocket;
+            // useWebSocketImplementation(ws);
+            // global.WebSocket = ws as unknown as typeof WebSocket;
+            // websocket = ws as unknown as typeof WebSocket;
             // });
-
+            websocket = ws as unknown as typeof WebSocket;
+            global.WebSocket = websocket;
         }
+
+        console.log("Is node: ", isNode)
 
         // const relay = await Relay.connect(relayUrl)
         // const relay = await AbstractRelay.connect(relayUrl,{websocketImplementation : websocket})
 
         // Correct way to pass options to Relay.connect()
-        const relay = isNode
-            ? await AbstractRelay.connect(relayUrl, { websocketImplementation: WebSocket, verifyEvent: (event: Event): event is VerifiedEvent => (event as VerifiedEvent)[verifiedSymbol] === true })
-            : await Relay.connect(relayUrl);
+        // const relay = isNode
+        //     ? await AbstractRelay.connect(relayUrl, { websocketImplementation: websocket, verifyEvent: (event: Event): event is VerifiedEvent => (event as VerifiedEvent)[verifiedSymbol] === true })
+        //     : await Relay.connect(relayUrl);
+
+        const relay = await Relay.connect(relayUrl);
 
         console.log(`connected to ${relay.url}`)
 
