@@ -23,11 +23,11 @@ export class WitnessTSA {
   }
 
   witness = async (hash: string, tsaUrl: string): Promise<[string, string, number]> => {
-    console.log("Hash before: ", hash)
+    // console.log("Hash before: ", hash)
     // DigiCert only supports up to SHA256
     const hashHex = createHash("sha256").update(hash).digest("hex")
     const hashBuffer = Uint8Array.from(Buffer.from(hashHex, "hex")) // Convert hex to ArrayBuffer
-    console.log("Hash buffer: ", hashBuffer)
+    // console.log("Hash buffer: ", hashBuffer)
 
     const tspReq = new pkijs.TimeStampReq({
       version: 1,
@@ -41,14 +41,14 @@ export class WitnessTSA {
       certReq: true,
     })
 
-    console.log("TSA Request: ", tspReq)
+    // console.log("TSA Request: ", tspReq)
 
     // Encode the TimeStampReq to DER format
     const tspReqSchema = tspReq.toSchema()
     const tspReqBuffer = tspReqSchema.toBER(false)
 
-    console.log("TSA Request 1: ", tspReqSchema)
-    console.log("TSA Request 2: ", tspReqBuffer)
+    // console.log("TSA Request 1: ", tspReqSchema)
+    // console.log("TSA Request 2: ", tspReqBuffer)
 
     const response = await fetch(tsaUrl, {
       method: "POST",
@@ -80,6 +80,11 @@ export class WitnessTSA {
     expectedMR: string,
     expectedTimestamp: number
   ): Promise<boolean> => {
+    console.log(`1. transactionHash ${transactionHash}`)
+    console.log(`1. expectedMR ${expectedMR}`)
+    console.log(`1. expectedTimestamp ${expectedTimestamp}`)
+
+    
     const tspResponseBuffer = Buffer.from(transactionHash, "base64")
     const tspResponseAsn1 = asn1js.fromBER(tspResponseBuffer)
     const tspResponse = new pkijs.TimeStampResp({

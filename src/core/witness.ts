@@ -39,18 +39,17 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
 
     verificationData = { ...verificationData, ...witness }
 
-    // Merklelize the dictionary
-    const leaves = dict2Leaves(verificationData)
 
+     // Merklelize the dictionary
+     const leaves = dict2Leaves(verificationData)
 
-
-    let verification_hash = "";
-    if (!enableScalar) {
-        verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
-        verificationData.leaves = leaves
-    } else {
-        verification_hash = getMerkleRoot(leaves); //tree.getHexRoot()
-    }
+     let verification_hash = "";
+     if (enableScalar) {
+         verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
+     } else {
+         verification_hash = getMerkleRoot(leaves); //tree.getHexRoot() 
+         verificationData.leaves = leaves
+     }
 
     const revisions = aquaTree.revisions
     revisions[verification_hash] = verificationData

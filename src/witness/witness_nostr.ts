@@ -78,7 +78,7 @@ export class WitnessNostr {
         if (isNode) {
             //    .then(WebSocket => {
             // useWebSocketImplementation(WebSocket.default);
-            useWebSocketImplementation(ws);
+            // useWebSocketImplementation(ws);
             global.WebSocket = ws as unknown as typeof WebSocket;
             websocket = ws as unknown as typeof WebSocket;
             // });
@@ -88,9 +88,11 @@ export class WitnessNostr {
         // const relay = await Relay.connect(relayUrl)
         // const relay = await AbstractRelay.connect(relayUrl,{websocketImplementation : websocket})
 
+        
+        console.table(new websocket(relayUrl))
         // Correct way to pass options to Relay.connect()
         const relay = isNode
-            ? await AbstractRelay.connect(relayUrl, { websocketImplementation: WebSocket, verifyEvent: (event: Event): event is VerifiedEvent => (event as VerifiedEvent)[verifiedSymbol] === true })
+            ? await AbstractRelay.connect(relayUrl, { websocketImplementation: websocket, verifyEvent: (event: Event): event is VerifiedEvent => (event as VerifiedEvent)[verifiedSymbol] === true })
             : await Relay.connect(relayUrl);
 
         console.log(`connected to ${relay.url}`)

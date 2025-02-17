@@ -91,18 +91,18 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
         signature_wallet_address: walletAddress,
         signature_type: signature_type,
     };
-    verificationData["version"] = `aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
+    // verificationData["version"] = `aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
 
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
 
     let verification_hash = "";
-    if (!enableScalar) {
+    if (enableScalar) {
         verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
-        verificationData.leaves = leaves
     } else {
-        verification_hash = getMerkleRoot(leaves); //tree.getHexRoot()
+        verification_hash = getMerkleRoot(leaves); //tree.getHexRoot() 
+        verificationData.leaves = leaves
     }
 
     const revisions = aquaTree.revisions
