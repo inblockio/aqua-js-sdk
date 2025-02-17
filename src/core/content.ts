@@ -22,6 +22,7 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
         previous_verification_hash: lastRevisionHash,
         local_timestamp: timestamp,
         revision_type: revisionType,
+        
     }
 
     let fileHash = getHashSum(fileObject.fileContent)
@@ -38,8 +39,9 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
     }
 
     verificationData["content"] = fileObject.fileContent;
-    verificationData["file_hash"] = fileHash
-    verificationData["file_nonce"] = prepareNonce()
+    verificationData["file_hash"] = fileHash;
+    verificationData["file_nonce"] = prepareNonce();
+    verificationData["version"] =`aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)

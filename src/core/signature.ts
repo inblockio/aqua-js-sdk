@@ -90,7 +90,10 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
         signature_public_key: publicKey,
         signature_wallet_address: walletAddress,
         signature_type: signature_type,
-    }
+    };
+    verificationData["version"] =`aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
+
+
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)

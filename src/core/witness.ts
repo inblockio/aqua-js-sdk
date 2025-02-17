@@ -24,8 +24,10 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
         previous_verification_hash: lastRevisionHash,
         local_timestamp: timestamp,
         revision_type: revisionType,
-
     }
+    verificationData["version"] =`aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
+
+    
     const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials!!, witnessNetwork)
 
     if (isErr(revisionResultData)) {

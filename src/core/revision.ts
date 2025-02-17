@@ -106,6 +106,8 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
 
     verificationData["file_hash"] = getHashSum(fileObject.fileContent)
     verificationData["file_nonce"] = prepareNonce()
+    verificationData["version"] =`aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
+
 
     switch (revisionType) {
         case "file":
