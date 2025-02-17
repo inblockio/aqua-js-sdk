@@ -16,6 +16,7 @@ export function checkIfFileAlreadyNotarizedUtil(aquaTree: AquaTree, fileObject :
 
 
 }
+
 export function fetchFilesToBeReadUtil(aquaTree: AquaTree): string[] {
 
     let files: Array<string> = []

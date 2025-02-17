@@ -2,7 +2,7 @@
 import { Revision, AquaOperationData, LogData, SignType, AquaTreeWrapper, CredentialsData, LogType, SignatureData } from "../types";
 import { MetaMaskSigner } from "../signature/sign_metamask";
 import { CLISigner } from "../signature/sign_cli";
-import { dict2Leaves, formatMwTimestamp, getMerkleRoot, getWallet } from "../utils";
+import { dict2Leaves, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet } from "../utils";
 import { DIDSigner } from "../signature/sign_did";
 import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
@@ -91,33 +91,31 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
         signature_wallet_address: walletAddress,
         signature_type: signature_type,
     };
-    verificationData["version"] =`aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
-
+    verificationData["version"] = `aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
 
 
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
 
-
+    let verification_hash = "";
     if (!enableScalar) {
+        verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
         verificationData.leaves = leaves
+    } else {
+        verification_hash = getMerkleRoot(leaves); //tree.getHexRoot()
     }
-    let verification_hash: string = getMerkleRoot(leaves); //tree.getHexRoot();
 
-    aquaTree.revisions[verification_hash] = verificationData;
+    const revisions = aquaTree.revisions
+    revisions[verification_hash] = verificationData
 
-    let data: AquaOperationData = {
-        aquaTrees: null,
-        aquaTree: aquaTree,
-        logData: logs
-    }
-    // Tree creation
-    let aquaTreeWithTree = createAquaTree(data.aquaTree)
+    let aquaTreeWithTree = createAquaTree(aquaTree)
 
     logs.push({
         log: `AquaTree signed succesfully`,
         logType: LogType.SUCCESS
     });
+
+
 
     let result: AquaOperationData = {
         aquaTree: aquaTreeWithTree,
