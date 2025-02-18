@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+// import { createHash } from 'crypto';
 import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, LogTypeEmojis, Revision, RevisionTree, TreeMapping } from './types';
 import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers";
 import crypto from 'crypto-browserify';
@@ -62,7 +62,7 @@ export function getFileHashSum(fileContent: string): string {
 }
 
 export function getHashSum(data: string | Buffer): string {
-  return createHash('sha256').update(data).digest('hex');
+  return crypto.createHash('sha256').update(data).digest('hex');
 }
 
 export function createNewAquaTree(): AquaTree {

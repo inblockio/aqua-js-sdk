@@ -53,4 +53,10 @@ You can use the library without having to instal it from npm
 in you aqua-container or any other project run `npm  link aqua-verifier` .
 optional to unlink remove this library `npm unlink aqua-verifier`
 
+## Testing Example browser
 
+Link full path to dist to browser dist
+
+```
+ln -s ~/{PATH_TO_YOUR_PROJECT}/aqua-verifier-js-lib/dist ~/{PATH_TO_YOUR_PROJECT}/aqua-verifier-js-lib/example/browser/
+```
