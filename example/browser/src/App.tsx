@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import Aquafier, { FileObject } from "aquafier-js-sdk";
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
 
 
   return (
-   <div>hi</div>
+   <div>Check browser console for the genesis aqua tree object.</div>
   );
 }
 

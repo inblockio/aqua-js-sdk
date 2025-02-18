@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [react()],
@@ -12,7 +11,12 @@ export default defineConfig({
       process: 'process/browser',
       events: 'events',
       assert: 'assert',
-      crypto: 'crypto-browserify'
+      http: 'stream-http',
+      https: 'https-browserify',
+      url: 'url',
+      vm: 'vm-browserify',
+      crypto: 'crypto-browserify',
+      'node:crypto': 'crypto-browserify'
     }
   },
   define: {
@@ -23,12 +27,12 @@ export default defineConfig({
     include: [
       'buffer',
       'process',
-      'util',
+      'crypto-browserify',
       'stream-browserify',
       'events',
-      'assert',
-      'crypto-browserify'
+      'assert'
     ],
+    exclude: ['fsevents'],
     esbuildOptions: {
       define: {
         global: 'globalThis'
@@ -37,13 +41,69 @@ export default defineConfig({
   },
   build: {
     commonjsOptions: {
+      include: [/node_modules/],
       transformMixedEsModules: true
     },
     rollupOptions: {
-      external: ['fsevents']
+      external: ['fsevents'],
+      output: {
+        manualChunks: undefined
+      }
     }
   }
 })
+
+// three
+// import { defineConfig } from 'vite'
+// import react from '@vitejs/plugin-react'
+// // import { resolve } from 'path'
+
+// export default defineConfig({
+//   plugins: [react()],
+//   resolve: {
+//     alias: {
+//       stream: 'stream-browserify',
+//       buffer: 'buffer',
+//       util: 'util',
+//       process: 'process/browser',
+//       events: 'events',
+//       assert: 'assert',
+//       http: 'stream-http',
+//       https: 'https-browserify',
+//       url: 'url',
+//       vm: 'vm-browserify',
+//       crypto: 'crypto-browserify'
+//     }
+//   },
+//   define: {
+//     'process.env': {},
+//     global: 'globalThis'
+//   },
+//   optimizeDeps: {
+//     include: [
+//       'buffer',
+//       'process',
+//       'util',
+//       'stream-browserify',
+//       'events',
+//       'assert',
+//       'crypto-browserify'
+//     ],
+//     esbuildOptions: {
+//       define: {
+//         global: 'globalThis'
+//       }
+//     }
+//   },
+//   build: {
+//     commonjsOptions: {
+//       transformMixedEsModules: true
+//     },
+//     rollupOptions: {
+//       external: ['fsevents']
+//     }
+//   }
+// })
 
 //two
 // import { defineConfig } from 'vite'
