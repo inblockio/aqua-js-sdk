@@ -1,9 +1,8 @@
-import { finalizeEvent, Event, EventTemplate, getPublicKey, VerifiedEvent, verifiedSymbol } from 'nostr-tools/pure'
-import { AbstractRelay, Relay } from 'nostr-tools/relay'
+import { finalizeEvent, Event, EventTemplate, getPublicKey } from 'nostr-tools/pure'
+import { Relay } from 'nostr-tools/relay'
 import { hexToBytes } from '@noble/hashes/utils'
 import * as nip19 from 'nostr-tools/nip19'
 import { CredentialsData, WitnessNostrVerifyResult } from '../types'
-import { useWebSocketImplementation } from "nostr-tools/relay";
 import ws from 'ws';
 
 

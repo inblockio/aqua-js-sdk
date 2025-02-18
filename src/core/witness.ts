@@ -1,4 +1,4 @@
-import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, GasEstimateResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
 import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
@@ -177,7 +177,7 @@ const prepareWitness = async (
     let logs: Array<LogData> = [];
 
     const merkle_root: string = verificationHash;
-    let witness_type: string = "";
+    // let witness_type: string = "";
     let smart_contract_address: string,
         transactionHash: string,
         publisher: string,
@@ -189,7 +189,7 @@ const prepareWitness = async (
             let witnessNostr = new WitnessNostr();
             [transactionHash, publisher, witnessTimestamp] = await witnessNostr.witness(merkle_root, credentials);
 
-            witness_type = "nostr";
+            // witness_type = "nostr";
             smart_contract_address = "N/A";
             break;
         }
@@ -198,7 +198,7 @@ const prepareWitness = async (
             let witnessTsa = new WitnessTSA();
             [transactionHash, publisher, witnessTimestamp] =
                 await witnessTsa.witness(merkle_root, tsaUrl);
-            witness_type = "TSA_RFC3161";
+            // witness_type = "TSA_RFC3161";
             smart_contract_address = tsaUrl;
             break;
         }

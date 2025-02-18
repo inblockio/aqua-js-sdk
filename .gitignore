@@ -1,3 +1,7 @@
 node_modules
 dist
 package-log.json
+
+src/credentials.json
+*/credentials.json
+**/credentials.json

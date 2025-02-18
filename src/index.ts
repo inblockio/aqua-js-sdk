@@ -200,25 +200,7 @@ export class AquafierChainable {
         this.verificationResult = data;
         return this;
     }
-
-
-    // content(n: number): this {
-    //     this.value *= n;
-    //     return this;
-    // }
-
-    // async link(n: number): Promise<this> {
-    //     if (n === 0) throw new Error("Cannot divide by zero");
-    //     this.value /= n;
-    //     return this;
-    // }
-
-    // async form(n: number): Promise<this> {
-    //     await new Promise(resolve => setTimeout(resolve, 100)); // Simulating async operation
-    //     this.value += n;
-    //     return this;
-    // }
-
+    
     getValue(): AquaTree {
         return this.value;
     }
