@@ -7,7 +7,7 @@ import { verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
 import { Result } from "./type_guards";
 import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
-
+import { default as packageJson } from "./../package.json";
 
 export * from "./utils";
 export * from "./types";
@@ -255,6 +255,13 @@ export default class Aquafier {
         return getFileByHashUtil(aquaTree, hash)
     }
 
+    getVersionFromPackageJson = (): string => {
+        let version = "1.3.2.0"
+        console.log(packageJson.version);
+        return packageJson.version ?? version
+
+    }
+
 }
 
 
@@ -301,7 +308,7 @@ export class AquafierChainable {
         "did:key": "",
         alchemy_key: "",
         witness_eth_network: "",
-        witness_eth_platform: ""
+        witness_method: ""
     }, enableScalar: boolean = false): Promise<this> {
         let data = await signAquaTreeUtil({
             aquaTree: this.value,
@@ -327,7 +334,7 @@ export class AquafierChainable {
         "did:key": "",
         alchemy_key: "",
         witness_eth_network: "",
-        witness_eth_platform: ""
+        witness_method: ""
     }, enableScalar: boolean = false): Promise<this> {
         let data = await witnessAquaTreeUtil(this.value, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
         // this.value = this.unwrap(data);

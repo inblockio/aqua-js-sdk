@@ -30,7 +30,7 @@ export interface CredentialsData {
   "did:key": string;
   alchemy_key: string,
   witness_eth_network: string;
-  witness_eth_platform: string;
+  witness_method: string;
 }
 
 /**
