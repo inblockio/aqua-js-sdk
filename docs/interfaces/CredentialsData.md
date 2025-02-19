@@ -4,7 +4,7 @@
 
 # Interface: CredentialsData
 
-Defined in: [types.ts:27](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L27)
+Defined in: [types.ts:27](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L27)
 
 ## Description
 
@@ -28,7 +28,7 @@ The data required for the credentials of the user
 
 > **alchemy\_key**: `string`
 
-Defined in: [types.ts:31](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L31)
+Defined in: [types.ts:31](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L31)
 
 The Alchemy key of the user
 
@@ -38,7 +38,7 @@ The Alchemy key of the user
 
 > **did:key**: `string`
 
-Defined in: [types.ts:30](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L30)
+Defined in: [types.ts:30](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L30)
 
 The DID key of the user
 
@@ -48,7 +48,7 @@ The DID key of the user
 
 > **mnemonic**: `string`
 
-Defined in: [types.ts:28](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L28)
+Defined in: [types.ts:28](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L28)
 
 The mnemonic of the user
 
@@ -58,7 +58,7 @@ The mnemonic of the user
 
 > **nostr\_sk**: `string`
 
-Defined in: [types.ts:29](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L29)
+Defined in: [types.ts:29](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L29)
 
 The secret key of the Nostr account
 
@@ -68,16 +68,14 @@ The secret key of the Nostr account
 
 > **witness\_eth\_network**: `string`
 
-Defined in: [types.ts:32](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L32)
+Defined in: [types.ts:32](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L32)
 
 The Ethereum network of the witness
 
 ***
 
-### witness\_eth\_platform
+### witness\_method
 
-> **witness\_eth\_platform**: `string`
+> **witness\_method**: `string`
 
-Defined in: [types.ts:33](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L33)
-
-The Ethereum platform of the witness
+Defined in: [types.ts:33](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L33)

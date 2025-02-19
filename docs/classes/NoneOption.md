@@ -4,7 +4,7 @@
 
 # Class: NoneOption\<T\>
 
-Defined in: [type\_guards.ts:103](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L103)
+Defined in: [type\_guards.ts:103](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L103)
 
 ## Type Parameters
 
@@ -26,7 +26,7 @@ Defined in: [type\_guards.ts:103](https://github.com/inblockio/aqua-verifier-js-
 
 > `readonly` **tag**: `"none"` = `'none'`
 
-Defined in: [type\_guards.ts:104](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L104)
+Defined in: [type\_guards.ts:104](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L104)
 
 ## Methods
 
@@ -34,7 +34,7 @@ Defined in: [type\_guards.ts:104](https://github.com/inblockio/aqua-verifier-js-
 
 > **isNone**(): `this is NoneOption<T>`
 
-Defined in: [type\_guards.ts:110](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L110)
+Defined in: [type\_guards.ts:110](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L110)
 
 #### Returns
 
@@ -46,7 +46,7 @@ Defined in: [type\_guards.ts:110](https://github.com/inblockio/aqua-verifier-js-
 
 > **isSome**(): `this is SomeOption<T>`
 
-Defined in: [type\_guards.ts:106](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L106)
+Defined in: [type\_guards.ts:106](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L106)
 
 #### Returns
 
@@ -58,7 +58,7 @@ Defined in: [type\_guards.ts:106](https://github.com/inblockio/aqua-verifier-js-
 
 > **map**\<`U`\>(`_fn`): [`Option`](../type-aliases/Option.md)\<`U`\>
 
-Defined in: [type\_guards.ts:115](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L115)
+Defined in: [type\_guards.ts:115](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L115)
 
 #### Type Parameters
 
@@ -80,7 +80,7 @@ Defined in: [type\_guards.ts:115](https://github.com/inblockio/aqua-verifier-js-
 
 > **unwrap**(): `never`
 
-Defined in: [type\_guards.ts:119](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L119)
+Defined in: [type\_guards.ts:119](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L119)
 
 #### Returns
 
@@ -92,7 +92,7 @@ Defined in: [type\_guards.ts:119](https://github.com/inblockio/aqua-verifier-js-
 
 > **unwrapOr**(`defaultValue`): `T`
 
-Defined in: [type\_guards.ts:123](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L123)
+Defined in: [type\_guards.ts:123](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L123)
 
 #### Parameters
 

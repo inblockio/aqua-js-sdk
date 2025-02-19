@@ -4,7 +4,7 @@
 
 # Interface: LogData
 
-Defined in: [types.ts:97](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L97)
+Defined in: [types.ts:97](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L97)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:97](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **log**: `string`
 
-Defined in: [types.ts:99](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L99)
+Defined in: [types.ts:99](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L99)
 
 ***
 
@@ -20,4 +20,4 @@ Defined in: [types.ts:99](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **logType**: [`LogType`](../enumerations/LogType.md)
 
-Defined in: [types.ts:98](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L98)
+Defined in: [types.ts:98](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L98)

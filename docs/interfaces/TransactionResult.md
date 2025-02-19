@@ -4,7 +4,7 @@
 
 # Interface: TransactionResult
 
-Defined in: [types.ts:233](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L233)
+Defined in: [types.ts:233](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L233)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:233](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **error**: `string`
 
-Defined in: [types.ts:234](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L234)
+Defined in: [types.ts:234](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L234)
 
 ***
 
@@ -20,4 +20,4 @@ Defined in: [types.ts:234](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > `optional` **transactionHash**: `string`
 
-Defined in: [types.ts:235](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L235)
+Defined in: [types.ts:235](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L235)

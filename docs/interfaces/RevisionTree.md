@@ -4,7 +4,7 @@
 
 # Interface: RevisionTree
 
-Defined in: [types.ts:104](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L104)
+Defined in: [types.ts:104](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L104)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:104](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **children**: [`RevisionTree`](RevisionTree.md)[]
 
-Defined in: [types.ts:106](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L106)
+Defined in: [types.ts:106](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L106)
 
 ***
 
@@ -20,4 +20,4 @@ Defined in: [types.ts:106](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **hash**: `string`
 
-Defined in: [types.ts:105](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L105)
+Defined in: [types.ts:105](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L105)

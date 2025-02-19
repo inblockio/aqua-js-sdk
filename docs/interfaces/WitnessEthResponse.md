@@ -4,7 +4,7 @@
 
 # Interface: WitnessEthResponse
 
-Defined in: [types.ts:250](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L250)
+Defined in: [types.ts:250](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L250)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:250](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **transactionHash**: `string`
 
-Defined in: [types.ts:251](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L251)
+Defined in: [types.ts:251](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L251)
 
 ***
 
@@ -20,4 +20,4 @@ Defined in: [types.ts:251](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **walletAddress**: `string`
 
-Defined in: [types.ts:252](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L252)
+Defined in: [types.ts:252](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L252)

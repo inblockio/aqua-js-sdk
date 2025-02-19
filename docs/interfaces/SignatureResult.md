@@ -4,7 +4,7 @@
 
 # Interface: SignatureResult
 
-Defined in: [types.ts:170](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L170)
+Defined in: [types.ts:170](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L170)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:170](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **jws**: [`SignatureData`](SignatureData.md)
 
-Defined in: [types.ts:171](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L171)
+Defined in: [types.ts:171](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L171)
 
 ***
 
@@ -20,4 +20,4 @@ Defined in: [types.ts:171](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **key**: `string`
 
-Defined in: [types.ts:172](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L172)
+Defined in: [types.ts:172](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L172)

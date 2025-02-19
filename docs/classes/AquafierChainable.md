@@ -4,7 +4,7 @@
 
 # Class: AquafierChainable
 
-Defined in: [index.ts:168](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L168)
+Defined in: [index.ts:268](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L268)
 
 ## Constructors
 
@@ -12,7 +12,7 @@ Defined in: [index.ts:168](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **new AquafierChainable**(`initialValue`): [`AquafierChainable`](AquafierChainable.md)
 
-Defined in: [index.ts:173](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L173)
+Defined in: [index.ts:273](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L273)
 
 #### Parameters
 
@@ -30,7 +30,7 @@ Defined in: [index.ts:173](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **getLogs**(): [`LogData`](../interfaces/LogData.md)[]
 
-Defined in: [index.ts:269](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L269)
+Defined in: [index.ts:369](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L369)
 
 #### Returns
 
@@ -42,7 +42,7 @@ Defined in: [index.ts:269](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **getValue**(): [`AquaTree`](../interfaces/AquaTree.md)
 
-Defined in: [index.ts:263](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L263)
+Defined in: [index.ts:363](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L363)
 
 #### Returns
 
@@ -54,7 +54,7 @@ Defined in: [index.ts:263](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **getVerificationValue**(): [`Result`](../type-aliases/Result.md)\<[`AquaOperationData`](../interfaces/AquaOperationData.md), [`LogData`](../interfaces/LogData.md)[]\>
 
-Defined in: [index.ts:266](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L266)
+Defined in: [index.ts:366](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L366)
 
 #### Returns
 
@@ -66,7 +66,7 @@ Defined in: [index.ts:266](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **notarize**(`fileObject`, `isForm`, `enableContent`, `enableScalar`): `Promise`\<[`AquafierChainable`](AquafierChainable.md)\>
 
-Defined in: [index.ts:191](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L191)
+Defined in: [index.ts:291](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L291)
 
 #### Parameters
 
@@ -96,7 +96,7 @@ Defined in: [index.ts:191](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **sign**(`signType`, `credentials`, `enableScalar`): `Promise`\<[`AquafierChainable`](AquafierChainable.md)\>
 
-Defined in: [index.ts:205](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L205)
+Defined in: [index.ts:305](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L305)
 
 #### Parameters
 
@@ -122,7 +122,7 @@ Defined in: [index.ts:205](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **unwrap**(`result`): [`AquaTree`](../interfaces/AquaTree.md)
 
-Defined in: [index.ts:179](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L179)
+Defined in: [index.ts:279](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L279)
 
 #### Parameters
 
@@ -140,7 +140,7 @@ Defined in: [index.ts:179](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **verify**(`linkedFileObject`): `Promise`\<[`AquafierChainable`](AquafierChainable.md)\>
 
-Defined in: [index.ts:252](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L252)
+Defined in: [index.ts:352](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L352)
 
 #### Parameters
 
@@ -158,7 +158,7 @@ Defined in: [index.ts:252](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **witness**(`witnessType`, `witnessNetwork`, `witnessPlatform`, `credentials`, `enableScalar`): `Promise`\<[`AquafierChainable`](AquafierChainable.md)\>
 
-Defined in: [index.ts:231](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/index.ts#L231)
+Defined in: [index.ts:331](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L331)
 
 #### Parameters
 

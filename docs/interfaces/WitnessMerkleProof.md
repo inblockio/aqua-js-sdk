@@ -4,7 +4,7 @@
 
 # Interface: WitnessMerkleProof
 
-Defined in: [types.ts:201](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L201)
+Defined in: [types.ts:201](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L201)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:201](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > `optional` **depth**: `string`
 
-Defined in: [types.ts:202](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L202)
+Defined in: [types.ts:202](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L202)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [types.ts:202](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > `optional` **left\_leaf**: `string`
 
-Defined in: [types.ts:203](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L203)
+Defined in: [types.ts:203](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L203)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [types.ts:203](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > `optional` **right\_leaf**: `string`
 
-Defined in: [types.ts:204](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L204)
+Defined in: [types.ts:204](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L204)
 
 ***
 
@@ -36,4 +36,4 @@ Defined in: [types.ts:204](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > `optional` **successor**: `string`
 
-Defined in: [types.ts:205](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L205)
+Defined in: [types.ts:205](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L205)

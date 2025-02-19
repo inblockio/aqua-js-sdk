@@ -4,7 +4,7 @@
 
 # Enumeration: LogType
 
-Defined in: [types.ts:63](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L63)
+Defined in: [types.ts:63](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L63)
 
 ## Enumeration Members
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:63](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **DEBUGDATA**: `"debug_data"`
 
-Defined in: [types.ts:70](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L70)
+Defined in: [types.ts:70](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L70)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [types.ts:70](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **EMPTY**: `"empty"`
 
-Defined in: [types.ts:77](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L77)
+Defined in: [types.ts:77](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L77)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [types.ts:77](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **ERROR**: `"error"`
 
-Defined in: [types.ts:66](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L66)
+Defined in: [types.ts:66](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L66)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [types.ts:66](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **FILE**: `"file"`
 
-Defined in: [types.ts:71](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L71)
+Defined in: [types.ts:71](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L71)
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [types.ts:71](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **FINAL\_ERROR**: `"final_error"`
 
-Defined in: [types.ts:67](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L67)
+Defined in: [types.ts:67](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L67)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [types.ts:67](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **FORM**: `"form"`
 
-Defined in: [types.ts:75](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L75)
+Defined in: [types.ts:75](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L75)
 
 ***
 
@@ -60,7 +60,7 @@ Defined in: [types.ts:75](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **HINT**: `"hint"`
 
-Defined in: [types.ts:69](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L69)
+Defined in: [types.ts:69](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L69)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [types.ts:69](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **INFO**: `"info"`
 
-Defined in: [types.ts:65](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L65)
+Defined in: [types.ts:65](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L65)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [types.ts:65](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **LINK**: `"link"`
 
-Defined in: [types.ts:72](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L72)
+Defined in: [types.ts:72](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L72)
 
 ***
 
@@ -84,7 +84,7 @@ Defined in: [types.ts:72](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **SCALAR**: `"scalar"`
 
-Defined in: [types.ts:76](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L76)
+Defined in: [types.ts:76](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L76)
 
 ***
 
@@ -92,7 +92,7 @@ Defined in: [types.ts:76](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **SIGNATURE**: `"signature"`
 
-Defined in: [types.ts:73](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L73)
+Defined in: [types.ts:73](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L73)
 
 ***
 
@@ -100,7 +100,7 @@ Defined in: [types.ts:73](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **SUCCESS**: `"success"`
 
-Defined in: [types.ts:64](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L64)
+Defined in: [types.ts:64](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L64)
 
 ***
 
@@ -108,7 +108,7 @@ Defined in: [types.ts:64](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **WARNING**: `"warning"`
 
-Defined in: [types.ts:68](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L68)
+Defined in: [types.ts:68](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L68)
 
 ***
 
@@ -116,4 +116,4 @@ Defined in: [types.ts:68](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **WITNESS**: `"witness"`
 
-Defined in: [types.ts:74](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L74)
+Defined in: [types.ts:74](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L74)

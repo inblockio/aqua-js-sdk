@@ -4,7 +4,7 @@
 
 # Interface: AquaTreeWrapper
 
-Defined in: [types.ts:151](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L151)
+Defined in: [types.ts:151](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L151)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:151](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **aquaTree**: [`AquaTree`](AquaTree.md)
 
-Defined in: [types.ts:152](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L152)
+Defined in: [types.ts:152](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L152)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [types.ts:152](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **fileObject**: [`FileObject`](FileObject.md)
 
-Defined in: [types.ts:153](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L153)
+Defined in: [types.ts:153](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L153)
 
 ***
 
@@ -28,4 +28,4 @@ Defined in: [types.ts:153](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **revision**: `string`
 
-Defined in: [types.ts:154](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L154)
+Defined in: [types.ts:154](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L154)

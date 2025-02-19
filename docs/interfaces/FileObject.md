@@ -4,7 +4,7 @@
 
 # Interface: FileObject
 
-Defined in: [types.ts:57](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L57)
+Defined in: [types.ts:57](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L57)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:57](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **fileContent**: `string`
 
-Defined in: [types.ts:59](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L59)
+Defined in: [types.ts:59](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L59)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [types.ts:59](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **fileName**: `string`
 
-Defined in: [types.ts:58](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L58)
+Defined in: [types.ts:58](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L58)
 
 ***
 
@@ -28,4 +28,4 @@ Defined in: [types.ts:58](https://github.com/inblockio/aqua-verifier-js-lib/blob
 
 > **path**: `string`
 
-Defined in: [types.ts:60](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L60)
+Defined in: [types.ts:60](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L60)

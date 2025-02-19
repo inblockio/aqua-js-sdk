@@ -4,7 +4,7 @@
 
 # Interface: WitnessConfig
 
-Defined in: [types.ts:227](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L227)
+Defined in: [types.ts:227](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L227)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:227](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **smartContractAddress**: `string`
 
-Defined in: [types.ts:230](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L230)
+Defined in: [types.ts:230](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L230)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [types.ts:230](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **witnessEventVerificationHash**: `string`
 
-Defined in: [types.ts:228](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L228)
+Defined in: [types.ts:228](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L228)
 
 ***
 
@@ -28,4 +28,4 @@ Defined in: [types.ts:228](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **witnessNetwork**: [`WitnessNetwork`](../type-aliases/WitnessNetwork.md)
 
-Defined in: [types.ts:229](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L229)
+Defined in: [types.ts:229](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L229)

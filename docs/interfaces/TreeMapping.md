@@ -4,7 +4,7 @@
 
 # Interface: TreeMapping
 
-Defined in: [types.ts:143](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L143)
+Defined in: [types.ts:143](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L143)
 
 ## Properties
 
@@ -12,7 +12,7 @@ Defined in: [types.ts:143](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **latestHash**: `string`
 
-Defined in: [types.ts:147](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L147)
+Defined in: [types.ts:147](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L147)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [types.ts:147](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 > **paths**: `object`
 
-Defined in: [types.ts:144](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/types.ts#L144)
+Defined in: [types.ts:144](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L144)
 
 #### Index Signature
 

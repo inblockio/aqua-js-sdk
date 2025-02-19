@@ -4,7 +4,7 @@
 
 # Class: SomeOption\<T\>
 
-Defined in: [type\_guards.ts:77](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L77)
+Defined in: [type\_guards.ts:77](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L77)
 
 ## Type Parameters
 
@@ -16,7 +16,7 @@ Defined in: [type\_guards.ts:77](https://github.com/inblockio/aqua-verifier-js-l
 
 > **new SomeOption**\<`T`\>(`value`): [`SomeOption`](SomeOption.md)\<`T`\>
 
-Defined in: [type\_guards.ts:79](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L79)
+Defined in: [type\_guards.ts:79](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L79)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [type\_guards.ts:79](https://github.com/inblockio/aqua-verifier-js-l
 
 > `readonly` **tag**: `"some"` = `'some'`
 
-Defined in: [type\_guards.ts:78](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L78)
+Defined in: [type\_guards.ts:78](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L78)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [type\_guards.ts:78](https://github.com/inblockio/aqua-verifier-js-l
 
 > `readonly` **value**: `T`
 
-Defined in: [type\_guards.ts:79](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L79)
+Defined in: [type\_guards.ts:79](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L79)
 
 ## Methods
 
@@ -50,7 +50,7 @@ Defined in: [type\_guards.ts:79](https://github.com/inblockio/aqua-verifier-js-l
 
 > **isNone**(): `this is NoneOption<T>`
 
-Defined in: [type\_guards.ts:85](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L85)
+Defined in: [type\_guards.ts:85](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L85)
 
 #### Returns
 
@@ -62,7 +62,7 @@ Defined in: [type\_guards.ts:85](https://github.com/inblockio/aqua-verifier-js-l
 
 > **isSome**(): `this is SomeOption<T>`
 
-Defined in: [type\_guards.ts:81](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L81)
+Defined in: [type\_guards.ts:81](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L81)
 
 #### Returns
 
@@ -74,7 +74,7 @@ Defined in: [type\_guards.ts:81](https://github.com/inblockio/aqua-verifier-js-l
 
 > **map**\<`U`\>(`fn`): [`Option`](../type-aliases/Option.md)\<`U`\>
 
-Defined in: [type\_guards.ts:90](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L90)
+Defined in: [type\_guards.ts:90](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L90)
 
 #### Type Parameters
 
@@ -96,7 +96,7 @@ Defined in: [type\_guards.ts:90](https://github.com/inblockio/aqua-verifier-js-l
 
 > **unwrap**(): `T`
 
-Defined in: [type\_guards.ts:94](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L94)
+Defined in: [type\_guards.ts:94](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L94)
 
 #### Returns
 
@@ -108,7 +108,7 @@ Defined in: [type\_guards.ts:94](https://github.com/inblockio/aqua-verifier-js-l
 
 > **unwrapOr**(`_default`): `T`
 
-Defined in: [type\_guards.ts:98](https://github.com/inblockio/aqua-verifier-js-lib/blob/09413c69301a51b584d51846ffabc4d8f820b4fa/src/type_guards.ts#L98)
+Defined in: [type\_guards.ts:98](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/type_guards.ts#L98)
 
 #### Parameters
 

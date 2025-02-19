@@ -8,6 +8,7 @@ import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witnes
 import { Result } from "./type_guards";
 import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
 import { default as packageJson } from "./../package.json";
+import { logAquaTree } from "./aquavhtree";
 
 export * from "./utils";
 export * from "./types";
@@ -260,6 +261,10 @@ export default class Aquafier {
         console.log(packageJson.version);
         return packageJson.version ?? version
 
+    }
+
+    renderTree = (aquaTree: AquaTree) => {
+        logAquaTree(aquaTree.tree)
     }
 
 }
