@@ -7,12 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "patch-package"
   },
   "dependencies": {
-    "aquafier-js-sdk": "github:inblockio/aqua-verifier-js-lib#master",
     "@chakra-ui/react": "^3.8.0",
     "@emotion/react": "^11.14.0",
+    "aquafier-js-sdk": "github:inblockio/aqua-verifier-js-lib#master",
+    "patch-package": "^8.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
