@@ -140,9 +140,14 @@ describe("Aquafier", () => {
     test("should witness aquatree via cli", async () => {
         const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
 
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: undefined,
+            revision: ""
+        }
         const creds: CredentialsData = credentialsData;
 
-        const result = await aquafier.witnessAquaTree(mockAquaTree, "eth", "sepolia", "cli", creds,);
+        const result = await aquafier.witnessAquaTree(aquaTreeWrapper, "eth", "sepolia", "cli", creds,);
 
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
@@ -171,7 +176,14 @@ describe("Aquafier", () => {
 
         const creds: CredentialsData = credentialsData;
 
-        const result = await aquafier.witnessAquaTree(mockAquaTree, "nostr", "sepolia", "cli", creds,);
+
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: undefined,
+            revision: ""
+        }
+
+        const result = await aquafier.witnessAquaTree(aquaTreeWrapper, "nostr", "sepolia", "cli", creds,);
 
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {

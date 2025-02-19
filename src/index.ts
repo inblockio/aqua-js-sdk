@@ -36,7 +36,7 @@ export default class Aquafier {
         return verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject)
     }
 
-    witnessAquaTree = async (aquaTree: AquaTree, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    witnessAquaTree = async (aquaTree: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
     }
 
@@ -184,7 +184,11 @@ export class AquafierChainable {
         witness_eth_network: "",
         witness_method: ""
     }, enableScalar: boolean = false): Promise<this> {
-        let data = await witnessAquaTreeUtil(this.value, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
+        let data = await witnessAquaTreeUtil({
+            aquaTree: this.value,
+            fileObject: null,
+            revision: ""
+        }, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
         // this.value = this.unwrap(data);
 
         if (data.isOk()) {

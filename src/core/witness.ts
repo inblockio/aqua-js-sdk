@@ -9,12 +9,17 @@ import { Err, isErr, Ok, Result } from "../type_guards";
 
 
 
-export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
+    let lastRevisionHash = "";
 
-    const verificationHashes = Object.keys(aquaTree.revisions);
-    let lastRevisionHash = verificationHashes[verificationHashes.length - 1];
+    if (aquaTreeWrapper.revision == undefined || aquaTreeWrapper.revision == null || aquaTreeWrapper.revision.length == 0) {
+        const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions);
+        lastRevisionHash = verificationHashes[verificationHashes.length - 1];
+    } else {
+        lastRevisionHash = aquaTreeWrapper.revision;
+    }
 
     const now = new Date().toISOString()
     const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
@@ -25,9 +30,9 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
         local_timestamp: timestamp,
         revision_type: revisionType,
     }
-    verificationData["version"] =`aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
+    verificationData["version"] = `aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
 
-    
+
     const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials!!, witnessNetwork)
 
     if (isErr(revisionResultData)) {
@@ -40,21 +45,21 @@ export async function witnessAquaTreeUtil(aquaTree: AquaTree, witnessType: Witne
     verificationData = { ...verificationData, ...witness }
 
 
-     // Merklelize the dictionary
-     const leaves = dict2Leaves(verificationData)
+    // Merklelize the dictionary
+    const leaves = dict2Leaves(verificationData)
 
-     let verification_hash = "";
-     if (enableScalar) {
-         verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
-     } else {
-         verification_hash = getMerkleRoot(leaves); //tree.getHexRoot() 
-         verificationData.leaves = leaves
-     }
+    let verification_hash = "";
+    if (enableScalar) {
+        verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
+    } else {
+        verification_hash = getMerkleRoot(leaves); //tree.getHexRoot() 
+        verificationData.leaves = leaves
+    }
 
-    const revisions = aquaTree.revisions
+    const revisions = aquaTreeWrapper.aquaTree.revisions
     revisions[verification_hash] = verificationData
 
-    let aquaTreeWithTree = createAquaTree(aquaTree)
+    let aquaTreeWithTree = createAquaTree(aquaTreeWrapper.aquaTree)
 
 
     logs.push({
@@ -185,7 +190,7 @@ const prepareWitness = async (
 
     switch (witnessType) {
         case "nostr": {
-            
+
             let witnessNostr = new WitnessNostr();
             [transactionHash, publisher, witnessTimestamp] = await witnessNostr.witness(merkle_root, credentials);
 
