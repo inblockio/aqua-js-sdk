@@ -103,3 +103,24 @@ export function logAquaTree(node: RevisionTree, prefix: string = "", isLast: boo
         logAquaTree(child, newPrefix, isChildLast);
     });
 }
+
+// export function logAquaTree(node: RevisionTree, prefix: string = "", isLast: boolean = true): void {
+//     const PURPLE = "\x1b[35m"; // Purple for parent nodes
+//     const YELLOW = "\x1b[33m"; // Yellow for child nodes
+//     const RESET = "\x1b[0m"; // Reset color
+
+//     // Determine color based on depth
+//     const color = prefix === "" ? PURPLE : YELLOW;
+
+//     // Log the current node's hash with color
+//     console.log(color + prefix + (isLast ? "└── " : "├── ") + node.hash + RESET);
+
+//     // Update the prefix for children
+//     const newPrefix = prefix + (isLast ? "    " : "│   ");
+
+//     // Recursively log each child
+//     node.children.forEach((child, index) => {
+//         const isChildLast = index === node.children.length - 1;
+//         logAquaTree(child, newPrefix, isChildLast);
+//     });
+// }

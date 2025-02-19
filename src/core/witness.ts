@@ -13,7 +13,6 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
     let logs: Array<LogData> = [];
 
     let lastRevisionHash = "";
-
     if (aquaTreeWrapper.revision == undefined || aquaTreeWrapper.revision == null || aquaTreeWrapper.revision.length == 0) {
         const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions);
         lastRevisionHash = verificationHashes[verificationHashes.length - 1];
