@@ -1,0 +1,8 @@
+{
+  "entryPoints": ["./src/index.ts"], // Entry point of your library
+  "out": "./docs",                   // Output directory for Markdown files
+  "plugin": ["typedoc-plugin-markdown"], // Enable Markdown plugin
+  // "hideProjectName": true,          // Optional: Hide project name in output
+  "hideBreadcrumbs": true,          // Optional: Hide breadcrumbs in output
+  // "hideInPageTOC": true             // Optional: Hide in-page table of contents
+}
