@@ -1,4 +1,29 @@
 
+/**
+ * @module types
+ * @description This module contains all the types used in the Aqua SDK
+ * @preferred @description This module contains all the types used in the Aqua SDK
+ * @preferred @exports {CredentialsData, AquaOperationData, RevisionType, WitnessType, WitnessPlatformType, WitnessNetwork, SignType, WitnessEnvironment, FileObject, LogType, LogTypeEmojis, LogData, RevisionTree, Revision, Revisions, FileIndex, FormData, TreeMapping, AquaTreeWrapper, AquaTree, SignaturePayload, SignatureResult, SignatureData, SignatureItem, IWitnessConfig, AnObject, WitnessMerkleProof, WitnessResult, GasEstimateResult, WitnessConfig, TransactionResult, WitnessTransactionData, WitnessTSAResponse, WitnessEthResponse, WitnessNostrResponse, WitnessNostrVerifyResult}
+ */
+
+/**
+ * @typedef {Object} CredentialsData
+ * @property {string} mnemonic - The mnemonic of the user
+ * @property {string} nostr_sk - The secret key of the Nostr account
+ * @property {string} did:key - The DID key of the user
+ * @property {string} alchemy_key - The Alchemy key of the user
+ * @property {string} witness_eth_network - The Ethereum network of the witness
+ * @property {string} witness_eth_platform - The Ethereum platform of the witness
+ * @description The data required for the credentials of the user
+ * @example
+ * { mnemonic: "abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, about",
+ * nostr_sk: "0x
+ * did:key: "did:key:z6Mkq
+ * alchemy_key: "0x
+ * witness_eth_network: "sepolia"
+ * witness_eth_platform: "cli"
+ * }
+ */
 export interface CredentialsData {
   mnemonic: string;
   nostr_sk: string;
@@ -8,6 +33,13 @@ export interface CredentialsData {
   witness_method: string;
 }
 
+/**
+ * @typedef {Object} AquaOperationData
+ * @property {AquaTree[]} aquaTrees - The list of Aqua Trees
+ * @property {AquaTree} aquaTree - The Aqua Tree
+ * @property {Array<LogData>} logData - The log data
+ * @description The data required for the Aqua operation
+ */
 export interface AquaOperationData {
   aquaTrees: AquaTree[]
   aquaTree: AquaTree
@@ -27,21 +59,6 @@ export interface FileObject {
   fileContent: string,
   path: string
 }
-
-// export enum LogType {
-//   SUCCESS = "success",
-//   INFO = "info",
-//   ERROR = "error",
-//   WARNING = "warning",
-//   HINT = "hint",
-//   DEBUGDATA = "debug_data",
-//   file = "file",
-//   link = "link",
-//   signature = "signature",
-//   witness = "witness",
-//   form = "form",
-//   scalar = "scalar"
-// }
 
 export enum LogType {
   SUCCESS = "success",
