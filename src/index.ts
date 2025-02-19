@@ -149,7 +149,7 @@ export class AquafierChainable {
         "did:key": "",
         alchemy_key: "",
         witness_eth_network: "",
-        witness_eth_platform: ""
+        witness_method: ""
     }, enableScalar: boolean = false): Promise<this> {
         let data = await signAquaTreeUtil({
             aquaTree: this.value,
@@ -175,7 +175,7 @@ export class AquafierChainable {
         "did:key": "",
         alchemy_key: "",
         witness_eth_network: "",
-        witness_eth_platform: ""
+        witness_method: ""
     }, enableScalar: boolean = false): Promise<this> {
         let data = await witnessAquaTreeUtil(this.value, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
         // this.value = this.unwrap(data);

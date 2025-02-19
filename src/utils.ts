@@ -113,7 +113,7 @@ export function createCredentials() {
     mnemonic: mnemonic.phrase, nostr_sk: "", "did:key": "",
     alchemy_key: "ZaQtnup49WhU7fxrujVpkFdRz4JaFRtZ", // project defualt key
     witness_eth_network: "sepolia",
-    witness_eth_platform: "metamask"
+    witness_method: "metamask"
   };
   try {
 
