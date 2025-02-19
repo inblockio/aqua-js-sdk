@@ -202,7 +202,7 @@ describe("Aquafier", () => {
         }
 
         const result = await aquafier.linkAquaTree(aquaTreeWrapper, linkaquaTreeWrapper);
-   
+
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             const data = result.data
@@ -210,48 +210,119 @@ describe("Aquafier", () => {
         }
     });
 
-    // test("should read file content correctly", async () => {
-    //     // Mock `fs.promises.readFile` to return fake content
-    //     // (fs.readFile as jest.Mock).mockResolvedValue("Mock file content");
 
-    //     const filePath = "/fake/path/test.txt";
-    //     const content = await fs.readFile(filePath, "utf-8");
+    test("should create a form revision", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+        const fileObject: FileObject = {
+            fileName: "test.json",
+            fileContent: '{"name":"kenn","age":200}',
+            path: "/fake/path/test.json"
+        };
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
 
-    //     expect(fs.readFile).toHaveBeenCalledWith(filePath, "utf-8");
-    //     expect(content).toBe("Mock file content");
-    // });
+        const result = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+        expect(result.isOk()).toBe(true);
+    });
 
-    // test("should handle missing files gracefully", async () => {
-    //     // Mock `fs.readFile` to throw an error when file doesn't exist
-    //     // (fs.readFile as jest.Mock).mockRejectedValue(new Error("File not found"));
+    test("should hide form in form revision item", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+        const fileObject: FileObject = {
+            fileName: "test.json",
+            fileContent: '{"name":"kenn","age":200}',
+            path: "/fake/path/test.json"
+        };
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
 
-    //     const filePath = "/fake/path/nonexistent.txt";
+        const resultFormRevision = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+        expect(resultFormRevision.isOk()).toBe(true);
 
-    //     try {
-    //         await fs.readFile(filePath, "utf-8");
-    //     } catch (error: any) {
-    //         expect(error.message).toBe("File not found");
-    //     }
-    // });
+        const resultHide = await aquafier.hideFormElements(aquaTreeWrapper, "name");
+        expect(resultHide.isOk()).toBe(true);
 
-    // test("should write file content correctly", async () => {
-    //     const filePath = "/fake/path/test.txt";
-    //     const fileContent = "New content";
+        if (resultHide.isOk()) {
+            const data = resultHide.data
+            // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+            expect(JSON.stringify(data.aquaTree)).toContain('.deleted');
+        } else {
+            expect(true).toBe(false);
+        }
 
-    //     await fs.writeFile(filePath, fileContent, "utf-8");
 
-    //     expect(fs.writeFile).toHaveBeenCalledWith(filePath, fileContent, "utf-8");
-    // });
+    });
 
-    // test("should generate correct revision hashes", async () => {
-    //     const fileObject: FileObject = {
-    //         fileName: "test.txt",
-    //         fileContent: "Sample content",
-    //         path: "/fake/path/test.txt"
-    //     };
+    test("should hide form in form revision item then unhide it", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+        const fileObject: FileObject = {
+            fileName: "test.json",
+            fileContent: '{"name":"kenn","age":200}',
+            path: "/fake/path/test.json"
+        };
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
 
-    //     const revision = await aquafier.createGenesisRevision(fileObject);
-    //     expect(revision.isOk()).toBe(true);
-    //     expect(revision.unwrap().hash).toBeDefined();
-    // });
+        const resultFormRevision = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+        expect(resultFormRevision.isOk()).toBe(true);
+        if (resultFormRevision.isOk()) {
+            const aquaTreeWrapperToHideWrapper: AquaTreeWrapper = {
+                aquaTree: resultFormRevision.data.aquaTree,
+                fileObject: fileObject,
+                revision: ""
+            }
+            const resultHide = await aquafier.hideFormElements(aquaTreeWrapperToHideWrapper, "name");
+            expect(resultHide.isOk()).toBe(true);
+
+            if (resultHide.isOk()) {
+                const data = resultHide.data
+                // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+                expect(JSON.stringify(data.aquaTree)).toContain('.deleted');
+
+
+                const aquaTreeWrapperHidenElementsWrapper: AquaTreeWrapper = {
+                    aquaTree: resultHide.data.aquaTree,
+                    fileObject: fileObject,
+                    revision: ""
+                }
+
+                const resultUnHide = await aquafier.unHideFormElements(aquaTreeWrapperHidenElementsWrapper, "name", "arthur");
+                expect(resultUnHide.isOk()).toBe(true);
+
+                if (resultUnHide.isOk()) {
+                    const data = resultUnHide.data
+                    // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+                    expect(JSON.stringify(data.aquaTree)).not.toContain('.deleted');
+                } else {
+                    console.log("=========== Unhide failed ======================")
+                    console.log(resultUnHide.data.forEach((e) => console.log(e)))
+                    expect(true).toBe(false
+                    );
+                }
+
+
+            } else {
+                console.log("=========== Hide failed ======================")
+                console.log(resultHide.data.forEach((e) => console.log(e)))
+                expect(true).toBe(false);
+            }
+
+        } else {
+            console.log("=========== creating form revision  failed ======================")
+            console.log(resultFormRevision.data.forEach((e) => console.log(e)))
+            expect(true).toBe(false);
+        }
+
+
+    });
+
+
 });

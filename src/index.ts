@@ -7,7 +7,7 @@ import { verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
 import { Result } from "./type_guards";
 import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
-
+import { default as packageJson } from "./../package.json";
 
 export * from "./utils";
 export * from "./types";
@@ -79,12 +79,12 @@ export default class Aquafier {
     }
 
     //get files to be read to file objects 
-    fetchFilesToBeRead = (aquaTree: AquaTree) : string[] => {
+    fetchFilesToBeRead = (aquaTree: AquaTree): string[] => {
         return fetchFilesToBeReadUtil(aquaTree)
     }
 
-    checkIfFileAlreadyNotarized=(aquaTree: AquaTree, fileObject : FileObject): boolean =>{
-     return   checkIfFileAlreadyNotarizedUtil(aquaTree,fileObject)
+    checkIfFileAlreadyNotarized = (aquaTree: AquaTree, fileObject: FileObject): boolean => {
+        return checkIfFileAlreadyNotarizedUtil(aquaTree, fileObject)
     }
 
 
@@ -101,6 +101,13 @@ export default class Aquafier {
     // get file
     getFileByHash = async (aquaTree: AquaTree, hash: string): Promise<Result<string, LogData[]>> => {
         return getFileByHashUtil(aquaTree, hash)
+    }
+
+    getVersionFromPackageJson = (): string => {
+        let version = "1.3.2.0"
+        console.log(packageJson.version);
+        return packageJson.version ?? version
+
     }
 
 }
@@ -123,7 +130,7 @@ export class AquafierChainable {
             this.logs.push(...result.data)
             throw Error("an error occured")
 
-        }else{
+        } else {
             this.logs.push(...result.data.logData)
         }
         return result.data.aquaTree
@@ -132,10 +139,10 @@ export class AquafierChainable {
     async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<this> {
         let data = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
 
-        if(data.isOk()){
+        if (data.isOk()) {
             this.value = this.unwrap(data);
             this.logs.push(...data.data.logData)
-        }else{
+        } else {
             this.logs.push(...data.data)
         }
 
@@ -156,16 +163,16 @@ export class AquafierChainable {
             fileObject: null,
             revision: ""
         }, signType, credentials, enableScalar)
-        
+
         // this.value = this.unwrap(data);
 
-        if(data.isOk()){
+        if (data.isOk()) {
             this.value = this.unwrap(data);
             this.logs.push(...data.data.logData)
-        }else{
+        } else {
             this.logs.push(...data.data)
         }
-        
+
         return this;
     }
 
@@ -180,27 +187,27 @@ export class AquafierChainable {
         let data = await witnessAquaTreeUtil(this.value, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
         // this.value = this.unwrap(data);
 
-        if(data.isOk()){
+        if (data.isOk()) {
             this.value = this.unwrap(data);
             this.logs.push(...data.data.logData)
-        }else{
+        } else {
             this.logs.push(...data.data)
         }
-        
+
         return this;
     }
 
     async verify(linkedFileObject: Array<FileObject> = []): Promise<this> {
         let data = await verifyAquaTreeUtil(this.value, linkedFileObject)
-        if(data.isOk()){
+        if (data.isOk()) {
             this.logs.push(...data.data.logData)
-        }else{
+        } else {
             this.logs.push(...data.data)
         }
         this.verificationResult = data;
         return this;
     }
-    
+
     getValue(): AquaTree {
         return this.value;
     }
