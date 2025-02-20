@@ -24,7 +24,7 @@ function App() {
 
   return (
     <>
-      tryAquafier
+      check browser console for output.
     </>
   )
 }
