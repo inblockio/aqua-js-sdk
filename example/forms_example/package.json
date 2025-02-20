@@ -12,6 +12,7 @@
   "dependencies": {
     "@chakra-ui/react": "^3.8.0",
     "@emotion/react": "^11.14.0",
+    "@vitejs/plugin-react": "^4.3.4",
     "aquafier-js-sdk": "github:inblockio/aqua-verifier-js-lib#try_js_sha3",
     "patch-package": "^8.0.0",
     "react": "^19.0.0",

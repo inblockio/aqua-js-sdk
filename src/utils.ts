@@ -62,12 +62,19 @@ export function getFileHashSum(fileContent: string): string {
   return getHashSum(fileContent)
 }
 
-export function getHashSum(data: string | Buffer): string {
-  // return  crypto.createHash('sha256').update(data).digest('hex');
-
-  const input = Buffer.isBuffer(data) ? data.toString() : data;
+export function getHashSum(data: string | Uint8Array): string {
+  // If data is Uint8Array, convert it to string
+  const input = data instanceof Uint8Array ? 
+      new TextDecoder().decode(data) : 
+      data;
   return sha3.sha3_256(input);
 }
+
+// export function getHashSum(data: string | Buffer): string {
+  // return  crypto.createHash('sha256').update(data).digest('hex');
+//   const input = Buffer.isBuffer(data) ? data.toString() : data;
+//   return sha3.sha3_256(input);
+// }
 
 export function createNewAquaTree(): AquaTree {
   return {
