@@ -59,7 +59,13 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
     revisions[verification_hash] = verificationData
 
     let aquaTreeWithTree = createAquaTree(aquaTreeWrapper.aquaTree)
-
+    if (!aquaTreeWithTree) {
+        logs.push({
+            log: `Failed to create AquaTree`,
+            logType: LogType.ERROR
+        });
+        return Err(logs);
+    }
 
     logs.push({
         log: `AquaTree witnessed succesfully`,
@@ -68,7 +74,7 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
 
     let result: AquaOperationData = {
         aquaTree: aquaTreeWithTree,
-        aquaTrees: null,
+        aquaTrees: [],
         logData: logs
     }
     return Ok(result)
@@ -76,7 +82,7 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
 
 export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
-    let lastRevisionOrSpecifiedHashes = [];
+    let lastRevisionOrSpecifiedHashes: string[] = [];
 
     for (let item of aquaTrees) {
         if (item.revision != null && item.revision != undefined && item.revision.length > 0) {
@@ -135,7 +141,9 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
 
         let aquaTreeUpdated = createAquaTree(item.aquaTree)
 
-        aquaTreesResult.push(aquaTreeUpdated);
+        if (aquaTreeUpdated) {
+            aquaTreesResult.push(aquaTreeUpdated);
+        }
     }
 
     if (hasError) {
@@ -300,15 +308,15 @@ const prepareWitness = async (
                     })
                 }
 
-                if (transactionResult == null || transactionResult.error != null) {
+                if (transactionResult == null || transactionResult.error != null || !transactionResult.transactionHash) {
                     logs.push({
                         logType: LogType.ERROR,
-                        log: "An error witnessing using etherium (empty object) "
+                        log: "An error witnessing using etherium (empty object or missing transaction hash)"
                     })
                     return Err(logs);
                 }
 
-                transactionHash = transactionResult!!.transactionHash;
+                transactionHash = transactionResult.transactionHash;
                 publisher = walletAddress;
             } else {
                 /**

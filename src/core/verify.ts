@@ -21,7 +21,7 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
     // });
     let data: AquaOperationData = {
         aquaTree: aquaTree,
-        aquaTrees: null,
+        aquaTrees: [],
         logData: logs
     }
 
@@ -81,7 +81,7 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
 
     let data: AquaOperationData = {
         aquaTree: aquaTree,
-        aquaTrees: null,
+        aquaTrees: [],
         logData: logs
     }
 
@@ -273,8 +273,8 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] {
     let logs: Array<LogData> = [];
     let contains_deleted_fields = false;
-    let fieldsWithVerification = [];
-    let fieldsWithPartialVerification = [];
+    let fieldsWithVerification: any = [];
+    let fieldsWithPartialVerification: any = [];
     let ok = true;
 
     Object.keys(input).sort().forEach((field, i: number) => {
@@ -300,7 +300,7 @@ function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] 
             log: `Warning: The following fields cannot be verified:`,
             logType: LogType.WARNING
         });
-        fieldsWithPartialVerification.forEach((field, i: number) => {
+        fieldsWithPartialVerification.forEach((field: any, i: number) => {
             logs.push({
                 log: `${i + 1}. ${field.replace('.deleted', '')}\n`,
                 logType: LogType.WARNING
@@ -312,7 +312,7 @@ function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] 
         log: `The following fields were verified:`,
         logType: LogType.SUCCESS
     });
-    fieldsWithVerification.forEach(field => {
+    fieldsWithVerification.forEach((field: any) => {
         logs.push({
             log: `${field}}\n`,
             logType: LogType.SUCCESS
@@ -333,7 +333,7 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
     let vhOk: boolean = true
 
     // Ensure mandatory claims are present
-    const mandatory = {
+    const mandatory: any = {
         file: ["file_hash", "file_nonce"],
         link: ["link_verification_hashes"],
         signature: ["signature"],

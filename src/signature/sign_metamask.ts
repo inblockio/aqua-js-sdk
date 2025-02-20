@@ -169,7 +169,7 @@ export class MetaMaskSigner {
         let attempts = 0;
 
         while (attempts < this.maxAttempts) {
-            if (this.lastResult.signature) {
+            if (this.lastResult && this.lastResult.signature) {
                 const { signature, wallet_address } = this.lastResult;
                 const publicKey = await this.recoverPublicKey(message, signature);
                 return [signature, wallet_address, publicKey];

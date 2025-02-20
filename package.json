@@ -10,7 +10,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts --dts --format esm,cjs --out-dir dist",
+    "build": "tsup src/index.ts --dts --format esm,cjs --out-dir dist --tsconfig tsconfig.json",
     "prepare": "npm run build",
     "dev": "tsc",
     "test": "NODE_OPTIONS='--experimental-vm-modules' npx jest",

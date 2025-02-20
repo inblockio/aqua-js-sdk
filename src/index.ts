@@ -264,7 +264,9 @@ export default class Aquafier {
     }
 
     renderTree = (aquaTree: AquaTree) => {
-        logAquaTree(aquaTree.tree)
+        if (aquaTree.tree) {
+            logAquaTree(aquaTree?.tree)
+        }
     }
 
 }
@@ -290,7 +292,7 @@ export class AquafierChainable {
         } else {
             this.logs.push(...result.data.logData)
         }
-        return result.data.aquaTree
+        return result.data.aquaTree!
     }
 
     async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<this> {
@@ -317,7 +319,11 @@ export class AquafierChainable {
     }, enableScalar: boolean = false): Promise<this> {
         let data = await signAquaTreeUtil({
             aquaTree: this.value,
-            fileObject: null,
+            fileObject: {
+                fileName: "test.txt",
+                fileContent: "",
+                path: "/fake/path/test.txt"
+            },
             revision: ""
         }, signType, credentials, enableScalar)
 
@@ -343,7 +349,7 @@ export class AquafierChainable {
     }, enableScalar: boolean = false): Promise<this> {
         let data = await witnessAquaTreeUtil({
             aquaTree: this.value,
-            fileObject: null,
+            fileObject: undefined,
             revision: ""
         }, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
         // this.value = this.unwrap(data);

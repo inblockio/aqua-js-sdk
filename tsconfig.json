@@ -31,12 +31,13 @@
       "node",
       "jest"
     ]
-  }, 
+  },
   "include": [
-    "src"
+    "src",
+    "node_modules/nostr-tools"
   ],
   "exclude": [
     "node_modules",
-    "dist",
+    "dist"
   ]
 }

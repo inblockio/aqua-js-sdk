@@ -14,7 +14,7 @@ export class WitnessTSA {
 
   extractGenTimeFromResp = (resp: pkijs.TimeStampResp): number => {
     const signedData = new pkijs.SignedData({
-      schema: resp.timeStampToken.content,
+      schema: resp?.timeStampToken?.content,
     })
     const tstInfoAsn1 = asn1js.fromBER(
       signedData.encapContentInfo.eContent!!.valueBlock.valueHexView,

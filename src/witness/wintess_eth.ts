@@ -43,10 +43,10 @@ export class WitnessEth {
 
   static async commonPrepareListener(htmlContent: string) {
     let output = "{}"
-    const requestListener = async (req, res) => {
+    const requestListener = async (req: any, res: any) => {
       if (req.method == "POST") {
         let data = ""
-        req.on("data", (chunk) => {
+        req.on("data", (chunk: any) => {
           data += chunk
         })
         await new Promise((resolve) => {

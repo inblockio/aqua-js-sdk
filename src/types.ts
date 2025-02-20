@@ -42,7 +42,7 @@ export interface CredentialsData {
  */
 export interface AquaOperationData {
   aquaTrees: AquaTree[]
-  aquaTree: AquaTree
+  aquaTree: AquaTree | null
   logData: Array<LogData>
 }
 
@@ -150,7 +150,7 @@ export interface TreeMapping {
 
 export interface AquaTreeWrapper {
   aquaTree: AquaTree;
-  fileObject: FileObject;
+  fileObject?: FileObject;
   revision: string;
 }
 

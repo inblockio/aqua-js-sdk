@@ -14,7 +14,7 @@ export function findFormKey(revision: Revision, key: string) {
   return keys.find(k => k === key || k === `forms_${key}` || k.startsWith(`forms_${key}`));
 }
 
-export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string, linkVerificationHash, linkFileName: string): Result<AquaTree, LogData[]> {
+export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string, linkVerificationHash: string, linkFileName: string): Result<AquaTree, LogData[]> {
   let logs: LogData[] = [];
   const validRevisionTypes = ["file", "form", "link"];
   if (!validRevisionTypes.includes(revisionType)) {

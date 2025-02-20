@@ -42,7 +42,7 @@ describe("Aquafier", () => {
         if (result.isOk()) {
             const data = result.data
 
-            const verificationResult = await aquafier.verifyAquaTree(data.aquaTree, [fileObject])
+            const verificationResult = await aquafier.verifyAquaTree(data.aquaTree!, [fileObject])
             expect(verificationResult.isOk()).toBe(true)
         }
     });
@@ -57,11 +57,11 @@ describe("Aquafier", () => {
         const result = await aquafier.createGenesisRevision(fileObject);
         expect(result.isOk()).toBe(true);
 
-        if (result.isOk()) {
+        if (result.isOk() && result.data.aquaTree) {
             const data = result.data
-            const revisionKeys = Object.keys(data.aquaTree.revisions)
-            const revision = data.aquaTree.revisions[revisionKeys[0]]
-            const verificationResult = await aquafier.verifyAquaTreeRevision(data.aquaTree, revision, revisionKeys[0], [fileObject])
+            const revisionKeys = Object.keys(data.aquaTree!.revisions || {})
+            const revision = data.aquaTree!.revisions[revisionKeys[0]]
+            const verificationResult = await aquafier.verifyAquaTreeRevision(data.aquaTree!, revision, revisionKeys[0], [fileObject])
             expect(verificationResult.isOk()).toBe(true)
         }
     });
@@ -80,7 +80,7 @@ describe("Aquafier", () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             const data = result.data
-            expect(Object.keys(data.aquaTree.revisions).length).toBe(1);
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(1);
         }
     });
 
@@ -106,7 +106,7 @@ describe("Aquafier", () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             const data = result.data
-            expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
         }
     });
 
@@ -132,7 +132,7 @@ describe("Aquafier", () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             const data = result.data
-            expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
         }
     });
 
@@ -141,7 +141,11 @@ describe("Aquafier", () => {
 
         const aquaTreeWrapper: AquaTreeWrapper = {
             aquaTree: mockAquaTree,
-            fileObject: undefined,
+            fileObject: {
+                fileName: "test.txt",
+                fileContent: "",
+                path: "/fake/path/test.txt"
+            },
             revision: ""
         }
         const creds: CredentialsData = credentialsData;
@@ -151,8 +155,8 @@ describe("Aquafier", () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             const data = result.data
-            expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
-        }else{
+            expect(Object.keys(data.aquaTree?.revisions || {}).length).toBe(2);
+        } else {
             console.log(result.data)
         }
     });
@@ -180,7 +184,11 @@ describe("Aquafier", () => {
 
         const aquaTreeWrapper: AquaTreeWrapper = {
             aquaTree: mockAquaTree,
-            fileObject: undefined,
+            fileObject: {
+                fileName: "test.txt",
+                fileContent: "",
+                path: "/fake/path/test.txt"
+            },
             revision: ""
         }
 
@@ -189,7 +197,7 @@ describe("Aquafier", () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             const data = result.data
-            expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
         }
     });
 
@@ -219,7 +227,7 @@ describe("Aquafier", () => {
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
             const data = result.data
-            expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
         }
     });
 
@@ -288,7 +296,7 @@ describe("Aquafier", () => {
         expect(resultFormRevision.isOk()).toBe(true);
         if (resultFormRevision.isOk()) {
             const aquaTreeWrapperToHideWrapper: AquaTreeWrapper = {
-                aquaTree: resultFormRevision.data.aquaTree,
+                aquaTree: resultFormRevision.data.aquaTree!,
                 fileObject: fileObject,
                 revision: ""
             }
@@ -302,7 +310,7 @@ describe("Aquafier", () => {
 
 
                 const aquaTreeWrapperHidenElementsWrapper: AquaTreeWrapper = {
-                    aquaTree: resultHide.data.aquaTree,
+                    aquaTree: resultHide.data.aquaTree!,
                     fileObject: fileObject,
                     revision: ""
                 }
