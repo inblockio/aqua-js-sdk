@@ -15,8 +15,8 @@ export default defineConfig({
       https: 'https-browserify',
       url: 'url',
       vm: 'vm-browserify',
-      crypto: 'crypto-browserify',
-      'node:crypto': 'crypto-browserify'
+      // crypto: 'crypto-browserify',
+      // 'node:crypto': 'crypto-browserify'
     }
   },
   define: {

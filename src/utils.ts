@@ -1,7 +1,8 @@
 // import { createHash } from 'crypto';
 import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, LogTypeEmojis, Revision, RevisionTree, TreeMapping } from './types';
 import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers";
-import crypto from 'crypto-browserify';
+// import crypto from 'crypto-browserify';
+import sha3 from "js-sha3"
 import { MerkleTree } from 'merkletreejs';
 import { Err, Ok, Result } from './type_guards';
 
@@ -13,7 +14,7 @@ export function findFormKey(revision: Revision, key: string) {
   return keys.find(k => k === key || k === `forms_${key}` || k.startsWith(`forms_${key}`));
 }
 
-export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string, linkVerificationHash ,linkFileName : string): Result<AquaTree, LogData[]> {
+export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: string, revisionType: string, aquaFileName: string, formFileName: string, linkVerificationHash, linkFileName: string): Result<AquaTree, LogData[]> {
   let logs: LogData[] = [];
   const validRevisionTypes = ["file", "form", "link"];
   if (!validRevisionTypes.includes(revisionType)) {
@@ -38,8 +39,8 @@ export function maybeUpdateFileIndex(aquaTree: AquaTree, verificationHash: strin
       aquaTree.file_index[verificationHash] = aquaFileName //filename
       break
     case "link":
-      aquaTree.file_index[linkVerificationHash] = linkFileName 
-  
+      aquaTree.file_index[linkVerificationHash] = linkFileName
+
   }
 
   logs.push({
@@ -62,7 +63,10 @@ export function getFileHashSum(fileContent: string): string {
 }
 
 export function getHashSum(data: string | Buffer): string {
-  return crypto.createHash('sha256').update(data).digest('hex');
+  // return  crypto.createHash('sha256').update(data).digest('hex');
+
+  const input = Buffer.isBuffer(data) ? data.toString() : data;
+  return sha3.sha3_256(input);
 }
 
 export function createNewAquaTree(): AquaTree {
@@ -100,11 +104,23 @@ export function getWallet(mnemonic: string): [HDNodeWallet, string, string] {
   return [wallet, walletAddress, wallet.publicKey]
 }
 
+// Cross-platform version
+export function getEntropy(): Uint8Array {
+  if (typeof window !== 'undefined' && window.crypto) {
+      // Browser environment
+      return crypto.getRandomValues(new Uint8Array(16));
+  } else {
+      // Node.js environment
+      const nodeCrypto = require('crypto');
+      return new Uint8Array(nodeCrypto.randomBytes(16));
+  }
+}
 export function createCredentials() {
   console.log('Credential file  does not exist.Creating wallet');
 
   // Generate random entropy (128 bits for a 12-word mnemonic)
-  const entropy = crypto.randomBytes(16);
+  // const entropy = crypto.randomBytes(16);
+  const entropy = getEntropy();
 
   // Convert entropy to a mnemonic phrase
   const mnemonic = Mnemonic.fromEntropy(entropy);
@@ -273,7 +289,7 @@ export const getTimestamp = () => {
 
 
 
-export function printLogs(logs: LogData[], enableVerbose: boolean= true) {
+export function printLogs(logs: LogData[], enableVerbose: boolean = true) {
   if (enableVerbose) {
     logs.forEach(element => {
       console.log(`${LogTypeEmojis[element.logType]} ${element.log}`)

@@ -1,7 +1,8 @@
 // import * as fs from "fs"
 import * as asn1js from "asn1js"
 import * as pkijs from "pkijs"
-import { createHash } from "node:crypto"
+import {getHashSum}  from "../utils"
+// import { createHash } from "node:crypto"
 
 
 
@@ -25,7 +26,7 @@ export class WitnessTSA {
   witness = async (hash: string, tsaUrl: string): Promise<[string, string, number]> => {
     // console.log("Hash before: ", hash)
     // DigiCert only supports up to SHA256
-    const hashHex = createHash("sha256").update(hash).digest("hex")
+    const hashHex = getHashSum(hash) //createHash("sha256").update(hash).digest("hex")
     const hashBuffer = Uint8Array.from(Buffer.from(hashHex, "hex")) // Convert hex to ArrayBuffer
     // console.log("Hash buffer: ", hashBuffer)
 
@@ -104,7 +105,7 @@ export class WitnessTSA {
     }
 
     // Verifying the content itself
-    const hashHex = createHash("sha256").update(expectedMR).digest("hex")
+    const hashHex = getHashSum(expectedMR);//createHash("sha256").update(expectedMR).digest("hex")
 
     const messageImprintHash = Buffer.from(
       tstInfo.messageImprint.hashedMessage.valueBlock.valueHexView,
