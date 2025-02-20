@@ -56,8 +56,27 @@ optional to unlink remove this library `npm unlink aqua-verifier`
 
 ## Testing 
 
-
 Ensure to create `credentials.json` file in src the contents should be 
+
+```
+{
+    "mnemonic": "",
+    "nostr_sk": "",
+    "did:key": "",
+    "alchemy_key": "",
+    "witness_eth_network": "",
+    "witness_method": ""
+}
+```
+Purpose of each property :
+
+1. mnemonic enables us to construct your wallet address The menemonic could be from metamask or a cli wallet.
+2.  nostr_sk is needed as it you can witne via nostr
+3. Aqua provides the ability to sign via did, to use did a did key is required.
+4. when verifying a witness the alchemy key enables aqua to do an alchemy loopkup of the  transaction hash.
+5. witness_eth_network is used to switch networks ie among : mainnet, sepolia, holesky.
+6. witness_method is used to instruct aqua to use metamask or cli when witness, ie in some everonments metamask is not available , cli will use menomonic from credentials to construct a wallet.
+
 Run `npm test` to ru tests
 
 

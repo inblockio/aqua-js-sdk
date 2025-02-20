@@ -1,9 +1,8 @@
 import { expect, jest } from "@jest/globals";
 import Aquafier from "../index";  // Adjust the path based on your structure
 import { FileObject, AquaTree, CredentialsData, AquaTreeWrapper } from "../types";
-// import fs from "fs/promises"; // Using Node.js promises for file handling
 import { mockAquaTreeOnerevision, mockAquaTreeTworevisions } from "./test_revisions";
-// import * as credentials from "./../credentials.json"
+//check readme
 import { default as credentialsData } from "./../credentials.json";
 
 jest.mock("fs/promises", () => ({
