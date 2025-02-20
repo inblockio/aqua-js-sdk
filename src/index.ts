@@ -76,7 +76,7 @@ export default class Aquafier {
      * @param enableContent - A boolean value to enable content
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
-     */ 
+     */
     createGenesisRevision = async (fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return createGenesisRevision(fileObject, isForm, enableContent, enableScalar)
     }
@@ -259,7 +259,7 @@ export default class Aquafier {
     getVersionFromPackageJson = (): string => {
         let version = "1.3.2.0"
         console.log(packageJson.version);
-        return packageJson.version ?? version
+        return packageJson.version ? packageJson.version : version
 
     }
 

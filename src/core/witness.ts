@@ -252,7 +252,7 @@ const prepareWitness = async (
 
                 if (gasEstimateResult.error !== null) {
                     logs.push({
-                        log: `Unable to Estimate gas fee: ${gasEstimateResult?.error}`,
+                        log: `Unable to Estimate gas fee: ${gasEstimateResult.error}`,
                         logType: LogType.DEBUGDATA
                     });
                     process.exit(1);
@@ -308,7 +308,7 @@ const prepareWitness = async (
                     return Err(logs);
                 }
 
-                transactionHash = transactionResult!!.transactionHash ?? "--error--";
+                transactionHash = transactionResult!!.transactionHash;
                 publisher = walletAddress;
             } else {
                 /**
@@ -419,7 +419,7 @@ export async function verifyWitness(
         isValid = verifyMerkleIntegrity(
             // JSON.parse(witnessData.witness_merkle_proof),
             // verification_hash,
-            witnessData.witness_merkle_proof ?? [],
+            witnessData.witness_merkle_proof ? witnessData.witness_merkle_proof : [],
             witnessData.witness_merkle_root!
         )
 

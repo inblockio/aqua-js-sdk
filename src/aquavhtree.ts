@@ -19,7 +19,7 @@ function findNode(tree: RevisionTree, hash: string): RevisionTree | null {
 function findPaths(tree: RevisionTree, path: string[]): { [key: string]: string[] } {
     let paths: { [key: string]: string[] } = {};
     path.push(tree.hash);
-    if (tree.children?.length === 0) {
+    if (tree.children.length === 0) {
         paths[tree.hash] = path;
     } else {
         for (let i = 0; i < tree.children.length; i++) {

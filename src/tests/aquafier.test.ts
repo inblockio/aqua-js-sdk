@@ -152,6 +152,8 @@ describe("Aquafier", () => {
         if (result.isOk()) {
             const data = result.data
             expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+        }else{
+            console.log(result.data)
         }
     });
 

@@ -64,14 +64,14 @@ export function getFileHashSum(fileContent: string): string {
 
 export function getHashSum(data: string | Uint8Array): string {
   // If data is Uint8Array, convert it to string
-  const input = data instanceof Uint8Array ? 
-      new TextDecoder().decode(data) : 
-      data;
+  const input = data instanceof Uint8Array ?
+    new TextDecoder().decode(data) :
+    data;
   return sha3.sha3_256(input);
 }
 
 // export function getHashSum(data: string | Buffer): string {
-  // return  crypto.createHash('sha256').update(data).digest('hex');
+// return  crypto.createHash('sha256').update(data).digest('hex');
 //   const input = Buffer.isBuffer(data) ? data.toString() : data;
 //   return sha3.sha3_256(input);
 // }
@@ -114,12 +114,12 @@ export function getWallet(mnemonic: string): [HDNodeWallet, string, string] {
 // Cross-platform version
 export function getEntropy(): Uint8Array {
   if (typeof window !== 'undefined' && window.crypto) {
-      // Browser environment
-      return crypto.getRandomValues(new Uint8Array(16));
+    // Browser environment
+    return crypto.getRandomValues(new Uint8Array(16));
   } else {
-      // Node.js environment
-      const nodeCrypto = require('crypto');
-      return new Uint8Array(nodeCrypto.randomBytes(16));
+    // Node.js environment
+    const nodeCrypto = require('crypto');
+    return new Uint8Array(nodeCrypto.randomBytes(16));
   }
 }
 export function createCredentials() {
@@ -197,7 +197,7 @@ export const estimateWitnessGas = async (wallet_address: string, witness_event_v
       logType: LogType.DEBUGDATA
     })
 
-    const gasPrice = feeData.gasPrice ?? BigInt(0);
+    const gasPrice = feeData.gasPrice ? feeData.gasPrice : BigInt(0);
 
     logData.push({
       log: `Gas Price: ${ethers.formatUnits(gasPrice, "gwei")} Gwei`,

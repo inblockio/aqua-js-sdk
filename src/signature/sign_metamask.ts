@@ -136,10 +136,10 @@ export class MetaMaskSigner {
                     .then(resolve)
                     .catch(reject)
                     .finally(() => {
-                        this.server?.close();
+                        this.server.close();
                     });
             } catch (error) {
-                this.server?.close();
+                this.server.close();
                 reject(error);
             }
         });
@@ -169,7 +169,7 @@ export class MetaMaskSigner {
         let attempts = 0;
 
         while (attempts < this.maxAttempts) {
-            if (this.lastResult?.signature) {
+            if (this.lastResult.signature) {
                 const { signature, wallet_address } = this.lastResult;
                 const publicKey = await this.recoverPublicKey(message, signature);
                 return [signature, wallet_address, publicKey];

@@ -227,7 +227,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                         logType: LogType.ERROR
                     })
                 } else {
-                    const linkAquaTree = JSON.parse(fileObj?.fileContent)
+                    const linkAquaTree = JSON.parse(fileObj.fileContent)
 
                     let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
 
