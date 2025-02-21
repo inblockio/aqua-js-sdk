@@ -56,7 +56,7 @@ export type WitnessEnvironment = 'node' | 'browser'
 
 export interface FileObject {
   fileName: string,
-  fileContent: string,
+  fileContent: string | AquaTree,
   path: string
 }
 

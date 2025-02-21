@@ -10,7 +10,7 @@ export function checkIfFileAlreadyNotarizedUtil(aquaTree: AquaTree, fileObject: 
     let keys = Object.keys(aquaTree.revisions);
     let firstRevision: Revision = aquaTree.revisions[keys[0]];
 
-    let fileHash = getHashSum(fileObject.fileContent)
+    let fileHash = getHashSum(fileObject.fileContent as string)
     return firstRevision.file_hash == fileHash
 
 
@@ -105,7 +105,7 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
     }
 
 
-    verificationData["file_hash"] = getHashSum(fileObject.fileContent)
+    verificationData["file_hash"] = getHashSum(fileObject.fileContent as string)
     verificationData["file_nonce"] = prepareNonce()
     verificationData["version"] = `aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
 
@@ -128,7 +128,7 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
             let formDataJson: any = {}
             try {
                 // Attempt to parse the JSON data
-                formDataJson = JSON.parse(fileObject.fileContent)
+                formDataJson = JSON.parse(fileObject.fileContent as string);
             } catch (parseError) {
                 logs.push({
                     log: `Error: The file ${fileObject.fileName} does not contain valid JSON data.`,

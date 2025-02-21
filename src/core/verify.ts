@@ -75,7 +75,7 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
     }
 
 
-    if (!isSuccess) { 
+    if (!isSuccess) {
         return Err(logs);
     }
 
@@ -112,11 +112,11 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         // const leaves = dict2Leaves(revision)
         // const actualVH = getMerkleRoot(leaves);
 
-        const actualVH = "0x" + getHashSum(JSON.stringify(revision)) 
+        const actualVH = "0x" + getHashSum(JSON.stringify(revision))
         isScalarSuccess = actualVH === verificationHash
 
         // console.log("\n  revision data "+JSON.stringify(revision)+"\n actualVH  "+actualVH+" \n leaves " + JSON.stringify(leaves) + "\n")
-    
+
         if (!isScalarSuccess) {
             logs.push({
                 logType: LogType.ERROR,
@@ -151,7 +151,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 logType: LogType.FORM,
                 log: "Verifying form revision. \n"
             })
-            let res =  verifyFormRevision(
+            let res = verifyFormRevision(
                 revision,
                 revision.leaves,
             );
@@ -180,7 +180,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                     })
                     return [false, logs]
                 }
-                fileContent = Buffer.from(fileObjectItem.fileContent)
+                fileContent = Buffer.from(fileObjectItem.fileContent as string)
             }
             const fileHash = getHashSum(fileContent)
             isSuccess = fileHash === revision.file_hash
@@ -233,23 +233,38 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                         logType: LogType.ERROR
                     })
                 } else {
-                    const linkAquaTree = JSON.parse(fileObj.fileContent)
+                   
+                    logs.push({
+                        log: `Verifying linked File ${aquaFileUri}.`,
+                        logType: LogType.INFO
+                    })
 
-                    let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
+                    try {
+                        const linkAquaTree = fileObj.fileContent as AquaTree;//JSON.parse(fileObj.fileContent)  as AquaTree;
 
-                    if (isErr(linkVerificationResult)) {
-                        linkOk=false
-                        // logs.push(...linkVerificationResult.data)
+                        let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
+
+                        if (isErr(linkVerificationResult)) {
+                            linkOk = false
+                            // logs.push(...linkVerificationResult.data)
+                            logs.push({
+                                log: `\t  verification of ${fileUri}.aqua.json failed `,
+                                logType: LogType.ERROR
+                            })
+                        } else {
+                            // logs.push(...linkVerificationResult.data.logData)
+                            logs.push({
+                                log: `\t successfully verified ${fileUri}.aqua.json `,
+                                logType: LogType.SUCCESS
+                            })
+                        }
+                    } catch (error) {
+                        linkOk = false;
                         logs.push({
-                            log: `\t  verification of ${fileUri}.aqua.json failed `,
+                            log: `Error verifying linked file ${aquaFileUri}: ${error}`,
                             logType: LogType.ERROR
                         })
-                    } else {
-                        // logs.push(...linkVerificationResult.data.logData)
-                        logs.push({
-                            log: `\t successfully verified ${fileUri}.aqua.json `,
-                            logType: LogType.SUCCESS
-                        })
+
                     }
                 }
             }
@@ -260,7 +275,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     logs.push(...logsResult)
 
     if (isSuccess && isScalarSuccess) {
-       
+
         logs.push({
             log: `Successfully verified revision ${revision.revision_type}  with hash ${verificationHash} \n`,
             logType: LogType.SUCCESS
@@ -272,7 +287,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         })
     }
 
-    return [isSuccess && isScalarSuccess , logs]
+    return [isSuccess && isScalarSuccess, logs]
 }
 
 
@@ -333,7 +348,6 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
     // console.log("verification hash: ", verificationHash)
 
     let logs: Array<LogData> = [];
-
 
     let ok: boolean = true
     let vhOk: boolean = true
