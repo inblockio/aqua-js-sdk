@@ -29,7 +29,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     }
 
     // Calculate the hash of the file
-    let fileHash = getHashSum(fileObject.fileContent)
+    let fileHash = getHashSum(fileObject.fileContent as string)
     let alreadyFormified = checkFileHashAlreadyNotarized(fileHash, aquaTreeWrapper.aquaTree)
 
     if (alreadyFormified) {
@@ -49,7 +49,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     let formDataJson:  { [key: string]: any } = {}
     try {
         // Attempt to parse the JSON data
-        formDataJson = JSON.parse(fileObject.fileContent)
+        formDataJson = JSON.parse(fileObject.fileContent as string)
     } catch (parseError) {
         // Handle invalid JSON data
         logs.push({
