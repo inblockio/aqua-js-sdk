@@ -81,10 +81,6 @@ export class WitnessTSA {
     expectedMR: string,
     expectedTimestamp: number
   ): Promise<boolean> => {
-    console.log(`1. transactionHash ${transactionHash}`)
-    console.log(`1. expectedMR ${expectedMR}`)
-    console.log(`1. expectedTimestamp ${expectedTimestamp}`)
-
     
     const tspResponseBuffer = Buffer.from(transactionHash, "base64")
     const tspResponseAsn1 = asn1js.fromBER(tspResponseBuffer)
