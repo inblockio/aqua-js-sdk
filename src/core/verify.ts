@@ -151,8 +151,14 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 logType: LogType.FORM,
                 log: "Verifying form revision. \n"
             })
+            let res =  verifyFormRevision(
+                revision,
+                revision.leaves,
+            );
+            isSuccess = res[0];
+            logsResult = res[1];
             // verification is already done in verifyRevisionMerkleTreeStructure
-            isSuccess = true;
+            // isSuccess = true;
             break
         case "file":
             logs.push({
