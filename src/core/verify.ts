@@ -335,7 +335,7 @@ function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] 
     });
     fieldsWithVerification.forEach((field: any) => {
         logs.push({
-            log: `${field}}\n`,
+            log: `${field}\n`,
             logType: LogType.SUCCESS
         });
     });
