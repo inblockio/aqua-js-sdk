@@ -94,7 +94,13 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     let isSuccess = true;
     let isScalarSuccess = true;
 
-    if (isScalar) {
+    let verifyWitnessMerkleProof = false
+
+    if(revision.revision_type === 'witness' && revision.witness_merkle_proof.length > 1){
+        verifyWitnessMerkleProof = true
+    }
+
+    if (isScalar && !verifyWitnessMerkleProof) {
         logs.push({
             logType: LogType.SCALAR,
             log: "Scalar revision detected."
@@ -204,9 +210,14 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 log: "Verifying witness revision.\n"
             });
             // Verify witness
+            // If multiple use merkle root else use previous verification hash
+            let hash_ = revision.previous_verification_hash
+            if (revision.previous_verification_hash !== revision.witness_merkle_root){
+                hash_ = revision.witness_merkle_root
+            }
             let [isSuccessResult, logsResultData] = await verifyWitness(
                 revision,
-                revision.previous_verification_hash,
+                hash_,
                 doVerifyMerkleProof,
             );
             // console.log(`Witness  result ${isSuccessResult} ---  data ${JSON.stringify(logsResultData)}`)

@@ -374,8 +374,9 @@ export class WitnessEth {
     actual = actual.slice(0, 128);
 
     await this.sleep(200); // prevent overloading free endpoint
-
+    
+    const actualMrSans0x = actual.startsWith('0x') ? actual.slice(2) : actual;
     const mrSans0x = expectedMR.startsWith('0x') ? expectedMR.slice(2) : expectedMR;
-    return [actual === mrSans0x, `${actual === mrSans0x ? 'Transaction found' : ' Transaction not valid'}`];
+    return [actualMrSans0x === mrSans0x, `${actualMrSans0x === mrSans0x ? 'Transaction found' : ' Transaction not valid'}`];
   }
 }
