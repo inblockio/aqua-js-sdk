@@ -62,7 +62,7 @@ let testFileContent = readFile("./test.txt")
 
 let aquaFileObject: FileObject = {
     fileName: "text.txt",
-    fileContent: testFileContent ?? "",
+    fileContent: testFileContent ?  testFileContent : "",
     path: "./text.txt"
 }
 

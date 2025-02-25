@@ -29,7 +29,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     }
 
     // Calculate the hash of the file
-    let fileHash = getHashSum(fileObject.fileContent)
+    let fileHash = getHashSum(fileObject.fileContent as string)
     let alreadyFormified = checkFileHashAlreadyNotarized(fileHash, aquaTreeWrapper.aquaTree)
 
     if (alreadyFormified) {
@@ -46,10 +46,10 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
 
 
 
-    let formDataJson = {}
+    let formDataJson:  { [key: string]: any } = {}
     try {
         // Attempt to parse the JSON data
-        formDataJson = JSON.parse(fileObject.fileContent)
+        formDataJson = JSON.parse(fileObject.fileContent as string)
     } catch (parseError) {
         // Handle invalid JSON data
         logs.push({
@@ -61,7 +61,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
 
     // Sort the keys
     let form_data_sorted_keys = Object.keys(formDataJson)
-    let form_data_sorted_with_prefix = {}
+    let form_data_sorted_with_prefix:  { [key: string]: any } = {}
     for (let key of form_data_sorted_keys) {
         form_data_sorted_with_prefix[`forms_${key}`] = formDataJson[key]
     }
@@ -113,7 +113,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
 
     let result: AquaOperationData = {
         aquaTree: aquaTreeWithTree, //aquaTreeWithTree,
-        aquaTrees: null,
+        aquaTrees: [],
         logData: logs
     }
 
@@ -163,7 +163,7 @@ export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide
     // Update in place by renaming the key and setting value to empty string
     const deletedKey = `${formKey}.deleted`;
 
-    let newRevision = {};
+    let newRevision: { [key: string]: any } = {};
     for (let key in targetRevision) {
         if (formKey == key) {
             newRevision[deletedKey] = null;
@@ -229,7 +229,7 @@ export function unHideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToUn
         // Restore deleted field
         const originalKey = formKey.replace('.deleted', '');
 
-        let newRevision = {};
+        let newRevision:  { [key: string]: any } = {};
         for (let key in targetRevision) {
             if (formKey == key) {
                 newRevision[originalKey] = content;

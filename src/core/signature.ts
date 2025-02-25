@@ -109,17 +109,22 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
     revisions[verification_hash] = verificationData
 
     let aquaTreeWithTree = createAquaTree(aquaTree)
+    if (!aquaTreeWithTree) {
+        logs.push({
+            log: "Failed to create AquaTree",
+            logType: LogType.ERROR
+        });
+        return Err(logs);
+    }
 
     logs.push({
         log: `AquaTree signed succesfully`,
         logType: LogType.SUCCESS
     });
 
-
-
     let result: AquaOperationData = {
         aquaTree: aquaTreeWithTree,
-        aquaTrees: null,
+        aquaTrees: [],
         logData: logs
     }
     return Ok(result)

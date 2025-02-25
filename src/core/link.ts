@@ -26,7 +26,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
 
     const linkVHs = [getLatestVH(linkAquaTreeWrapper.aquaTree)]
 
-    const linkFileHashes = [getHashSum(linkAquaTreeWrapper.fileObject.fileContent)]
+    const linkFileHashes = [getHashSum(linkAquaTreeWrapper.fileObject.fileContent as string)]
     // Validation again
     linkFileHashes.forEach((fh) => {
         if (!(fh in linkAquaTreeWrapper.aquaTree.file_index)) {

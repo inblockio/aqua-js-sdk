@@ -9,6 +9,8 @@ import { Err, Ok, Result } from "../type_guards";
 export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
+    console.log("File object: ", fileObject)
+
     const now = new Date().toISOString()
     const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
     let revisionType = "file";
@@ -25,7 +27,7 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
         
     }
 
-    let fileHash = getHashSum(fileObject.fileContent)
+    let fileHash = getHashSum(fileObject.fileContent as string)
 
     let alreadyNotarized = checkFileHashAlreadyNotarized(fileHash, aquaTreeWrapper.aquaTree)
 

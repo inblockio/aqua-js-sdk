@@ -42,7 +42,7 @@ export interface CredentialsData {
  */
 export interface AquaOperationData {
   aquaTrees: AquaTree[]
-  aquaTree: AquaTree
+  aquaTree: AquaTree | null
   logData: Array<LogData>
 }
 
@@ -56,7 +56,7 @@ export type WitnessEnvironment = 'node' | 'browser'
 
 export interface FileObject {
   fileName: string,
-  fileContent: string,
+  fileContent: string | AquaTree,
   path: string
 }
 
@@ -150,7 +150,7 @@ export interface TreeMapping {
 
 export interface AquaTreeWrapper {
   aquaTree: AquaTree;
-  fileObject: FileObject;
+  fileObject?: FileObject;
   revision: string;
 }
 

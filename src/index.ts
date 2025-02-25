@@ -76,7 +76,7 @@ export default class Aquafier {
      * @param enableContent - A boolean value to enable content
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
-     */ 
+     */
     createGenesisRevision = async (fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
         return createGenesisRevision(fileObject, isForm, enableContent, enableScalar)
     }
@@ -259,12 +259,14 @@ export default class Aquafier {
     getVersionFromPackageJson = (): string => {
         let version = "1.3.2.0"
         console.log(packageJson.version);
-        return packageJson.version ?? version
+        return packageJson.version ? packageJson.version : version
 
     }
 
     renderTree = (aquaTree: AquaTree) => {
-        logAquaTree(aquaTree.tree)
+        if (aquaTree.tree) {
+            logAquaTree(aquaTree?.tree)
+        }
     }
 
 }
@@ -290,7 +292,7 @@ export class AquafierChainable {
         } else {
             this.logs.push(...result.data.logData)
         }
-        return result.data.aquaTree
+        return result.data.aquaTree!
     }
 
     async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<this> {
@@ -317,7 +319,11 @@ export class AquafierChainable {
     }, enableScalar: boolean = false): Promise<this> {
         let data = await signAquaTreeUtil({
             aquaTree: this.value,
-            fileObject: null,
+            fileObject: {
+                fileName: "test.txt",
+                fileContent: "",
+                path: "/fake/path/test.txt"
+            },
             revision: ""
         }, signType, credentials, enableScalar)
 
@@ -343,7 +349,7 @@ export class AquafierChainable {
     }, enableScalar: boolean = false): Promise<this> {
         let data = await witnessAquaTreeUtil({
             aquaTree: this.value,
-            fileObject: null,
+            fileObject: undefined,
             revision: ""
         }, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar);
         // this.value = this.unwrap(data);

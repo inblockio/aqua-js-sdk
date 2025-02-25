@@ -12,12 +12,14 @@ Link the library to node modules
 npm link
 ```
 
+
+## Building locally
 Then, navigate to example/node_example
 
 Run,
 
 ```bash
-npm run build #npm link aqua-protocol
+npm link aqua-protocol
 ```
 
 If you update the main libray, always run the build command

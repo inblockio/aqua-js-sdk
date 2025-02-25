@@ -21,7 +21,7 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
     // });
     let data: AquaOperationData = {
         aquaTree: aquaTree,
-        aquaTrees: null,
+        aquaTrees: [],
         logData: logs
     }
 
@@ -75,13 +75,13 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
     }
 
 
-    if (!isSuccess) { 
+    if (!isSuccess) {
         return Err(logs);
     }
 
     let data: AquaOperationData = {
         aquaTree: aquaTree,
-        aquaTrees: null,
+        aquaTrees: [],
         logData: logs
     }
 
@@ -112,11 +112,11 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         // const leaves = dict2Leaves(revision)
         // const actualVH = getMerkleRoot(leaves);
 
-        const actualVH = "0x" + getHashSum(JSON.stringify(revision)) 
+        const actualVH = "0x" + getHashSum(JSON.stringify(revision))
         isScalarSuccess = actualVH === verificationHash
 
         // console.log("\n  revision data "+JSON.stringify(revision)+"\n actualVH  "+actualVH+" \n leaves " + JSON.stringify(leaves) + "\n")
-    
+
         if (!isScalarSuccess) {
             logs.push({
                 logType: LogType.ERROR,
@@ -151,8 +151,14 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 logType: LogType.FORM,
                 log: "Verifying form revision. \n"
             })
+            let res = verifyFormRevision(
+                revision,
+                revision.leaves,
+            );
+            isSuccess = res[0];
+            logsResult = res[1];
             // verification is already done in verifyRevisionMerkleTreeStructure
-            isSuccess = true;
+            // isSuccess = true;
             break
         case "file":
             logs.push({
@@ -174,7 +180,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                     })
                     return [false, logs]
                 }
-                fileContent = Buffer.from(fileObjectItem.fileContent)
+                fileContent = Buffer.from(fileObjectItem.fileContent as string)
             }
             const fileHash = getHashSum(fileContent)
             isSuccess = fileHash === revision.file_hash
@@ -227,23 +233,38 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                         logType: LogType.ERROR
                     })
                 } else {
-                    const linkAquaTree = JSON.parse(fileObj?.fileContent)
+                   
+                    logs.push({
+                        log: `Verifying linked File ${aquaFileUri}.`,
+                        logType: LogType.INFO
+                    })
 
-                    let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
+                    try {
+                        const linkAquaTree = fileObj.fileContent as AquaTree;//JSON.parse(fileObj.fileContent)  as AquaTree;
 
-                    if (isErr(linkVerificationResult)) {
-                        linkOk=false
-                        // logs.push(...linkVerificationResult.data)
+                        let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects)
+
+                        if (isErr(linkVerificationResult)) {
+                            linkOk = false
+                            // logs.push(...linkVerificationResult.data)
+                            logs.push({
+                                log: `\t  verification of ${fileUri}.aqua.json failed `,
+                                logType: LogType.ERROR
+                            })
+                        } else {
+                            // logs.push(...linkVerificationResult.data.logData)
+                            logs.push({
+                                log: `\t successfully verified ${fileUri}.aqua.json `,
+                                logType: LogType.SUCCESS
+                            })
+                        }
+                    } catch (error) {
+                        linkOk = false;
                         logs.push({
-                            log: `\t  verification of ${fileUri}.aqua.json failed `,
+                            log: `Error verifying linked file ${aquaFileUri}: ${error}`,
                             logType: LogType.ERROR
                         })
-                    } else {
-                        // logs.push(...linkVerificationResult.data.logData)
-                        logs.push({
-                            log: `\t successfully verified ${fileUri}.aqua.json `,
-                            logType: LogType.SUCCESS
-                        })
+
                     }
                 }
             }
@@ -254,7 +275,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     logs.push(...logsResult)
 
     if (isSuccess && isScalarSuccess) {
-       
+
         logs.push({
             log: `Successfully verified revision ${revision.revision_type}  with hash ${verificationHash} \n`,
             logType: LogType.SUCCESS
@@ -266,15 +287,15 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         })
     }
 
-    return [isSuccess && isScalarSuccess , logs]
+    return [isSuccess && isScalarSuccess, logs]
 }
 
 
 function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] {
     let logs: Array<LogData> = [];
     let contains_deleted_fields = false;
-    let fieldsWithVerification = [];
-    let fieldsWithPartialVerification = [];
+    let fieldsWithVerification: any = [];
+    let fieldsWithPartialVerification: any = [];
     let ok = true;
 
     Object.keys(input).sort().forEach((field, i: number) => {
@@ -300,7 +321,7 @@ function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] 
             log: `Warning: The following fields cannot be verified:`,
             logType: LogType.WARNING
         });
-        fieldsWithPartialVerification.forEach((field, i: number) => {
+        fieldsWithPartialVerification.forEach((field: any, i: number) => {
             logs.push({
                 log: `${i + 1}. ${field.replace('.deleted', '')}\n`,
                 logType: LogType.WARNING
@@ -312,7 +333,7 @@ function verifyFormRevision(input: any, leaves: any): [boolean, Array<LogData>] 
         log: `The following fields were verified:`,
         logType: LogType.SUCCESS
     });
-    fieldsWithVerification.forEach(field => {
+    fieldsWithVerification.forEach((field: any) => {
         logs.push({
             log: `${field}}\n`,
             logType: LogType.SUCCESS
@@ -328,12 +349,11 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
 
     let logs: Array<LogData> = [];
 
-
     let ok: boolean = true
     let vhOk: boolean = true
 
     // Ensure mandatory claims are present
-    const mandatory = {
+    const mandatory: any = {
         file: ["file_hash", "file_nonce"],
         link: ["link_verification_hashes"],
         signature: ["signature"],

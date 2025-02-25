@@ -43,10 +43,10 @@ export class WitnessEth {
 
   static async commonPrepareListener(htmlContent: string) {
     let output = "{}"
-    const requestListener = async (req, res) => {
+    const requestListener = async (req: any, res: any) => {
       if (req.method == "POST") {
         let data = ""
-        req.on("data", (chunk) => {
+        req.on("data", (chunk: any) => {
           data += chunk
         })
         await new Promise((resolve) => {
@@ -159,7 +159,7 @@ export class WitnessEth {
     };
 
     //@ts-ignore
-    if (!window.ethereum?.isMetaMask) {
+    if (!window.ethereum.isMetaMask) {
       throw new Error("MetaMask not detected");
     }
 
@@ -290,19 +290,6 @@ export class WitnessEth {
 
       const balance = await provider.getBalance(sender);
       const balanceInEth = ethers.formatEther(balance);
-      // console.log(`Sender Balance: ${balanceInEth} ETH`);
-
-      // const estimatedGas = await provider.estimateGas(tx);
-      // console.log(`Estimated Gas: ${estimatedGas.toString()} units`);
-
-      // const feeData = await provider.getFeeData();
-      // const gasPrice = feeData.gasPrice ?? BigInt(0);
-      // console.log(`Gas Price: ${ethers.formatUnits(gasPrice, 'gwei')} Gwei`);
-
-      // const gasCost = estimatedGas * gasPrice;
-      // const gasCostInEth = ethers.formatEther(gasCost);
-      // console.log(`Estimated Gas Fee: ${gasCostInEth} ETH`);
-
       logData.push({
         log: `Sender Balance: ${balanceInEth} ETH`,
         logType: LogType.DEBUGDATA
@@ -324,7 +311,7 @@ export class WitnessEth {
         logType: LogType.DEBUGDATA
       })
 
-      const gasPrice = feeData.gasPrice ?? BigInt(0);
+      const gasPrice = feeData.gasPrice ? feeData.gasPrice : BigInt(0);
 
       logData.push({
         log: `Gas Price: ${ethers.formatUnits(gasPrice, "gwei")} Gwei`,
