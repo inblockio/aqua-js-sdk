@@ -45,13 +45,13 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
         let revision: Revision = aquaTree.revisions[revisionItemHash]
         let revisionIndex = verificationHashes.indexOf(revisionItemHash)
         logs.push({
-            logType: LogType.DEBUGDATA,
+            logType: LogType.ARROW,
             log: `${revisionIndex + 1}. Verifying Revision Hash: ${revisionItemHash}`
         })
-        logs.push({
-            logType: LogType.DEBUGDATA,
-            log: "Revision data: \n " + JSON.stringify(revision, null, 4)
-        })
+        // logs.push({
+        //     logType: LogType.DEBUGDATA,
+        //     log: "Revision data: \n " + JSON.stringify(revision, null, 4)
+        // })
 
         switch (revision.revision_type) {
             case "form":
