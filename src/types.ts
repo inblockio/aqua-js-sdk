@@ -100,7 +100,8 @@ export const LogTypeEmojis: Record<LogType, string> = {
 
 export interface LogData {
   logType: LogType,
-  log: string
+  log: string,
+  ident? : string | null | undefined
 }
 
 

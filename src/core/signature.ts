@@ -8,7 +8,7 @@ import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
 import { Err, Ok, Result } from "../type_guards";
 
-export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false, identCharacter : string = ""): Promise<Result<AquaOperationData, LogData[]>> {
     let aquaTree = aquaTreeWrapper.aquaTree
     let logs: Array<LogData> = [];
     let targetRevisionHash = "";
@@ -35,7 +35,8 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
                 if (credentials == null || credentials == undefined) {
                     logs.push({
                         log: "Credentials not found ",
-                        logType: LogType.ERROR
+                        logType: LogType.ERROR,
+                        ident: identCharacter
                     })
                     return Err(logs);
                 }
@@ -48,7 +49,8 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
             } catch (error) {
                 logs.push({
                     log: "Failed to read mnemonic:" + error,
-                    logType: LogType.ERROR
+                    logType: LogType.ERROR,
+                    ident: identCharacter
                 })
                 return Err(logs);
 
@@ -61,7 +63,8 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
 
                 logs.push({
                     log: "DID key is required.  Please get a key from https://hub.ebsi.eu/tools/did-generator",
-                    logType: LogType.ERROR
+                    logType: LogType.ERROR,
+                    ident: identCharacter
                 });
                 return Err(logs);
 
@@ -112,14 +115,16 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
     if (!aquaTreeWithTree) {
         logs.push({
             log: "Failed to create AquaTree",
-            logType: LogType.ERROR
+            logType: LogType.ERROR,
+            ident: identCharacter
         });
         return Err(logs);
     }
 
     logs.push({
         log: `AquaTree signed succesfully`,
-        logType: LogType.SUCCESS
+        logType: LogType.SUCCESS,
+        ident: identCharacter
     });
 
     let result: AquaOperationData = {
@@ -130,11 +135,12 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
     return Ok(result)
 }
 
-export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _signType: SignType, _credentials: CredentialsData, _enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _signType: SignType, _credentials: CredentialsData, _enableScalar: boolean = false, identCharacter : string = ""): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     logs.push({
         log: "unimplmented need to be fixes",
-        logType: LogType.ERROR
+        logType: LogType.ERROR,
+        ident: identCharacter
     });
 
     return Err(logs)
@@ -142,7 +148,7 @@ export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _
 
 
 
-export async function verifySignature(data: Revision, verificationHash: string): Promise<[boolean, LogData[]]> {
+export async function verifySignature(data: Revision, verificationHash: string,identCharacter : string = ""): Promise<[boolean, LogData[]]> {
 
     let logs: Array<LogData> = [];
 
@@ -164,6 +170,7 @@ export async function verifySignature(data: Revision, verificationHash: string):
     logs.push({
         log: `Wallet address:  ${data.signature_wallet_address}`,
         logType: LogType.SIGNATURE,
+        ident: identCharacter
     })
 
     let signerDID = new DIDSigner();

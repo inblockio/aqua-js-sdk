@@ -299,14 +299,14 @@ export const getTimestamp = () => {
 export function printLogs(logs: LogData[], enableVerbose: boolean = true) {
   if (enableVerbose) {
     logs.forEach(element => {
-      console.log(`${LogTypeEmojis[element.logType]} ${element.log}`)
+      console.log(`${element.ident ? element.ident : '' } ${LogTypeEmojis[element.logType]} ${element.log}`)
     });
   } else {
     let containsError = logs.filter((element) => element.logType == "error");
     if (containsError.length > 0) {
       logs.forEach(element => {
         if (element.logType == "error") {
-          console.log(`${LogTypeEmojis[element.logType]} ${element.log}`)
+          console.log(`${element.ident ? element.ident : '' } ${LogTypeEmojis[element.logType]} ${element.log}`)
         }
       });
     } else {
