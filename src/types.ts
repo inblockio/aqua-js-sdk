@@ -51,6 +51,7 @@ export interface VerificationGraphData {
   isValidationSucessful: boolean;
   revisionType: RevisionType;
   verificationGraphData: VerificationGraphData[]
+  linkVerificationGraphData: VerificationGraphData[]
 }
 
 export type RevisionType = "file" | "witness" | "signature" | "form" | "link"

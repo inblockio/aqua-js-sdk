@@ -157,7 +157,8 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
         hash: verificationHashes[0],
         isValidationSucessful: isGenesisOkay,
         revisionType: aquaTree.revisions[verificationHashes[0]].revision_type,
-        verificationGraphData: []
+        verificationGraphData: [],
+        linkVerificationGraphData: []
     }
 
     if (verificationHashes.length === 1) {
@@ -233,11 +234,40 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
             break;
         }
 
+        let linkedVerificationGraphData: VerificationGraphData[] = []
+
+        if (revision.revision_type === "link") {
+            let aqtreeFilename = aquaTree.file_index[revision.link_verification_hashes[0]]
+            let linkedAquaTree = fileObject.find(el => el.fileName === `${aqtreeFilename}.aqua.json`)
+            if (!linkedAquaTree) {
+                logs.push({
+                    logType: LogType.ERROR,
+                    log: "Linked aqua tree not found"
+                })
+                break;
+            }
+            
+            let result = await verifyAndGetGraphDataUtil(linkedAquaTree.fileContent as AquaTree, fileObject, `${identCharacter}\t`)
+
+            if (result.isOk()) {
+                linkedVerificationGraphData = [result.data]
+            } else {
+                isSuccess = false
+                logs.push({
+                    logType: LogType.ERROR,
+                    log: "Linked aqua tree failed to create graph data"
+                })
+                break;
+            }
+
+        }
+
         verificationResultsNode.verificationGraphData.push({
             hash: revisionItemHash,
             isValidationSucessful: result[0],
             revisionType: revision.revision_type,
-            verificationGraphData: []
+            verificationGraphData: [],
+            linkVerificationGraphData: linkedVerificationGraphData
         })
 
         if (result[1].length > 0) {

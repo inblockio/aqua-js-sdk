@@ -1,5 +1,5 @@
 // import { createHash } from 'crypto';
-import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, LogTypeEmojis, Revision, RevisionTree, TreeMapping } from './types';
+import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, LogTypeEmojis, Revision, RevisionTree, TreeMapping, VerificationGraphData } from './types';
 import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers";
 // import crypto from 'crypto-browserify';
 import sha3 from "js-sha3"
@@ -317,4 +317,45 @@ export function printLogs(logs: LogData[], enableVerbose: boolean = true) {
     }
 
   }
+}
+
+export function printlinkedGraphData(node: VerificationGraphData, prefix: string = "", isLast: boolean = true): void {
+    // Log the current node's hash
+    let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
+    let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis['success'] : LogTypeEmojis['error']
+    // console.log(`${prefix} ${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+    console.log(`${prefix}└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+
+    // Update the prefix for children
+    const newPrefix = prefix + (isLast ? "\t" : " │\t");
+
+    // Recursively log each child
+    node.verificationGraphData.forEach((child, index) => {
+        const isChildLast = index === node.verificationGraphData.length - 1;
+        printGraphData(child, newPrefix, isChildLast);
+    });
+}
+
+export function printGraphData(node: VerificationGraphData, prefix: string = "", isLast: boolean = true): void {
+    // Log the current node's hash
+    let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
+    let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis['success'] : LogTypeEmojis['error']
+    // console.log(`${prefix}${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+    console.log(`└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+
+    if(node.revisionType === "link"){
+      console.log(`\tTree ${node.hash.slice(-4)}`)
+      for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
+        const el = node.linkVerificationGraphData[i];
+        printlinkedGraphData(el, `${prefix}\t`, false)
+      }
+    }
+    // Update the prefix for children
+    const newPrefix = prefix + (isLast ? "\t" : " │\t");
+
+    // Recursively log each child
+    node.verificationGraphData.forEach((child, index) => {
+        const isChildLast = index === node.verificationGraphData.length - 1;
+        printGraphData(child, newPrefix, isChildLast);
+    });
 }
