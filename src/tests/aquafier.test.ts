@@ -323,7 +323,6 @@ describe("Aquafier", () => {
                     // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
                     expect(JSON.stringify(data.aquaTree)).not.toContain('.deleted');
                 } else {
-                    console.log("=========== Unhide failed ======================")
                     console.log(resultUnHide.data.forEach((e) => console.log(e)))
                     expect(true).toBe(false
                     );
@@ -331,13 +330,11 @@ describe("Aquafier", () => {
 
 
             } else {
-                console.log("=========== Hide failed ======================")
                 console.log(resultHide.data.forEach((e) => console.log(e)))
                 expect(true).toBe(false);
             }
 
         } else {
-            console.log("=========== creating form revision  failed ======================")
             console.log(resultFormRevision.data.forEach((e) => console.log(e)))
             expect(true).toBe(false);
         }

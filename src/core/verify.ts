@@ -43,13 +43,14 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
         })
 
         let revision: Revision = aquaTree.revisions[revisionItemHash]
+        let revisionIndex = verificationHashes.indexOf(revisionItemHash)
         logs.push({
             logType: LogType.DEBUGDATA,
-            log: "Revision Hashes: " + revisionItemHash
+            log: `${revisionIndex + 1}. Verifying Revision Hash: ${revisionItemHash}`
         })
         logs.push({
             logType: LogType.DEBUGDATA,
-            log: "Revision data \n " + JSON.stringify(revision, null, 4)
+            log: "Revision data: \n " + JSON.stringify(revision, null, 4)
         })
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
@@ -63,15 +64,10 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
         if (!result[0]) {
             isSuccess = false;
         }
-
-        logs.push({
-            logType: LogType.EMPTY,
-            log: "==============================================================="
-        })
-        logs.push({
-            logType: LogType.EMPTY,
-            log: "\n"
-        })
+        // logs.push({
+        //     logType: LogType.EMPTY,
+        //     log: "\n"
+        // })
     }
 
 
@@ -96,7 +92,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
     let verifyWitnessMerkleProof = false
 
-    if(revision.revision_type === 'witness' && revision.witness_merkle_proof.length > 1){
+    if (revision.revision_type === 'witness' && revision.witness_merkle_proof.length > 1) {
         verifyWitnessMerkleProof = true
     }
 
@@ -212,7 +208,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             // Verify witness
             // If multiple use merkle root else use previous verification hash
             let hash_ = revision.previous_verification_hash
-            if (revision.previous_verification_hash !== revision.witness_merkle_root){
+            if (revision.previous_verification_hash !== revision.witness_merkle_root) {
                 hash_ = revision.witness_merkle_root
             }
             let [isSuccessResult, logsResultData] = await verifyWitness(
@@ -244,7 +240,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                         logType: LogType.ERROR
                     })
                 } else {
-                   
+
                     logs.push({
                         log: `Verifying linked File ${aquaFileUri}.`,
                         logType: LogType.INFO
