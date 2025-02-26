@@ -162,9 +162,10 @@ export async function verifySignature(data: Revision, verificationHash: string):
     }
 
     logs.push({
-        log: `did:key ==  ${data.signature_type}`,
+        log: `Wallet address  ${data.signature_wallet_address}`,
         logType: LogType.DEBUGDATA,
     })
+
     let signerDID = new DIDSigner();
     // Signature verification
     switch (data.signature_type) {

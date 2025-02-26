@@ -97,10 +97,10 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     }
 
     if (isScalar && !verifyWitnessMerkleProof) {
-        logs.push({
-            logType: LogType.SCALAR,
-            log: "Scalar revision detected."
-        })
+        // logs.push({
+        //     logType: LogType.SCALAR,
+        //     log: "Scalar revision detected."
+        // })
         // todo fix verifyRevisionMerkleTreeStructure
         // if (revision.witness_merkle_proof && revision.witness_merkle_proof.length > 1) {
 
