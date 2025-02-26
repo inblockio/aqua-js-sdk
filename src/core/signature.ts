@@ -162,7 +162,7 @@ export async function verifySignature(data: Revision, verificationHash: string):
     }
 
     logs.push({
-        log: `Wallet address  ${data.signature_wallet_address}`,
+        log: `Wallet address:  ${data.signature_wallet_address}`,
         logType: LogType.SIGNATURE,
     })
 

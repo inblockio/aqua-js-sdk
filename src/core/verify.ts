@@ -280,6 +280,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                             })
                         } else {
                             // logs.push(...linkVerificationResult.data.logData)
+                            
                             logs.push({
                                 log: `\t successfully verified ${fileUri}.aqua.json `,
                                 logType: LogType.SUCCESS
@@ -295,13 +296,17 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                     }
                 }
             }
+            
             isSuccess = linkOk
             break
     }
 
+   
+
     logs.push(...logsResult)
 
     if (isSuccess && isScalarSuccess) {
+
 
         if(isScalar){
             logs.push({
@@ -324,6 +329,11 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         })
     }
 
+    logs.push({
+        log: `\n`,
+        logType: LogType.EMPTY
+    })
+    
     return [isSuccess && isScalarSuccess, logs]
 }
 
