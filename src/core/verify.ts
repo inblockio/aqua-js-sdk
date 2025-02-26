@@ -46,7 +46,7 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
         let revisionIndex = verificationHashes.indexOf(revisionItemHash)
         logs.push({
             logType: LogType.ARROW,
-            log: `${revisionIndex + 1}. Verifying Revision Hash: ${revisionItemHash}`
+            log: ` ${revisionIndex + 1}. Verifying Revision: ${revisionItemHash}`
         })
         // logs.push({
         //     logType: LogType.DEBUGDATA,
@@ -57,37 +57,37 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
             case "form":
                 logs.push({
                     logType: LogType.FORM,
-                    log: "Verifying form revision. \n"
+                    log: "Type : Form. \n"
                 })
                 break;
             case "file":
                 logs.push({
                     logType: LogType.FILE,
-                    log: "Verifying file revision.\n"
+                    log: "Type :  File.\n"
                 })
                 break;
             case "signature":
                 logs.push({
                     logType: LogType.SIGNATURE,
-                    log: "Verifying signature revision.\n"
+                    log: "Type Signature.\n"
                 });
                 break;
             case "witness":
                 logs.push({
                     logType: LogType.WITNESS,
-                    log: "Verifying witness revision.\n"
+                    log: "Type : Witness .\n"
                 });
                 break;
             case "link":
                 logs.push({
                     logType: LogType.LINK,
-                    log: "Verifying link revision.\n"
+                    log: "Type : L ink .\n"
                 });
                 break;
             default:
                 logs.push({
                     logType: LogType.WARNING,
-                    log: `Unknown revision ${revision.revision_type}.\n`
+                    log: `Type : Unknown ${revision.revision_type}.\n`
                 });
         }
         // We use fast scalar verification if input does not have leaves property
