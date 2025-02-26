@@ -1,8 +1,8 @@
-import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType, VerificationGraphData } from "../types";
 import { dict2Leaves, getHashSum, getMerkleRoot } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
-import { Err, isErr, Ok, Result } from "../type_guards";
+import { Err, isErr, isOk, Ok, Result } from "../type_guards";
 
 export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = []
@@ -63,12 +63,12 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
                 })
                 break;
             case "signature":
-                if(revision.signature_type)
-                logs.push({
-                    logType: LogType.SIGNATURE,
-                    log: "Type:Signature.",
-                    ident: `${identCharacter}\t`
-                });
+                if (revision.signature_type)
+                    logs.push({
+                        logType: LogType.SIGNATURE,
+                        log: "Type:Signature.",
+                        ident: `${identCharacter}\t`
+                    });
                 break;
             case "witness":
                 logs.push({
@@ -118,6 +118,143 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
     }
 
     return Ok(data);
+}
+
+
+function findNode(tree: VerificationGraphData, hash: string): VerificationGraphData | null {
+    if (tree.hash === hash) {
+        return tree;
+    }
+    for (let i = 0; i < tree.verificationGraphData.length; i++) {
+        const child = tree.verificationGraphData[i];
+        const result = findNode(child, hash);
+        if (result) {
+            return result;
+        }
+    }
+    return null;
+}
+
+
+export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: Array<FileObject>, identCharacter: string = ""): Promise<Result<VerificationGraphData, LogData[]>> {
+    let verificationHashes = Object.keys(aquaTree.revisions)
+    const logs: LogData[] = [];
+
+    if (verificationHashes.length === 0) {
+
+        logs.push({
+            logType: LogType.ERROR,
+            log: "Revisions should be greater than 0"
+        })
+        return Err(logs)
+    }
+    let genesisRevisionData = aquaTree.revisions[verificationHashes[0]]
+    const isScalar = !genesisRevisionData.hasOwnProperty('leaves');
+
+    let [isGenesisOkay, _genesisVerificationLogs] = await verifyRevision(aquaTree, genesisRevisionData, verificationHashes[0], fileObject, isScalar);
+
+    const verificationResults: VerificationGraphData = {
+        hash: verificationHashes[0],
+        isValidationSucessful: isGenesisOkay,
+        revisionType: aquaTree.revisions[verificationHashes[0]].revision_type,
+        verificationGraphData: []
+    }
+
+    if (verificationHashes.length === 1) {
+        return Ok(verificationResults)
+    }
+
+    let isSuccess = true
+    for (let revisionItemHash of verificationHashes.slice(1)) {
+
+
+        let revision: Revision = aquaTree.revisions[revisionItemHash]
+        let revisionIndex = verificationHashes.indexOf(revisionItemHash)
+        logs.push({
+            logType: LogType.ARROW,
+            log: ` ${revisionIndex + 1}.Verifying Revision: ${revisionItemHash}`,
+            ident: identCharacter
+        })
+
+        switch (revision.revision_type) {
+            case "form":
+                logs.push({
+                    logType: LogType.FORM,
+                    log: "Type:Form.",
+                    ident: `${identCharacter}\t`
+                })
+                break;
+            case "file":
+                logs.push({
+                    logType: LogType.FILE,
+                    log: "Type: File."
+                })
+                break;
+            case "signature":
+                if (revision.signature_type)
+                    logs.push({
+                        logType: LogType.SIGNATURE,
+                        log: "Type:Signature.",
+                        ident: `${identCharacter}\t`
+                    });
+                break;
+            case "witness":
+                logs.push({
+                    logType: LogType.WITNESS,
+                    log: "Type:Witness.",
+                    ident: `${identCharacter}\t`
+                });
+                break;
+            case "link":
+                logs.push({
+                    logType: LogType.LINK,
+                    log: "Type:Link.",
+                    ident: `${identCharacter}\t`
+                });
+                break;
+            default:
+                logs.push({
+                    logType: LogType.WARNING,
+                    log: `Type:Unknown ${revision.revision_type}.\n`,
+                    ident: `${identCharacter}\t`
+                });
+        }
+        // We use fast scalar verification if input does not have leaves property
+        const isScalar = !revision.hasOwnProperty('leaves');
+        let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
+
+        let verificationResultsNode = findNode(verificationResults, revision.previous_verification_hash)
+        if (verificationResultsNode === null) {
+            logs.push({
+                logType: LogType.ERROR,
+                log: `A detached chain detected. Cannot find previous verification hash: ${revision.previous_verification_hash}`
+            })
+            isSuccess = false
+            break;
+        }
+
+        verificationResultsNode.verificationGraphData.push({
+            hash: revisionItemHash,
+            isValidationSucessful: result[0],
+            revisionType: revision.revision_type,
+            verificationGraphData: []
+        })
+
+        if (result[1].length > 0) {
+            logs.push(...result[1]);
+        }
+        if (!result[0]) {
+            isSuccess = false;
+        }
+
+    }
+
+
+    if (!isSuccess) {
+        return Err(logs);
+    }
+
+    return Ok(verificationResults);
 }
 
 async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificationHash: string, fileObjects: Array<FileObject>, isScalar: boolean, identCharacter: string = ""): Promise<[boolean, Array<LogData>]> {
@@ -281,9 +418,9 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                     try {
                         const linkAquaTree = fileObj.fileContent as AquaTree;//JSON.parse(fileObj.fileContent)  as AquaTree;
 
-                        
-                        
-                        let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects,`${linkIdentChar}\t`)
+
+
+                        let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects, `${linkIdentChar}\t`)
 
                         if (isErr(linkVerificationResult)) {
                             linkOk = false
@@ -292,7 +429,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                             logs.push({
                                 log: `verification of ${fileUri}.aqua.json failed `,
                                 logType: LogType.ERROR,
-                                ident: linkIdentChar ,//`${identCharacter}\t`
+                                ident: linkIdentChar,//`${identCharacter}\t`
                             })
                         } else {
                             logs.push(...linkVerificationResult.data.logData)
@@ -336,7 +473,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             logs.push({
                 log: `🌿 Tree  revision verified`,
                 logType: LogType.SUCCESS,
-                ident:  identCharacter.length == 0 ? '\t' : linkIdentChar
+                ident: identCharacter.length == 0 ? '\t' : linkIdentChar
             })
 
         }
@@ -346,7 +483,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         logs.push({
             log: `Error verifying revision ${revision.revision_type}  with hash ${verificationHash} \n\n`,
             logType: LogType.ERROR,
-             ident: `${identCharacter}\t`
+            ident: `${identCharacter}\t`
         })
     }
 
@@ -359,7 +496,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 }
 
 
-function verifyFormRevision(input: any, leaves: any,identCharacter : string = ""): [boolean, Array<LogData>] {
+function verifyFormRevision(input: any, leaves: any, identCharacter: string = ""): [boolean, Array<LogData>] {
     let logs: Array<LogData> = [];
     let contains_deleted_fields = false;
     let fieldsWithVerification: any = [];

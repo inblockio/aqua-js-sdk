@@ -46,6 +46,13 @@ export interface AquaOperationData {
   logData: Array<LogData>
 }
 
+export interface VerificationGraphData {
+  hash: string;
+  isValidationSucessful: boolean;
+  revisionType: RevisionType;
+  verificationGraphData: VerificationGraphData[]
+}
+
 export type RevisionType = "file" | "witness" | "signature" | "form" | "link"
 export type WitnessType = "tsa" | "eth" | "nostr"
 export type WitnessPlatformType = 'cli' | 'metamask';

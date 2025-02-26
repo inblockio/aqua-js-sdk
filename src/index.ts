@@ -3,10 +3,10 @@ import { createFormRevisionUtil, hideFormElementsUtil, unHideFormElementsUtil } 
 import { linkAquaTreesToMultipleAquaTreesUtil, linkAquaTreeUtil, linkMultipleAquaTreesUtil } from "./core/link";
 import { checkIfFileAlreadyNotarizedUtil, createGenesisRevision, fetchFilesToBeReadUtil, getLastRevisionUtil, getRevisionByHashUtil, removeLastRevisionUtil } from "./core/revision";
 import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
-import { verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
+import { verifyAndGetGraphDataUtil, verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
 import { Result } from "./type_guards";
-import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType } from "./types"
+import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData } from "./types"
 import { default as packageJson } from "./../package.json";
 import { logAquaTree } from "./aquavhtree";
 
@@ -103,6 +103,10 @@ export default class Aquafier {
      */
     verifyAquaTreeRevision = async (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
         return verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject)
+    }
+
+    verifyAndGetGraphData = async (aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<VerificationGraphData, LogData[]>> => {
+        return verifyAndGetGraphDataUtil(aquaTree, fileObject)
     }
 
     /**
