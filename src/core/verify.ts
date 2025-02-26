@@ -3,7 +3,6 @@ import { dict2Leaves, getHashSum, getMerkleRoot } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
 import { Err, isErr, Ok, Result } from "../type_guards";
-import { id } from "ethers";
 
 export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = []
@@ -188,6 +187,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     }
 
 
+    let linkIdentChar = `${identCharacter}\t\t`;
     let logsResult: Array<LogData> = []
     switch (revision.revision_type) {
         case "form":
@@ -231,7 +231,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             [isSuccess, logsResult] = await verifySignature(
                 revision,
                 revision.previous_verification_hash,
-                identCharacter
+                `${identCharacter}\t`
             );
 
 
@@ -281,27 +281,26 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                     try {
                         const linkAquaTree = fileObj.fileContent as AquaTree;//JSON.parse(fileObj.fileContent)  as AquaTree;
 
-                        let identChar = "";
-                        if (identCharacter != "") {
-                            identChar=`${identCharacter}\t`
-                        }
-                        let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects,identChar)
+                        
+                        
+                        let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects,`${linkIdentChar}\t`)
 
                         if (isErr(linkVerificationResult)) {
                             linkOk = false
-                            // logs.push(...linkVerificationResult.data)
+
+                            logs.push(...linkVerificationResult.data)
                             logs.push({
-                                log: `\t  verification of ${fileUri}.aqua.json failed `,
+                                log: `verification of ${fileUri}.aqua.json failed `,
                                 logType: LogType.ERROR,
-                                ident: `${identCharacter}\t`
+                                ident: linkIdentChar ,//`${identCharacter}\t`
                             })
                         } else {
-                            // logs.push(...linkVerificationResult.data.logData)
+                            logs.push(...linkVerificationResult.data.logData)
 
                             logs.push({
-                                log: `\t successfully verified ${fileUri}.aqua.json `,
+                                log: `successfully verified ${fileUri}.aqua.json `,
                                 logType: LogType.SUCCESS,
-                                ident: `${identCharacter}\t`
+                                ident: linkIdentChar //`${identCharacter}\t`
                             })
                         }
                     } catch (error) {
@@ -331,13 +330,13 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             logs.push({
                 log: `⏺️ Scalar revision verified`,
                 logType: LogType.SUCCESS,
-                ident: `${identCharacter}\t`
+                ident: identCharacter.length == 0 ? '\t' : linkIdentChar
             })
         } else {
             logs.push({
                 log: `🌿 Tree  revision verified`,
                 logType: LogType.SUCCESS,
-                ident: `${identCharacter}\t`
+                ident:  identCharacter.length == 0 ? '\t' : linkIdentChar
             })
 
         }
