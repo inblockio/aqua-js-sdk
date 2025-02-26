@@ -51,37 +51,38 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
             case "form":
                 logs.push({
                     logType: LogType.FORM,
-                    log: "Type:Form."
+                    log: "Type: Form."
                 })
                 break;
             case "file":
                 logs.push({
                     logType: LogType.FILE,
-                    log: "Type:File."
+                    log: "Type: File."
                 })
                 break;
             case "signature":
+                if(revision.signature_type)
                 logs.push({
                     logType: LogType.SIGNATURE,
-                    log: "Type:Signature."
+                    log: `Type: Signature - ${revision.signature_type}`
                 });
                 break;
             case "witness":
                 logs.push({
                     logType: LogType.WITNESS,
-                    log: "Type:Witness."
+                    log: "Type: Witness."
                 });
                 break;
             case "link":
                 logs.push({
                     logType: LogType.LINK,
-                    log: "Type:Link."
+                    log: "Type: Link."
                 });
                 break;
             default:
                 logs.push({
                     logType: LogType.WARNING,
-                    log: `Type:Unknown ${revision.revision_type}.\n`
+                    log: `Type: Unknown ${revision.revision_type}.\n`
                 });
         }
         // We use fast scalar verification if input does not have leaves property

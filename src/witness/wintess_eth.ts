@@ -377,6 +377,6 @@ export class WitnessEth {
     
     const actualMrSans0x = actual.startsWith('0x') ? actual.slice(2) : actual;
     const mrSans0x = expectedMR.startsWith('0x') ? expectedMR.slice(2) : expectedMR;
-    return [actualMrSans0x === mrSans0x, `${actualMrSans0x === mrSans0x ? 'Transaction found' : ' Transaction not valid'}`];
+    return [actualMrSans0x === mrSans0x, `${actualMrSans0x === mrSans0x ? 'On-Chain Witness hash verified' : 'On-Chain Witness verification failed'}`];
   }
 }
