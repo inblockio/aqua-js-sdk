@@ -62,7 +62,7 @@ Ensure to create `credentials.json` file in src the contents should be
 {
     "mnemonic": "",
     "nostr_sk": "",
-    "did:key": "",
+    "did_key": "",
     "alchemy_key": "",
     "witness_eth_network": "",
     "witness_method": ""

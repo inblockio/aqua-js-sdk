@@ -15,7 +15,7 @@ The data required for the credentials of the user
 ```ts
 { mnemonic: "abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, about",
  * nostr_sk: "0x
- * did:key: "did:key:z6Mkq
+ * did_key: "did_key:z6Mkq
  * alchemy_key: "0x
  * witness_eth_network: "sepolia"
  * witness_eth_platform: "cli"
@@ -34,9 +34,9 @@ The Alchemy key of the user
 
 ***
 
-### did:key
+### did_key
 
-> **did:key**: `string`
+> **did_key**: `string`
 
 Defined in: [types.ts:30](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/types.ts#L30)
 

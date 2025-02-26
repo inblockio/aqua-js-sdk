@@ -63,7 +63,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    createContentRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    createContentRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return createContentRevisionUtil(aquaTree, fileObject, enableScalar)
     }
 
@@ -77,7 +77,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    createGenesisRevision = async (fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    createGenesisRevision = async (fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return createGenesisRevision(fileObject, isForm, enableContent, enableScalar)
     }
 
@@ -116,7 +116,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    witnessAquaTree = async (aquaTree: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    witnessAquaTree = async (aquaTree: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
     }
 
@@ -131,7 +131,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    witnessMultipleAquaTrees = async (aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    witnessMultipleAquaTrees = async (aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return witnessMultipleAquaTreesUtil(aquaTrees, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
     }
 
@@ -144,7 +144,8 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+        
         return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar)
     }
 
@@ -168,7 +169,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkAquaTree = async (aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    linkAquaTree = async (aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScalar)
     }
 
@@ -180,7 +181,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return linkMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
     }
 
@@ -192,7 +193,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkAquaTreesToMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper[], enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    linkAquaTreesToMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper[], enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return linkAquaTreesToMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
     }
 
@@ -204,7 +205,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, Log[]>
      */
-    createFormRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> => {
+    createFormRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return createFormRevisionUtil(aquaTree, fileObject, enableScalar)
     }
 
@@ -295,7 +296,7 @@ export class AquafierChainable {
         return result.data.aquaTree!
     }
 
-    async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = false): Promise<this> {
+    async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = true): Promise<this> {
         let data = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
 
         if (data.isOk()) {
@@ -312,11 +313,11 @@ export class AquafierChainable {
     async sign(signType: SignType = "metamask", credentials: CredentialsData = {
         mnemonic: "",
         nostr_sk: "",
-        "did:key": "",
+        "did_key": "",
         alchemy_key: "",
         witness_eth_network: "",
         witness_method: ""
-    }, enableScalar: boolean = false): Promise<this> {
+    }, enableScalar: boolean = true): Promise<this> {
         let data = await signAquaTreeUtil({
             aquaTree: this.value,
             fileObject: {
@@ -342,11 +343,11 @@ export class AquafierChainable {
     async witness(witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
         mnemonic: "",
         nostr_sk: "",
-        "did:key": "",
+        "did_key": "",
         alchemy_key: "",
         witness_eth_network: "",
         witness_method: ""
-    }, enableScalar: boolean = false): Promise<this> {
+    }, enableScalar: boolean = true): Promise<this> {
         let data = await witnessAquaTreeUtil({
             aquaTree: this.value,
             fileObject: undefined,

@@ -45,9 +45,9 @@
                     }
                 ]
             },
-            "signature_public_key": "did:key:z6Mkn1wMijuFw5ddA7JcyvgUkKid8Wh3wYnBsXWkaTURkMdL",
-            "signature_wallet_address": "did:key:z6Mkn1wMijuFw5ddA7JcyvgUkKid8Wh3wYnBsXWkaTURkMdL",
-            "signature_type": "did:key",
+            "signature_public_key": "did_key:z6Mkn1wMijuFw5ddA7JcyvgUkKid8Wh3wYnBsXWkaTURkMdL",
+            "signature_wallet_address": "did_key:z6Mkn1wMijuFw5ddA7JcyvgUkKid8Wh3wYnBsXWkaTURkMdL",
+            "signature_type": "did_key",
             "leaves": [
                 "2697640a6d8addb98ef6bdd9e50918bc62888a9bcc7e4dca7fb74e023369190c",
                 "0959676834b83be6cc8aa4cc9a2c6f1c3753a955e7d5b1ffd2c887e053f45be2",

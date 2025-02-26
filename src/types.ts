@@ -10,7 +10,7 @@
  * @typedef {Object} CredentialsData
  * @property {string} mnemonic - The mnemonic of the user
  * @property {string} nostr_sk - The secret key of the Nostr account
- * @property {string} did:key - The DID key of the user
+ * @property {string} did_key - The DID key of the user
  * @property {string} alchemy_key - The Alchemy key of the user
  * @property {string} witness_eth_network - The Ethereum network of the witness
  * @property {string} witness_eth_platform - The Ethereum platform of the witness
@@ -18,7 +18,7 @@
  * @example
  * { mnemonic: "abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, abandon, about",
  * nostr_sk: "0x
- * did:key: "did:key:z6Mkq
+ * did_key: "did_key:z6Mkq
  * alchemy_key: "0x
  * witness_eth_network: "sepolia"
  * witness_eth_platform: "cli"
@@ -27,7 +27,7 @@
 export interface CredentialsData {
   mnemonic: string;
   nostr_sk: string;
-  "did:key": string;
+  "did_key": string;
   alchemy_key: string,
   witness_eth_network: string;
   witness_method: string;

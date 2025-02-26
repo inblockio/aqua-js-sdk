@@ -52,6 +52,44 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
             logType: LogType.DEBUGDATA,
             log: "Revision data: \n " + JSON.stringify(revision, null, 4)
         })
+
+        switch (revision.revision_type) {
+            case "form":
+                logs.push({
+                    logType: LogType.FORM,
+                    log: "Verifying form revision. \n"
+                })
+                break;
+            case "file":
+                logs.push({
+                    logType: LogType.FILE,
+                    log: "Verifying file revision.\n"
+                })
+                break;
+            case "signature":
+                logs.push({
+                    logType: LogType.SIGNATURE,
+                    log: "Verifying signature revision.\n"
+                });
+                break;
+            case "witness":
+                logs.push({
+                    logType: LogType.WITNESS,
+                    log: "Verifying witness revision.\n"
+                });
+                break;
+            case "link":
+                logs.push({
+                    logType: LogType.LINK,
+                    log: "Verifying link revision.\n"
+                });
+                break;
+            default:
+                logs.push({
+                    logType: LogType.WARNING,
+                    log: `Unknown revision ${revision.revision_type}.\n`
+                });
+        }
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
 
@@ -149,10 +187,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     let logsResult: Array<LogData> = []
     switch (revision.revision_type) {
         case "form":
-            logs.push({
-                logType: LogType.FORM,
-                log: "Verifying form revision. \n"
-            })
+
             let res = verifyFormRevision(
                 revision,
                 revision.leaves,
@@ -163,10 +198,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             // isSuccess = true;
             break
         case "file":
-            logs.push({
-                logType: LogType.FILE,
-                log: "Verifying file revision.\n"
-            })
+
             let fileContent: Buffer
             if (!!revision.content) {
                 fileContent = Buffer.from(revision.content, "utf8")
@@ -188,10 +220,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             isSuccess = fileHash === revision.file_hash
             break
         case "signature":
-            logs.push({
-                logType: LogType.SIGNATURE,
-                log: "Verifying signature revision.\n"
-            });
+
             // Verify signature
             [isSuccess, logsResult] = await verifySignature(
                 revision,
@@ -201,10 +230,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
             break
         case "witness":
-            logs.push({
-                logType: LogType.WITNESS,
-                log: "Verifying witness revision.\n"
-            });
+
             // Verify witness
             // If multiple use merkle root else use previous verification hash
             let hash_ = revision.previous_verification_hash
@@ -222,10 +248,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
             break
         case "link":
-            logs.push({
-                logType: LogType.LINK,
-                log: "Verifying link revision.\n"
-            });
+
             let linkOk: boolean = true
             for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
                 const fileUri = aquaTree.file_index[vh];

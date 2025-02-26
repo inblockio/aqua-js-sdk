@@ -133,7 +133,7 @@ export function createCredentials() {
   const mnemonic = Mnemonic.fromEntropy(entropy);
 
   let credentialsObject: CredentialsData = {
-    mnemonic: mnemonic.phrase, nostr_sk: "", "did:key": "",
+    mnemonic: mnemonic.phrase, nostr_sk: "", "did_key": "",
     alchemy_key: "ZaQtnup49WhU7fxrujVpkFdRz4JaFRtZ", // project defualt key
     witness_eth_network: "sepolia",
     witness_method: "metamask"

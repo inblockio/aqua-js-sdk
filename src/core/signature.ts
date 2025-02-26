@@ -57,7 +57,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
             break
         case "did":
             // const credentials = readCredentials()
-            if (credentials == null || credentials == undefined || credentials['did:key'].length === 0 || !credentials['did:key']) {
+            if (credentials == null || credentials == undefined || credentials['did_key'].length === 0 || !credentials['did_key']) {
 
                 logs.push({
                     log: "DID key is required.  Please get a key from https://hub.ebsi.eu/tools/did-generator",
@@ -70,12 +70,12 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
             let did = new DIDSigner();
             const { jws, key } = await did.sign(
                 targetRevisionHash,
-                Buffer.from(credentials["did:key"], "hex"),
+                Buffer.from(credentials["did_key"], "hex"),
             )
             signature = jws //jws.payload
             walletAddress = key
             publicKey = key
-            signature_type = "did:key"
+            signature_type = "did_key"
             break
     }
 
@@ -169,7 +169,7 @@ export async function verifySignature(data: Revision, verificationHash: string):
     let signerDID = new DIDSigner();
     // Signature verification
     switch (data.signature_type) {
-        case "did:key":
+        case "did_key":
             signatureOk = await signerDID.verify(data.signature, data.signature_public_key!!, verificationHash)
             break
         case "ethereum:eip-191":
