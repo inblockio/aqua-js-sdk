@@ -91,7 +91,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
         signature_wallet_address: walletAddress,
         signature_type: signature_type,
     };
-    verificationData["version"] = `aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
+    verificationData["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
 
 
     // Merklelize the dictionary
@@ -163,7 +163,7 @@ export async function verifySignature(data: Revision, verificationHash: string):
 
     logs.push({
         log: `Wallet address  ${data.signature_wallet_address}`,
-        logType: LogType.DEBUGDATA,
+        logType: LogType.SIGNATURE,
     })
 
     let signerDID = new DIDSigner();

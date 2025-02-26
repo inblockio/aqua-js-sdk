@@ -22,7 +22,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
         revision_type: "link",
     }
 
-    newRevision["version"] =`aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
+    newRevision["version"] =`https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
 
     const linkVHs = [getLatestVH(linkAquaTreeWrapper.aquaTree)]
 

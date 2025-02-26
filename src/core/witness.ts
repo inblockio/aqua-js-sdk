@@ -29,7 +29,7 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
         local_timestamp: timestamp,
         revision_type: revisionType,
     }
-    verificationData["version"] = `aqua-protocol.org/docs/schema/v1.3.2 | SHA256 | Method:  ${enableScalar ? 'scalar' : 'tree'}`
+    verificationData["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
 
 
     const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials!!, witnessNetwork)
@@ -240,7 +240,7 @@ const prepareWitness = async (
 
                 logs.push({
                     log: `Wallet address: ${_wallet}`,
-                    logType: LogType.DEBUGDATA
+                    logType: LogType.SIGNATURE
                 });
 
                 const [gasEstimateResult, logData] = await estimateWitnessGas(

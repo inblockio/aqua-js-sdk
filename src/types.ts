@@ -76,6 +76,7 @@ export enum LogType {
   FORM = "form",
   SCALAR = "scalar",
   EMPTY = "empty",
+  TREE = "tree",
 }
 
 export const LogTypeEmojis: Record<LogType, string> = {
@@ -93,6 +94,7 @@ export const LogTypeEmojis: Record<LogType, string> = {
   [LogType.WITNESS]: "👀",
   [LogType.FORM]: "📝",
   [LogType.SCALAR]: "⏺️ ",
+  [LogType.TREE]: "🌿",
   [LogType.EMPTY]: "",
 };
 

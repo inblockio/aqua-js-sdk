@@ -37,57 +37,51 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
     let verificationHashes = Object.keys(aquaTree.revisions)
     let isSuccess = true
     for (let revisionItemHash of verificationHashes) {
-        logs.push({
-            logType: LogType.EMPTY,
-            log: "\n"
-        })
+       
 
         let revision: Revision = aquaTree.revisions[revisionItemHash]
         let revisionIndex = verificationHashes.indexOf(revisionItemHash)
         logs.push({
             logType: LogType.ARROW,
-            log: ` ${revisionIndex + 1}. Verifying Revision: ${revisionItemHash}`
+            log: ` ${revisionIndex + 1}.Verifying Revision: ${revisionItemHash}`
         })
-        // logs.push({
-        //     logType: LogType.DEBUGDATA,
-        //     log: "Revision data: \n " + JSON.stringify(revision, null, 4)
-        // })
+     
 
         switch (revision.revision_type) {
             case "form":
                 logs.push({
                     logType: LogType.FORM,
-                    log: "Type : Form. \n"
+                    log: "Type:Form."
                 })
                 break;
             case "file":
                 logs.push({
                     logType: LogType.FILE,
-                    log: "Type :  File.\n"
+                    log: "Type:File."
                 })
                 break;
             case "signature":
                 logs.push({
                     logType: LogType.SIGNATURE,
-                    log: "Type Signature.\n"
+                    log: "Type:Signature."
                 });
                 break;
             case "witness":
                 logs.push({
                     logType: LogType.WITNESS,
-                    log: "Type : Witness .\n"
+                    log: "Type:Witness."
                 });
                 break;
             case "link":
                 logs.push({
                     logType: LogType.LINK,
-                    log: "Type : L ink .\n"
+                    log: "Type:Link."
                 });
                 break;
             default:
                 logs.push({
                     logType: LogType.WARNING,
-                    log: `Type : Unknown ${revision.revision_type}.\n`
+                    log: `Type:Unknown ${revision.revision_type}.\n`
                 });
         }
         // We use fast scalar verification if input does not have leaves property
@@ -134,6 +128,9 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         verifyWitnessMerkleProof = true
     }
 
+    // todo this can be improved.
+    // remove  verifyWitnessMerkleProof which is hard coded.
+    // verify scalar should be minimal
     if (isScalar && !verifyWitnessMerkleProof) {
         // logs.push({
         //     logType: LogType.SCALAR,
@@ -163,10 +160,10 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 log: `Scalar revision verification failed.\n\tcalculated  hash ${actualVH} \n\t expected hash ${verificationHash} `
             });
         } else {
-            logs.push({
-                logType: LogType.SUCCESS,
-                log: "Scalar revision hash verified succeessully."
-            })
+            // logs.push({
+            //     logType: LogType.SUCCESS,
+            //     log: "Scalar revision hash verified succeessully."
+            // })
         }
 
 
@@ -306,10 +303,20 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
     if (isSuccess && isScalarSuccess) {
 
-        logs.push({
-            log: `Successfully verified revision ${revision.revision_type}  with hash ${verificationHash} \n`,
-            logType: LogType.SUCCESS
-        })
+        if(isScalar){
+            logs.push({
+                log: `⏺️ Scalar revision verified`,
+                logType: LogType.SUCCESS
+            })
+        }else{
+            logs.push({
+                log: `🌿 Tree  revision verified`,
+                logType: LogType.SUCCESS
+            })
+    
+        }
+        
+
     } else {
         logs.push({
             log: `Error verifying revision ${revision.revision_type}  with hash ${verificationHash} \n\n`,
