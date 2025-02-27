@@ -47,20 +47,78 @@ export interface AquaOperationData {
 }
 
 
-export interface FormVerificationGraphData {
+export interface FileVerificationGraphData {
+  // revisionType: "file";
+  isValidationSucessful: boolean;
+}
+
+export interface FormKeyGraphData {
   formKey: string;
   isValidationSucessful: boolean;
 }
-export interface VerificationGraphData {
-  hash: string;
+
+export interface FormVerificationGraphData {
+  // revisionType: "form";
+  formKeys: FormKeyGraphData[]
+}
+
+export interface SignatureVerificationGraphData {
+  // revisionType: "signature";
+  walletAddress: string;
+  chainHashIsValid: boolean;
+  signature: string;
+  signatureType: string
   isValidationSucessful: boolean;
-  revisionType: RevisionType;
-  formValidationData: FormVerificationGraphData[];
-  sinatureWalletAddress : string;
-  signatureChainHashIsValid : boolean;
-  signatureChainHash : string;
-  verificationGraphData: VerificationGraphData[]
-  linkVerificationGraphData: VerificationGraphData[]
+}
+
+export interface WitnessVerificationGraphData {
+  // revisionType: "witness";
+  txHash: string;
+  merkleRoot: string;
+  isValidationSucessful: boolean;
+}
+
+export interface LinkVerificationGraphData {
+  // revisionType: "link";
+  isValidationSucessful: boolean;
+}
+
+export type RevisionGraphInfo = FileVerificationGraphData
+  | WitnessVerificationGraphData
+  | SignatureVerificationGraphData
+  | FormVerificationGraphData
+  | LinkVerificationGraphData
+
+
+// export interface VerificationGraphData {
+//   hash: string;
+//   isValidationSucessful: boolean;
+//   revisionType: RevisionType;
+
+//   info: RevisionGraphInfo;
+
+//   verificationGraphData: VerificationGraphData[]
+//   linkVerificationGraphData: VerificationGraphData[]
+// }
+
+// Map RevisionType to corresponding info type
+type RevisionGraphInfoMap = {
+  file: FileVerificationGraphData;
+  witness: WitnessVerificationGraphData;
+  signature: SignatureVerificationGraphData;
+  form: FormVerificationGraphData;
+  link: LinkVerificationGraphData;
+};
+
+// Ensure info type matches revisionType
+export interface VerificationGraphData<T extends RevisionType = RevisionType> {
+  hash: string;
+  previous_verification_hash: string;
+  isValidationSucessful: boolean;
+  revisionType: T;
+  info: RevisionGraphInfoMap[T]; // Ensures info type is correct
+  verificationGraphData: VerificationGraphData[];
+  linkVerificationGraphData: VerificationGraphData[];
 }
 
 export type RevisionType = "file" | "witness" | "signature" | "form" | "link"
@@ -118,7 +176,7 @@ export const LogTypeEmojis: Record<LogType, string> = {
 export interface LogData {
   logType: LogType,
   log: string,
-  ident? : string | null | undefined
+  ident?: string | null | undefined
 }
 
 
@@ -289,5 +347,3 @@ export interface WitnessNostrVerifyResult {
     author?: string;
   };
 }
-
-

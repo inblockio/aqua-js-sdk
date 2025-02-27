@@ -1,4 +1,4 @@
-import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType, VerificationGraphData } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType, VerificationGraphData, FileVerificationGraphData, FormKeyGraphData, LinkVerificationGraphData, SignatureVerificationGraphData, WitnessVerificationGraphData, FormVerificationGraphData } from "../types";
 import { dict2Leaves, getHashSum, getMerkleRoot } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
@@ -139,10 +139,11 @@ function findNode(tree: VerificationGraphData, hash: string): VerificationGraphD
 
 
 
-export async function verifyAndGetGraphDataRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
-
+export async function verifyAndGetGraphDataRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<VerificationGraphData, LogData[]>> {
+    const logs: LogData[] = []
+    return Err(logs)
 }
-  
+
 
 export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: Array<FileObject>, identCharacter: string = ""): Promise<Result<VerificationGraphData, LogData[]>> {
     let verificationHashes = Object.keys(aquaTree.revisions)
@@ -160,13 +161,21 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
     const isScalar = !genesisRevisionData.hasOwnProperty('leaves');
 
     let [isGenesisOkay, _genesisVerificationLogs] = await verifyRevision(aquaTree, genesisRevisionData, verificationHashes[0], fileObject, isScalar, identCharacter);
+    const genesisRevisionType = aquaTree.revisions[verificationHashes[0]].revision_type
+
+    const fileGraphData: FileVerificationGraphData = {
+        isValidationSucessful: isGenesisOkay
+    }
 
     const verificationResults: VerificationGraphData = {
         hash: verificationHashes[0],
+        previous_verification_hash: genesisRevisionData.previous_verification_hash,
+        timestamp:  genesisRevisionData.local_timestamp,
         isValidationSucessful: isGenesisOkay,
-        revisionType: aquaTree.revisions[verificationHashes[0]].revision_type,
+        revisionType: genesisRevisionType,
         verificationGraphData: [],
-        linkVerificationGraphData: []
+        linkVerificationGraphData: [],
+        info: fileGraphData
     }
 
     if (verificationHashes.length === 1) {
@@ -271,12 +280,58 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
 
         }
 
+        let data: FileVerificationGraphData
+            | WitnessVerificationGraphData
+            | SignatureVerificationGraphData
+            | FormVerificationGraphData
+            | LinkVerificationGraphData | undefined = undefined;
+
+        if (revision.revision_type === "form") {
+            let formData: FormVerificationGraphData = {
+                formKeys: [],
+            }
+            data = formData
+        }
+        else if (revision.revision_type === "file") {
+            let formData: FileVerificationGraphData = {
+                isValidationSucessful: result[0]
+            }
+            data = formData
+        }
+        else if (revision.revision_type === "link") {
+            let formData: LinkVerificationGraphData = {
+                isValidationSucessful: result[0]
+            }
+            data = formData
+        }
+        else if (revision.revision_type === "signature") {
+            let formData: SignatureVerificationGraphData = {
+                isValidationSucessful: result[0],
+                walletAddress: revision.signature_wallet_address,
+                chainHashIsValid: result[0],
+                signature: revision.signature,
+                signatureType: revision.signature_type
+            }
+            data = formData
+        }
+        else if (revision.revision_type === "witness") {
+            let formData: WitnessVerificationGraphData = {
+                isValidationSucessful: result[0],
+                txHash: revision.witness_transaction_hash,
+                merkleRoot: revision.witness_merkle_root
+            }
+            data = formData
+        }
+
         verificationResultsNode.verificationGraphData.push({
             hash: revisionItemHash,
+            previous_verification_hash: revision.previous_verification_hash,
+            timestamp:  revision.local_timestamp,
             isValidationSucessful: result[0],
             revisionType: revision.revision_type,
             verificationGraphData: [],
-            linkVerificationGraphData: linkedVerificationGraphData
+            linkVerificationGraphData: linkedVerificationGraphData,
+            info: data!!
         })
 
         if (result[1].length > 0) {
@@ -332,7 +387,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         const actualVH = "0x" + getHashSum(JSON.stringify(revision))
         isScalarSuccess = actualVH === verificationHash
 
-       
+
         if (!isScalarSuccess) {
 
             logs.push({
