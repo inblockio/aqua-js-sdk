@@ -46,10 +46,19 @@ export interface AquaOperationData {
   logData: Array<LogData>
 }
 
+
+export interface FormVerificationGraphData {
+  formKey: string;
+  isValidationSucessful: boolean;
+}
 export interface VerificationGraphData {
   hash: string;
   isValidationSucessful: boolean;
   revisionType: RevisionType;
+  formValidationData: FormVerificationGraphData[];
+  sinatureWalletAddress : string;
+  signatureChainHashIsValid : boolean;
+  signatureChainHash : string;
   verificationGraphData: VerificationGraphData[]
   linkVerificationGraphData: VerificationGraphData[]
 }

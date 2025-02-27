@@ -137,6 +137,13 @@ function findNode(tree: VerificationGraphData, hash: string): VerificationGraphD
 }
 
 
+
+
+export async function verifyAndGetGraphDataRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
+
+}
+  
+
 export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: Array<FileObject>, identCharacter: string = ""): Promise<Result<VerificationGraphData, LogData[]>> {
     let verificationHashes = Object.keys(aquaTree.revisions)
     const logs: LogData[] = [];
