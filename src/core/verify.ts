@@ -59,7 +59,8 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
             case "file":
                 logs.push({
                     logType: LogType.FILE,
-                    log: "Type: File."
+                    log: "Type: File.",
+                    ident: `${identCharacter}\t`
                 })
                 break;
             case "signature":
@@ -94,7 +95,7 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
 
-        let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
+        let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar, identCharacter);
 
 
         if (result[1].length > 0) {
@@ -151,7 +152,7 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
     let genesisRevisionData = aquaTree.revisions[verificationHashes[0]]
     const isScalar = !genesisRevisionData.hasOwnProperty('leaves');
 
-    let [isGenesisOkay, _genesisVerificationLogs] = await verifyRevision(aquaTree, genesisRevisionData, verificationHashes[0], fileObject, isScalar);
+    let [isGenesisOkay, _genesisVerificationLogs] = await verifyRevision(aquaTree, genesisRevisionData, verificationHashes[0], fileObject, isScalar, identCharacter);
 
     const verificationResults: VerificationGraphData = {
         hash: verificationHashes[0],
@@ -188,7 +189,8 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
             case "file":
                 logs.push({
                     logType: LogType.FILE,
-                    log: "Type: File."
+                    log: "Type: File.",
+                    ident: `${identCharacter}\t`
                 })
                 break;
             case "signature":
@@ -222,7 +224,7 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
         }
         // We use fast scalar verification if input does not have leaves property
         const isScalar = !revision.hasOwnProperty('leaves');
-        let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
+        let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar, identCharacter);
 
         let verificationResultsNode = findNode(verificationResults, revision.previous_verification_hash)
         if (verificationResultsNode === null) {
@@ -246,7 +248,7 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
                 })
                 break;
             }
-            
+
             let result = await verifyAndGetGraphDataUtil(linkedAquaTree.fileContent as AquaTree, fileObject, `${identCharacter}\t`)
 
             if (result.isOk()) {
@@ -354,7 +356,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     }
 
 
-    let linkIdentChar = `${identCharacter}\t\t`;
+    let linkIdentChar = `${identCharacter}\t`;
     let logsResult: Array<LogData> = []
     switch (revision.revision_type) {
         case "form":
@@ -497,13 +499,13 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             logs.push({
                 log: `⏺️ Scalar revision verified`,
                 logType: LogType.SUCCESS,
-                ident: identCharacter.length == 0 ? '\t' : linkIdentChar
+                ident: identCharacter.length == 0 ? '\t' : `${linkIdentChar}`
             })
         } else {
             logs.push({
                 log: `🌿 Tree  revision verified`,
                 logType: LogType.SUCCESS,
-                ident: identCharacter.length == 0 ? '\t' : linkIdentChar
+                ident: identCharacter.length == 0 ? '\t' : `${linkIdentChar}`
             })
 
         }
@@ -511,7 +513,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
     } else {
         logs.push({
-            log: `Error verifying revision ${revision.revision_type}  with hash ${verificationHash} \n\n`,
+            log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash}`,
             logType: LogType.ERROR,
             ident: `${identCharacter}\t`
         })

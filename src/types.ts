@@ -91,7 +91,7 @@ export const LogTypeEmojis: Record<LogType, string> = {
   [LogType.SUCCESS]: "✅",
   [LogType.INFO]: "✨",
   [LogType.ERROR]: "❌",
-  [LogType.FINAL_ERROR]: "🚫",
+  [LogType.FINAL_ERROR]: "❌",
   [LogType.WARNING]: "🚨",
   [LogType.HINT]: "💡",
   [LogType.DEBUGDATA]: "🐞",
