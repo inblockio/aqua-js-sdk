@@ -351,11 +351,11 @@ export function printGraphData(node: VerificationGraphData, prefix: string = "",
       }
     }
     // Update the prefix for children
-    const newPrefix = prefix + (isLast ? "\t" : " │\t");
+    const newPrefix = prefix + (isLast ? "\t" : "\t|");
 
     // Recursively log each child
     node.verificationGraphData.forEach((child, index) => {
-        const isChildLast = index === node.verificationGraphData.length - 1;
-        printGraphData(child, newPrefix, isChildLast);
+        // const isChildLast = index === node.verificationGraphData.length - 1;
+        printGraphData(child, newPrefix, false);
     });
 }
