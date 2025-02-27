@@ -497,7 +497,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
         if (isScalar) {
             logs.push({
-                log: `⏺️ Scalar revision verified`,
+                log: `⏺️  Scalar revision verified`,
                 logType: LogType.SUCCESS,
                 ident: identCharacter.length == 0 ? '\t' : `${linkIdentChar}`
             })
