@@ -197,7 +197,7 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
                 if (revision.signature_type)
                     logs.push({
                         logType: LogType.SIGNATURE,
-                        log: "Type:Signature.",
+                        log: `Type:Signature ${revision.signature_type}`,
                         ident: `${identCharacter}\t`
                     });
                 break;
