@@ -197,7 +197,7 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
                 if (revision.signature_type)
                     logs.push({
                         logType: LogType.SIGNATURE,
-                        log: "Type:Signature.",
+                        log: `Type:Signature ${revision.signature_type}`,
                         ident: `${identCharacter}\t`
                     });
                 break;
@@ -497,7 +497,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
         if (isScalar) {
             logs.push({
-                log: `⏺️ Scalar revision verified`,
+                log: `⏺️  Scalar revision verified`,
                 logType: LogType.SUCCESS,
                 ident: identCharacter.length == 0 ? '\t' : `${linkIdentChar}`
             })
