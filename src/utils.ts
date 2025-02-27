@@ -319,7 +319,7 @@ export function printLogs(logs: LogData[], enableVerbose: boolean = true) {
   }
 }
 
-export function printlinkedGraphData(node: VerificationGraphData, prefix: string = "", isLast: boolean = true): void {
+export function printlinkedGraphData(node: VerificationGraphData, prefix: string = "", _isLast: boolean = true): void {
     // Log the current node's hash
     let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
     let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis['success'] : LogTypeEmojis['error']
@@ -328,15 +328,15 @@ export function printlinkedGraphData(node: VerificationGraphData, prefix: string
 
 
     if(node.revisionType === "link"){
-      console.log(`${prefix}\t\tTree ${node.hash.slice(-4)}`)
+      console.log(`${prefix}\tTree ${node.hash.slice(-4)}`)
       for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
         const el = node.linkVerificationGraphData[i];
-        printlinkedGraphData(el, `${prefix}\t\t`, false)
+        printlinkedGraphData(el, `${prefix}\t`, false)
       }
     }
 
     // Update the prefix for children
-    const newPrefix = prefix  + (isLast ? "\t" : "\t");
+    const newPrefix = prefix  //+ (isLast ? "\t" : "\t");
 
     // Recursively log each child
     node.verificationGraphData.forEach((child, index) => {
@@ -345,7 +345,7 @@ export function printlinkedGraphData(node: VerificationGraphData, prefix: string
     });
 }
 
-export function printGraphData(node: VerificationGraphData, prefix: string = "", isLast: boolean = true): void {
+export function printGraphData(node: VerificationGraphData, prefix: string = "", _isLast: boolean = true): void {
     // Log the current node's hash
     let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
     let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis['success'] : LogTypeEmojis['error']
@@ -360,10 +360,9 @@ export function printGraphData(node: VerificationGraphData, prefix: string = "",
       }
     }
 
-    
 
     // Update the prefix for children
-    const newPrefix = prefix + (isLast ? "\t" : "\t");
+    const newPrefix = prefix  //+ (isLast ? "\t" : "\t");
 
     // Recursively log each child
     node.verificationGraphData.forEach((child, index) => {
