@@ -325,12 +325,22 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         const actualVH = "0x" + getHashSum(JSON.stringify(revision))
         isScalarSuccess = actualVH === verificationHash
 
-        // console.log("\n  revision data "+JSON.stringify(revision)+"\n actualVH  "+actualVH+" \n leaves " + JSON.stringify(leaves) + "\n")
-
+       
         if (!isScalarSuccess) {
+
+            logs.push({
+                logType: LogType.DEBUGDATA,
+                log: `calculated  hash ${actualVH} expected hash ${verificationHash} `,
+                ident: `${identCharacter}\t`
+            });
+            logs.push({
+                logType: LogType.DEBUGDATA,
+                log: ` expected hash ${verificationHash} `,
+                ident: `${identCharacter}\t`
+            });
             logs.push({
                 logType: LogType.ERROR,
-                log: `Scalar revision verification failed.\n\tcalculated  hash ${actualVH} \n\t expected hash ${verificationHash} `,
+                log: `Scalar revision verification failed`,
                 ident: `${identCharacter}\t`
             });
         } else {
