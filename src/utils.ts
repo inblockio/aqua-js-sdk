@@ -366,7 +366,7 @@ export function printGraphData(node: VerificationGraphData, prefix: string = "",
 
     // Recursively log each child
     node.verificationGraphData.forEach((child, index) => {
-        const isChildLast = index === node.verificationGraphData.length - 1;
-        printGraphData(child, newPrefix, isChildLast);
+        // const isChildLast = index === node.verificationGraphData.length - 1;
+        printGraphData(child, newPrefix, false);
     });
 }
