@@ -1,8 +1,11 @@
-// import { createHash } from 'crypto';
+
 import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, LogTypeEmojis, Revision, RevisionTree, TreeMapping, VerificationGraphData } from './types';
 import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers";
 // import crypto from 'crypto-browserify';
-import sha3 from "js-sha3"
+// import { createHash } from 'crypto';
+// import sha3 from "js-sha3"
+// import { sha256 } from 'ethers';
+import shajs from 'sha.js';
 import { MerkleTree } from 'merkletreejs';
 import { Err, Ok, Result } from './type_guards';
 
@@ -67,7 +70,11 @@ export function getHashSum(data: string | Uint8Array): string {
   const input = data instanceof Uint8Array ?
     new TextDecoder().decode(data) :
     data;
-  return sha3.sha3_256(input);
+  // return sha3.sha3_256(input);
+
+  let hash = shajs('sha256').update(input).digest('hex')
+  return hash;
+
 }
 
 // export function getHashSum(data: string | Buffer): string {
