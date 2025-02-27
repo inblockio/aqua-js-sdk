@@ -114,6 +114,7 @@ type RevisionGraphInfoMap = {
 export interface VerificationGraphData<T extends RevisionType = RevisionType> {
   hash: string;
   previous_verification_hash: string;
+  timestamp: string;
   isValidationSucessful: boolean;
   revisionType: T;
   info: RevisionGraphInfoMap[T]; // Ensures info type is correct
