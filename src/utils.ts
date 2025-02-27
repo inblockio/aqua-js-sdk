@@ -326,13 +326,22 @@ export function printlinkedGraphData(node: VerificationGraphData, prefix: string
     // console.log(`${prefix} ${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
     console.log(`${prefix}└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
 
+
+    if(node.revisionType === "link"){
+      console.log(`${prefix}\t\tTree ${node.hash.slice(-4)}`)
+      for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
+        const el = node.linkVerificationGraphData[i];
+        printlinkedGraphData(el, `${prefix}\t\t`, false)
+      }
+    }
+
     // Update the prefix for children
-    const newPrefix = prefix + (isLast ? "\t" : " │\t");
+    const newPrefix = prefix  + (isLast ? "\t" : "\t");
 
     // Recursively log each child
     node.verificationGraphData.forEach((child, index) => {
         const isChildLast = index === node.verificationGraphData.length - 1;
-        printGraphData(child, newPrefix, isChildLast);
+        printlinkedGraphData(child, newPrefix, !isChildLast);
     });
 }
 
@@ -344,14 +353,17 @@ export function printGraphData(node: VerificationGraphData, prefix: string = "",
     console.log(`└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
 
     if(node.revisionType === "link"){
-      console.log(`\tTree ${node.hash.slice(-4)}`)
+      console.log(`${prefix}\tTree ${node.hash.slice(-4)}`)
       for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
         const el = node.linkVerificationGraphData[i];
         printlinkedGraphData(el, `${prefix}\t`, false)
       }
     }
+
+    
+
     // Update the prefix for children
-    const newPrefix = prefix + (isLast ? "\t" : " │\t");
+    const newPrefix = prefix + (isLast ? "\t" : "\t");
 
     // Recursively log each child
     node.verificationGraphData.forEach((child, index) => {
