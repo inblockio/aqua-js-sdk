@@ -1,5 +1,5 @@
 import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType, VerificationGraphData, FileVerificationGraphData, FormKeyGraphData, LinkVerificationGraphData, SignatureVerificationGraphData, WitnessVerificationGraphData, FormVerificationGraphData } from "../types";
-import { dict2Leaves, getHashSum, getMerkleRoot } from "../utils";
+import { dict2Leaves, getHashSum, getMerkleRoot, getPreviousVerificationHash } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
 import { Err, isErr, isOk, Ok, Result } from "../type_guards";
@@ -141,7 +141,33 @@ function findNode(tree: VerificationGraphData, hash: string): VerificationGraphD
 
 export async function verifyAndGetGraphDataRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<VerificationGraphData, LogData[]>> {
     const logs: LogData[] = []
-    return Err(logs)
+
+
+    const isScalar = !revision.hasOwnProperty('leaves');
+    let [isGenesisOkay, genesisLogData] = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
+
+    genesisLogData.forEach((e) => logs.push(e));
+    if (!isGenesisOkay) {
+        Err(logs)
+    }
+    const genesisRevisionType = revision.revision_type
+
+    const fileGraphData: FileVerificationGraphData = {
+        isValidationSucessful: isGenesisOkay
+    }
+
+    const verificationResults: VerificationGraphData = {
+        hash: revisionItemHash,
+        previous_verification_hash: getPreviousVerificationHash(aquaTree,revisionItemHash),
+        timestamp:  revision.local_timestamp,
+        isValidationSucessful: isGenesisOkay,
+        revisionType: genesisRevisionType,
+        verificationGraphData: [],
+        linkVerificationGraphData: [],
+        info: fileGraphData
+    }
+
+    return Ok(verificationResults);
 }
 
 

@@ -109,6 +109,7 @@ export default class Aquafier {
         return verifyAndGetGraphDataUtil(aquaTree, fileObject)
     }
 
+    // we need aqua tree because of the file index and the previous verification hash
     verifyAndGetGraphDataRevision = async (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<VerificationGraphData, LogData[]>> => {
         return verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionItemHash, fileObject)
     }

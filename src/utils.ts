@@ -10,7 +10,19 @@ import { MerkleTree } from 'merkletreejs';
 import { Err, Ok, Result } from './type_guards';
 
 
+export function getPreviousVerificationHash(aquaTree: AquaTree, currentHash: string): string {
+  let previousHash = ""
 
+  let hashes = Object.keys(aquaTree.revisions);
+
+  let index = hashes.indexOf(currentHash)
+
+  if (index > 0) {
+    previousHash = hashes[index - 1]
+  }
+
+  return previousHash;
+}
 export function findFormKey(revision: Revision, key: string) {
   // Look for exact match or partial match with 'forms-' prefix
   const keys = Object.keys(revision);
@@ -306,14 +318,14 @@ export const getTimestamp = () => {
 export function printLogs(logs: LogData[], enableVerbose: boolean = true) {
   if (enableVerbose) {
     logs.forEach(element => {
-      console.log(`${element.ident ? element.ident : '' } ${LogTypeEmojis[element.logType]} ${element.log}`)
+      console.log(`${element.ident ? element.ident : ''} ${LogTypeEmojis[element.logType]} ${element.log}`)
     });
   } else {
     let containsError = logs.filter((element) => element.logType == "error");
     if (containsError.length > 0) {
       logs.forEach(element => {
         if (element.logType == "error") {
-          console.log(`${element.ident ? element.ident : '' } ${LogTypeEmojis[element.logType]} ${element.log}`)
+          console.log(`${element.ident ? element.ident : ''} ${LogTypeEmojis[element.logType]} ${element.log}`)
         }
       });
     } else {
@@ -327,53 +339,53 @@ export function printLogs(logs: LogData[], enableVerbose: boolean = true) {
 }
 
 export function printlinkedGraphData(node: VerificationGraphData, prefix: string = "", _isLast: boolean = true): void {
-    // Log the current node's hash
-    let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
-    let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis['success'] : LogTypeEmojis['error']
-    // console.log(`${prefix} ${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
-    console.log(`${prefix}└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+  // Log the current node's hash
+  let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
+  let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis['success'] : LogTypeEmojis['error']
+  // console.log(`${prefix} ${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+  console.log(`${prefix}└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
 
 
-    if(node.revisionType === "link"){
-      console.log(`${prefix}\tTree ${node.hash.slice(-4)}`)
-      for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
-        const el = node.linkVerificationGraphData[i];
-        printlinkedGraphData(el, `${prefix}\t`, false)
-      }
+  if (node.revisionType === "link") {
+    console.log(`${prefix}\tTree ${node.hash.slice(-4)}`)
+    for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
+      const el = node.linkVerificationGraphData[i];
+      printlinkedGraphData(el, `${prefix}\t`, false)
     }
+  }
 
-    // Update the prefix for children
-    const newPrefix = prefix  //+ (isLast ? "\t" : "\t");
+  // Update the prefix for children
+  const newPrefix = prefix  //+ (isLast ? "\t" : "\t");
 
-    // Recursively log each child
-    node.verificationGraphData.forEach((child, index) => {
-        const isChildLast = index === node.verificationGraphData.length - 1;
-        printlinkedGraphData(child, newPrefix, !isChildLast);
-    });
+  // Recursively log each child
+  node.verificationGraphData.forEach((child, index) => {
+    const isChildLast = index === node.verificationGraphData.length - 1;
+    printlinkedGraphData(child, newPrefix, !isChildLast);
+  });
 }
 
 export function printGraphData(node: VerificationGraphData, prefix: string = "", _isLast: boolean = true): void {
-    // Log the current node's hash
-    let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
-    let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis['success'] : LogTypeEmojis['error']
-    // console.log(`${prefix}${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
-    console.log(`└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+  // Log the current node's hash
+  let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
+  let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis['success'] : LogTypeEmojis['error']
+  // console.log(`${prefix}${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+  console.log(`└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
 
-    if(node.revisionType === "link"){
-      console.log(`${prefix}\tTree ${node.hash.slice(-4)}`)
-      for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
-        const el = node.linkVerificationGraphData[i];
-        printlinkedGraphData(el, `${prefix}\t`, false)
-      }
+  if (node.revisionType === "link") {
+    console.log(`${prefix}\tTree ${node.hash.slice(-4)}`)
+    for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
+      const el = node.linkVerificationGraphData[i];
+      printlinkedGraphData(el, `${prefix}\t`, false)
     }
+  }
 
 
-    // Update the prefix for children
-    const newPrefix = prefix  //+ (isLast ? "\t" : "\t");
+  // Update the prefix for children
+  const newPrefix = prefix  //+ (isLast ? "\t" : "\t");
 
-    // Recursively log each child
-    node.verificationGraphData.forEach((child, _index) => {
-        // const isChildLast = index === node.verificationGraphData.length - 1;
-        printGraphData(child, newPrefix, false);
-    });
+  // Recursively log each child
+  node.verificationGraphData.forEach((child, _index) => {
+    // const isChildLast = index === node.verificationGraphData.length - 1;
+    printGraphData(child, newPrefix, false);
+  });
 }
