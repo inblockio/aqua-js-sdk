@@ -29,8 +29,6 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
 }
 
 
-
-
 export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<FileObject>, identCharacter: string = ""): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
@@ -535,7 +533,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 doVerifyMerkleProof,
             );
             // console.log(`Witness  result ${isSuccessResult} ---  data ${JSON.stringify(logsResultData)}`)
-            logsResult = logsResultData.map(log => ({ ...log, log: identCharacter + log }));
+            logsResult = logsResultData.map(log => ({ ...log, log: identCharacter + log.log }));
             isSuccess = isSuccessResult
 
             break
