@@ -408,7 +408,8 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     // todo this can be improved.
     // remove  verifyWitnessMerkleProof which is hard coded.
     // verify scalar should be minimal
-    if (isScalar && !verifyWitnessMerkleProof) {``
+    if (isScalar && !verifyWitnessMerkleProof) {
+        ``
         // logs.push({
         //     logType: LogType.SCALAR,
         //     log: "Scalar revision detected."
@@ -534,7 +535,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 doVerifyMerkleProof,
             );
             // console.log(`Witness  result ${isSuccessResult} ---  data ${JSON.stringify(logsResultData)}`)
-            logsResult = logsResultData;
+            logsResult = logsResultData.map(log => ({ ...log, log: identCharacter + log }));
             isSuccess = isSuccessResult
 
             break
