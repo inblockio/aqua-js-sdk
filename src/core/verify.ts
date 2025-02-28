@@ -408,7 +408,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     // todo this can be improved.
     // remove  verifyWitnessMerkleProof which is hard coded.
     // verify scalar should be minimal
-    if (isScalar && !verifyWitnessMerkleProof) {
+    if (isScalar && !verifyWitnessMerkleProof) {``
         // logs.push({
         //     logType: LogType.SCALAR,
         //     log: "Scalar revision detected."
@@ -475,15 +475,16 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     switch (revision.revision_type) {
         case "form":
 
-            let { isOk, logs } = verifyFormRevision(
+            let res = verifyFormRevision(
                 revision,
                 revision.leaves,
                 identCharacter
             );
-            isSuccess = isOk;
+            isSuccess = res[0];
             logsResult = logs;
             // verification is already done in verifyRevisionMerkleTreeStructure
             // isSuccess = true;
+            logs.push(...res[1])
             break
         case "file":
 
