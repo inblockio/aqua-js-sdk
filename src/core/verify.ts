@@ -479,11 +479,12 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 revision.leaves,
                 identCharacter
             );
-            isSuccess = res[0];
+            isSuccess = res.isOk;
+            // TODO: Look at this, some weird issue here
             logsResult = logs;
             // verification is already done in verifyRevisionMerkleTreeStructure
             // isSuccess = true;
-            logs.push(...res[1])
+            logs.push(...res.logs)
             break
         case "file":
 
