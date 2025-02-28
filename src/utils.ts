@@ -122,12 +122,11 @@ export function prepareNonce(): string {
   return getHashSum(Date.now().toString());
 }
 
-export function getWallet(mnemonic: string): [HDNodeWallet, string, string] {
+export function getWallet(mnemonic: string): [HDNodeWallet, string, string, string] {
   // Always trim the last new line
   const wallet = Wallet.fromPhrase(mnemonic.trim())
   const walletAddress = wallet.address.toLowerCase()
-  console.log("Wallet address", wallet.privateKey)
-  return [wallet, walletAddress, wallet.publicKey]
+  return [wallet, walletAddress, wallet.publicKey, wallet.privateKey]
 }
 
 // Cross-platform version

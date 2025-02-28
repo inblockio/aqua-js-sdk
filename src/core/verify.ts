@@ -1,8 +1,8 @@
-import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType, VerificationGraphData, FileVerificationGraphData, LinkVerificationGraphData, SignatureVerificationGraphData, WitnessVerificationGraphData, FormVerificationGraphData } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType, VerificationGraphData, FileVerificationGraphData, LinkVerificationGraphData, SignatureVerificationGraphData, WitnessVerificationGraphData, FormVerificationGraphData, FormKeyGraphData, FormVerificationResponseData } from "../types";
 import { dict2Leaves, getHashSum, getMerkleRoot, getPreviousVerificationHash } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
-import { Err, isErr,  Ok, Result } from "../type_guards";
+import { Err, isErr, Ok, Result } from "../type_guards";
 
 export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = []
@@ -158,8 +158,8 @@ export async function verifyAndGetGraphDataRevisionUtil(aquaTree: AquaTree, revi
 
     const verificationResults: VerificationGraphData = {
         hash: revisionItemHash,
-        previous_verification_hash: getPreviousVerificationHash(aquaTree,revisionItemHash),
-        timestamp:  revision.local_timestamp,
+        previous_verification_hash: getPreviousVerificationHash(aquaTree, revisionItemHash),
+        timestamp: revision.local_timestamp,
         isValidationSucessful: isGenesisOkay,
         revisionType: genesisRevisionType,
         verificationGraphData: [],
@@ -184,24 +184,37 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
         return Err(logs)
     }
     let genesisRevisionData = aquaTree.revisions[verificationHashes[0]]
-    const isScalar = !genesisRevisionData.hasOwnProperty('leaves');
 
+    let infoGraphData: FormVerificationGraphData | FileVerificationGraphData | null = null
+
+    const isScalar = !genesisRevisionData.hasOwnProperty('leaves')
     let [isGenesisOkay, _genesisVerificationLogs] = await verifyRevision(aquaTree, genesisRevisionData, verificationHashes[0], fileObject, isScalar, identCharacter);
     const genesisRevisionType = aquaTree.revisions[verificationHashes[0]].revision_type
 
-    const fileGraphData: FileVerificationGraphData = {
-        isValidationSucessful: isGenesisOkay
+    if (genesisRevisionData.revision_type === "form") {
+        let { formKeysGraphData } = verifyFormRevision(genesisRevisionData, genesisRevisionData.leaves);
+
+        let formData: FormVerificationGraphData = {
+            formKeys: formKeysGraphData,
+        }
+
+        infoGraphData = formData
+    } else {
+        const fileGraphData: FileVerificationGraphData = {
+            isValidationSucessful: isGenesisOkay
+        }
+        infoGraphData = fileGraphData
     }
 
     const verificationResults: VerificationGraphData = {
         hash: verificationHashes[0],
         previous_verification_hash: genesisRevisionData.previous_verification_hash,
-        timestamp:  genesisRevisionData.local_timestamp,
+        timestamp: genesisRevisionData.local_timestamp,
         isValidationSucessful: isGenesisOkay,
         revisionType: genesisRevisionType,
         verificationGraphData: [],
         linkVerificationGraphData: [],
-        info: fileGraphData
+        info: infoGraphData
     }
 
     if (verificationHashes.length === 1) {
@@ -280,6 +293,7 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
 
         let linkedVerificationGraphData: VerificationGraphData[] = []
 
+
         if (revision.revision_type === "link") {
             let aqtreeFilename = aquaTree.file_index[revision.link_verification_hashes[0]]
             let linkedAquaTree = fileObject.find(el => el.fileName === `${aqtreeFilename}.aqua.json`)
@@ -313,9 +327,11 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
             | LinkVerificationGraphData | undefined = undefined;
 
         if (revision.revision_type === "form") {
+            let { formKeysGraphData } = verifyFormRevision(revision, revision.leaves);
             let formData: FormVerificationGraphData = {
-                formKeys: [],
+                formKeys: formKeysGraphData,
             }
+
             data = formData
         }
         else if (revision.revision_type === "file") {
@@ -352,7 +368,7 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
         verificationResultsNode.verificationGraphData.push({
             hash: revisionItemHash,
             previous_verification_hash: revision.previous_verification_hash,
-            timestamp:  revision.local_timestamp,
+            timestamp: revision.local_timestamp,
             isValidationSucessful: result[0],
             revisionType: revision.revision_type,
             verificationGraphData: [],
@@ -459,13 +475,13 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     switch (revision.revision_type) {
         case "form":
 
-            let res = verifyFormRevision(
+            let { isOk, logs } = verifyFormRevision(
                 revision,
                 revision.leaves,
                 identCharacter
             );
-            isSuccess = res[0];
-            logsResult = res[1];
+            isSuccess = isOk;
+            logsResult = logs;
             // verification is already done in verifyRevisionMerkleTreeStructure
             // isSuccess = true;
             break
@@ -586,8 +602,6 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
             break
     }
 
-
-
     logs.push(...logsResult)
 
     if (isSuccess && isScalarSuccess) {
@@ -626,12 +640,14 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 }
 
 
-function verifyFormRevision(input: any, leaves: any, identCharacter: string = ""): [boolean, Array<LogData>] {
+function verifyFormRevision(input: any, leaves: any, identCharacter: string = ""): FormVerificationResponseData {
     let logs: Array<LogData> = [];
     let contains_deleted_fields = false;
     let fieldsWithVerification: any = [];
     let fieldsWithPartialVerification: any = [];
     let ok = true;
+
+    let formKeysGraphData: FormKeyGraphData[] = []
 
     Object.keys(input).sort().forEach((field, i: number) => {
         let new_hash = getHashSum(`${field}:${input[field]}`);
@@ -641,8 +657,18 @@ function verifyFormRevision(input: any, leaves: any, identCharacter: string = ""
                 if (new_hash !== leaves[i]) {
                     ok = false;
                     fieldsWithVerification.push(`🚫 ${field}: ${input[field]}`);
+                    formKeysGraphData.push({
+                        formKey: field,
+                        content: input[field],
+                        isValidationSucessful: false
+                    })
                 } else {
                     fieldsWithVerification.push(`✅ ${field}: ${input[field]}`);
+                    formKeysGraphData.push({
+                        formKey: field,
+                        content: input[field],
+                        isValidationSucessful: true
+                    })
                 }
             }
         } else {
@@ -678,7 +704,13 @@ function verifyFormRevision(input: any, leaves: any, identCharacter: string = ""
         });
     });
 
-    return [ok, logs]
+    // return [ok, logs]
+
+    return ({
+        isOk: ok,
+        logs: logs,
+        formKeysGraphData
+    })
 
 }
 
@@ -720,11 +752,11 @@ function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: st
 
     if (input.revision_type === 'form') {
 
-        let [isOk, logsAll] = verifyFormRevision(input, leaves);
+        let formVerificationResult = verifyFormRevision(input, leaves);
 
-        logs.push(...logsAll)
+        logs.push(...formVerificationResult.logs)
 
-        vhOk = isOk
+        vhOk = formVerificationResult.isOk
 
     }
     // For witness, we verify the merkle root

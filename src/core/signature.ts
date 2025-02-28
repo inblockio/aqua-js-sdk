@@ -8,7 +8,7 @@ import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
 import { Err, Ok, Result } from "../type_guards";
 
-export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false, identCharacter : string = ""): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false, identCharacter: string = ""): Promise<Result<AquaOperationData, LogData[]>> {
     let aquaTree = aquaTreeWrapper.aquaTree
     let logs: Array<LogData> = [];
     let targetRevisionHash = "";
@@ -135,7 +135,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
     return Ok(result)
 }
 
-export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _signType: SignType, _credentials: CredentialsData, _enableScalar: boolean = false, identCharacter : string = ""): Promise<Result<AquaOperationData, LogData[]>> {
+export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _signType: SignType, _credentials: CredentialsData, _enableScalar: boolean = false, identCharacter: string = ""): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     logs.push({
         log: "unimplmented need to be fixes",
@@ -147,8 +147,20 @@ export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _
 }
 
 
+export function recoverWalletAddress(verificationHash: string, signature: string): string {
+    try {
+        const message = `I sign this revision: [${verificationHash}]`
+        const messageHash = ethers.hashMessage(message);
+        const recoveredAddress = ethers.recoverAddress(messageHash, signature);
+        return recoveredAddress;
+    } catch (error) {
+        console.error("Error recovering wallet address:", error);
+        throw new Error("Invalid signature or message");
+    }
+}
 
-export async function verifySignature(data: Revision, verificationHash: string,identCharacter : string = ""): Promise<[boolean, LogData[]]> {
+
+export async function verifySignature(data: Revision, verificationHash: string, identCharacter: string = ""): Promise<[boolean, LogData[]]> {
 
     let logs: Array<LogData> = [];
 

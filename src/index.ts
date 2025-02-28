@@ -13,6 +13,8 @@ import { logAquaTree } from "./aquavhtree";
 export * from "./utils";
 export * from "./types";
 export * from "./type_guards";
+export { recoverWalletAddress } from "./core/signature"
+export * from "./core/formatter"
 
 
 // Letes writesome docs here
@@ -153,7 +155,7 @@ export default class Aquafier {
      * @returns Result<AquaOperationData, LogData[]>
      */
     signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
-        
+
         return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar)
     }
 

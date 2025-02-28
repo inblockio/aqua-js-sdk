@@ -54,6 +54,7 @@ export interface FileVerificationGraphData {
 
 export interface FormKeyGraphData {
   formKey: string;
+  content: string;
   isValidationSucessful: boolean;
 }
 
@@ -129,6 +130,13 @@ export type WitnessNetwork = "sepolia" | "mainnet" | "holesky"
 export type SignType = "cli" | "metamask" | "did"
 
 export type WitnessEnvironment = 'node' | 'browser'
+
+export interface FormVerificationResponseData {
+  isOk: boolean;
+  logs: LogData[];
+  formKeysGraphData: FormKeyGraphData[]; 
+}
+
 
 export interface FileObject {
   fileName: string,
