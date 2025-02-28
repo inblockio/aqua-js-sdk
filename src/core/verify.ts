@@ -1,8 +1,8 @@
-import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType, VerificationGraphData, FileVerificationGraphData, FormKeyGraphData, LinkVerificationGraphData, SignatureVerificationGraphData, WitnessVerificationGraphData, FormVerificationGraphData } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, FileObject, LogType, VerificationGraphData, FileVerificationGraphData, LinkVerificationGraphData, SignatureVerificationGraphData, WitnessVerificationGraphData, FormVerificationGraphData } from "../types";
 import { dict2Leaves, getHashSum, getMerkleRoot, getPreviousVerificationHash } from "../utils";
 import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
-import { Err, isErr, isOk, Ok, Result } from "../type_guards";
+import { Err, isErr,  Ok, Result } from "../type_guards";
 
 export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = []
