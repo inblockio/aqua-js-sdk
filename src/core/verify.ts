@@ -50,7 +50,7 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
             case "form":
                 logs.push({
                     logType: LogType.FORM,
-                    log: "Type:Form.",
+                    log: "Type: Form.",
                     ident: `${identCharacter}\t`
                 })
                 break;
@@ -65,28 +65,28 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
                 if (revision.signature_type)
                     logs.push({
                         logType: LogType.SIGNATURE,
-                        log: "Type:Signature.",
+                        log: `Type: Signature ${revision.signature_type}`,
                         ident: `${identCharacter}\t`
                     });
                 break;
             case "witness":
                 logs.push({
                     logType: LogType.WITNESS,
-                    log: "Type:Witness.",
+                    log: `Type: Witness ${revision.witness_network}`,
                     ident: `${identCharacter}\t`
                 });
                 break;
             case "link":
                 logs.push({
                     logType: LogType.LINK,
-                    log: "Type:Link.",
+                    log: "Type: Link.",
                     ident: `${identCharacter}\t`
                 });
                 break;
             default:
                 logs.push({
                     logType: LogType.WARNING,
-                    log: `Type:Unknown ${revision.revision_type}.\n`,
+                    log: `Type: Unknown ${revision.revision_type}.\n`,
                     ident: `${identCharacter}\t`
                 });
         }
@@ -532,9 +532,10 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
                 revision,
                 hash_,
                 doVerifyMerkleProof,
+                `${identCharacter}\t`
             );
             // console.log(`Witness  result ${isSuccessResult} ---  data ${JSON.stringify(logsResultData)}`)
-            logsResult = logsResultData.map(log => ({ ...log, log: identCharacter + log.log }));
+            logsResult = logsResultData;
             isSuccess = isSuccessResult
 
             break

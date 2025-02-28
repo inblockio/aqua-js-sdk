@@ -366,17 +366,17 @@ export async function verifyWitness(
     witnessData: Revision,
     verificationHash: string,
     doVerifyMerkleProof: boolean,
+    indentCharacter: string,
 ): Promise<[boolean, LogData[]]> {
     let logs: Array<LogData> = [];
-
-
-
+    
     let isValid: boolean = false;
     if (verificationHash === "") {
 
         logs.push({
             log: `The verification Hash MUST NOT be empty`,
             logType: LogType.ERROR,
+            ident: indentCharacter
         })
         return [isValid, logs]
     }
@@ -408,7 +408,8 @@ export async function verifyWitness(
         // console.log(`Narrowed down to ${isValid}  nd messae ${logMessage}`)
         logs.push({
             log: logMessage,
-            logType: isValid ? LogType.SUCCESS : LogType.ERROR
+            logType: isValid ? LogType.SUCCESS : LogType.ERROR,
+            ident: indentCharacter
         })
 
 
@@ -418,7 +419,8 @@ export async function verifyWitness(
     if (doVerifyMerkleProof) {
         logs.push({
             log: `verifying merkle integrity`,
-            logType: LogType.INFO
+            logType: LogType.INFO,
+            ident: indentCharacter
         })
         // Only verify the witness merkle proof when verifyWitness is successful,
         // because this step is expensive.
@@ -433,7 +435,8 @@ export async function verifyWitness(
 
         logs.push({
             log: `Merkle integrity is ${isValid ? '' : 'NOT'} valid `,
-            logType: isValid ? LogType.SUCCESS : LogType.ERROR
+            logType: isValid ? LogType.SUCCESS : LogType.ERROR,
+            ident: indentCharacter
         })
 
     }
