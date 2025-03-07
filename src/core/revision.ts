@@ -31,9 +31,10 @@ export function fetchFilesToBeReadUtil(aquaTree: AquaTree): string[] {
 
     //const allRevisionHashes = Object.keys(aquaTree.revisions);
 
-    hashAndfiles.forEach((key, value) => {
-        console.log(`key ${key}  and value ${value}`)
+    hashAndfiles.forEach((value, key) => {
+        // console.log(`key ${key}  and value ${value}`)
         const revision = aquaTree.revisions[key]
+        // console.log(`revision ${JSON.stringify(revision, null, 4)}`)
         let fileName = value; //hashAndfiles.get(revisionHash)
         if (revision != undefined && revision.content != undefined) {
             console.warn(`✓ File ${fileName} skipped: content already exists in revision ${key}`)

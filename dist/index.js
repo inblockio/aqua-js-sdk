@@ -853,9 +853,10 @@ function fetchFilesToBeReadUtil(aquaTree) {
     hashAndfiles.set(item, aquaTree.file_index[item]);
   });
   let filesWithoutContentInRevisions = [];
-  hashAndfiles.forEach((key, value) => {
+  hashAndfiles.forEach((value, key) => {
     console.log(`key ${key}  and value ${value}`);
     const revision = aquaTree.revisions[key];
+    console.log(`revision ${JSON.stringify(revision, null, 4)}`);
     let fileName = value;
     if (revision != void 0 && revision.content != void 0) {
       console.warn(`\u2713 File ${fileName} skipped: content already exists in revision ${key}`);
