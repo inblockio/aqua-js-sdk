@@ -202,6 +202,7 @@ export interface Revision {
   revision_type: "file" | "witness" | "signature" | "form" | "link";
   file_hash?: string;
   file_nonce?: string;
+  content?: string;
   witness_merkle_root?: string;
   witness_timestamp?: number;
   witness_network?: string;
