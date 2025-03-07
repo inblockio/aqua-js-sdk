@@ -31,17 +31,15 @@ export function fetchFilesToBeReadUtil(aquaTree: AquaTree): string[] {
 
     const allRevisionHashes = Object.keys(aquaTree.revisions);
 
-    allRevisionHashes.forEach((revisionHash) => {
-        const revision = aquaTree.revisions[revisionHash]
-
-        let fileName = hashAndfiles.get(revisionHash)
+    hashAndfiles.forEach((key, value) => {
+        const revision = aquaTree.revisions[key]
+        let fileName = value; //hashAndfiles.get(revisionHash)
         if (revision.content) {
-            console.warn(`💡 Skipping ${fileName} as content exists in  revision ${revisionHash}`)
+            console.warn(`✓ File ${fileName} skipped: content already exists in revision ${revisionHash}`)
         } else {
             filesWithoutContentInRevisions.push(fileName)
         }
     })
-
 
     return filesWithoutContentInRevisions;
 
