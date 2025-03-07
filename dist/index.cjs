@@ -926,12 +926,12 @@ function fetchFilesToBeReadUtil(aquaTree) {
     hashAndfiles.set(item, aquaTree.file_index[item]);
   });
   let filesWithoutContentInRevisions = [];
-  const allRevisionHashes = Object.keys(aquaTree.revisions);
-  allRevisionHashes.forEach((revisionHash) => {
-    const revision = aquaTree.revisions[revisionHash];
-    let fileName = hashAndfiles.get(revisionHash);
-    if (revision.content) {
-      console.warn(`\u{1F4A1} Skipping ${fileName} as content exists in  revision ${revisionHash}`);
+  hashAndfiles.forEach((key, value) => {
+    console.log(`key ${key}  and value ${value}`);
+    const revision = aquaTree.revisions[key];
+    let fileName = value;
+    if (revision != void 0 && revision.content != void 0) {
+      console.warn(`\u2713 File ${fileName} skipped: content already exists in revision ${key}`);
     } else {
       filesWithoutContentInRevisions.push(fileName);
     }
