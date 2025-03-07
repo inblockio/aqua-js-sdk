@@ -29,7 +29,7 @@ export function fetchFilesToBeReadUtil(aquaTree: AquaTree): string[] {
 
     let filesWithoutContentInRevisions: Array<string> = []
 
-    const allRevisionHashes = Object.keys(aquaTree.revisions);
+    //const allRevisionHashes = Object.keys(aquaTree.revisions);
 
     hashAndfiles.forEach((key, value) => {
         const revision = aquaTree.revisions[key]
