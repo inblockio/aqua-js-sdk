@@ -214,6 +214,7 @@ export interface Revision {
   signature_public_key?: string;
   signature_wallet_address?: string;
   signature_type?: string;
+  leaves?:string[],
   [key: string]: any;
 
 }
