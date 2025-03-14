@@ -142,6 +142,7 @@ export interface FileObject {
   fileName: string,
   fileContent: string | AquaTree,
   path: string
+  fileSize? : number
 }
 
 export enum LogType {
