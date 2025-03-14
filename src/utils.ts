@@ -402,7 +402,7 @@ export function OrderRevisionInAquaTree(params: AquaTree): AquaTree {
   //more than one  revision
   for (let hash in allHashes) {
       let revision = params.revisions[hash];
-      if (revision.previous_verification_hash == "" || revision.previous_verification_hash.trim.length == 0) {
+      if (revision.previous_verification_hash == null ||revision.previous_verification_hash == "" || revision.previous_verification_hash.trim.length == 0) {
           orderdHashes.push(hash);
           break;
       }
