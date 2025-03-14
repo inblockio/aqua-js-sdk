@@ -1,7 +1,9 @@
 import { jest } from "@jest/globals";
-import  { OrderRevisionInAquaTree } from "../index";  // Adjust the path based on your structure
-import { AquaTree } from "../types";
-import { mockAquaTreeTworevisionsReArranged } from "./test_revisions";
+import  Aquafier, { OrderRevisionInAquaTree } from "../index";  // Adjust the path based on your structure
+import { AquaTree, AquaTreeWrapper, CredentialsData, FileObject } from "../types";
+import { mockAquaTreeOnerevision, mockAquaTreeTworevisions, mockAquaTreeTworevisionsReArranged } from "./test_revisions";
+// import { createAquaTreeTree } from "../aquavhtree";
+import { default as credentialsData } from "./../credentials.json";
 //check readme
 
 jest.mock("fs/promises", () => ({
@@ -10,10 +12,10 @@ jest.mock("fs/promises", () => ({
 }));
 
 describe("Aquafier", () => {
-    // let aquafier: Aquafier;
+    let aquafier: Aquafier;
 
     beforeEach(() => {
-        // aquafier = new Aquafier();
+        aquafier = new Aquafier();
         jest.clearAllMocks(); // Reset mocks before each test
     });
 
@@ -22,334 +24,335 @@ describe("Aquafier", () => {
 
 
         const result = OrderRevisionInAquaTree(mockAquaTree);
+        // const result = createAquaTreeTree(mockAquaTree);
 
         console.log(`Result ${JSON.stringify(result, null, 4)}`)
         // expect(result.isOk()).toBe(true);
     });
 
-    // test("should create a genesis revision", async () => {
-    //     const fileObject: FileObject = {
-    //         fileName: "test.txt",
-    //         fileContent: "Sample content",
-    //         path: "/fake/path/test.txt"
-    //     };
+    test("should create a genesis revision", async () => {
+        const fileObject: FileObject = {
+            fileName: "test.txt",
+            fileContent: "Sample content",
+            path: "/fake/path/test.txt"
+        };
 
-    //     const result = await aquafier.createGenesisRevision(fileObject);
-    //     expect(result.isOk()).toBe(true);
-    // });
+        const result = await aquafier.createGenesisRevision(fileObject);
+        expect(result.isOk()).toBe(true);
+    });
 
-    // test("should verify Genesis Revision", async () => {
-    //     const fileObject: FileObject = {
-    //         fileName: "test.txt",
-    //         fileContent: "Sample content",
-    //         path: "/fake/path/test.txt"
-    //     };
+    test("should verify Genesis Revision", async () => {
+        const fileObject: FileObject = {
+            fileName: "test.txt",
+            fileContent: "Sample content",
+            path: "/fake/path/test.txt"
+        };
 
-    //     const result = await aquafier.createGenesisRevision(fileObject);
-    //     expect(result.isOk()).toBe(true);
+        const result = await aquafier.createGenesisRevision(fileObject);
+        expect(result.isOk()).toBe(true);
 
-    //     if (result.isOk()) {
-    //         const data = result.data
+        if (result.isOk()) {
+            const data = result.data
 
-    //         const verificationResult = await aquafier.verifyAquaTree(data.aquaTree!, [fileObject])
-    //         expect(verificationResult.isOk()).toBe(true)
-    //     }
-    // });
+            const verificationResult = await aquafier.verifyAquaTree(data.aquaTree!, [fileObject])
+            expect(verificationResult.isOk()).toBe(true)
+        }
+    });
 
-    // test("should verify one Revision", async () => {
-    //     const fileObject: FileObject = {
-    //         fileName: "test.txt",
-    //         fileContent: "Sample content",
-    //         path: "/fake/path/test.txt"
-    //     };
+    test("should verify one Revision", async () => {
+        const fileObject: FileObject = {
+            fileName: "test.txt",
+            fileContent: "Sample content",
+            path: "/fake/path/test.txt"
+        };
 
-    //     const result = await aquafier.createGenesisRevision(fileObject);
-    //     expect(result.isOk()).toBe(true);
+        const result = await aquafier.createGenesisRevision(fileObject);
+        expect(result.isOk()).toBe(true);
 
-    //     if (result.isOk() && result.data.aquaTree) {
-    //         const data = result.data
-    //         const revisionKeys = Object.keys(data.aquaTree!.revisions || {})
-    //         const revision = data.aquaTree!.revisions[revisionKeys[0]]
-    //         const verificationResult = await aquafier.verifyAquaTreeRevision(data.aquaTree!, revision, revisionKeys[0], [fileObject])
-    //         expect(verificationResult.isOk()).toBe(true)
-    //     }
-    // });
+        if (result.isOk() && result.data.aquaTree) {
+            const data = result.data
+            const revisionKeys = Object.keys(data.aquaTree!.revisions || {})
+            const revision = data.aquaTree!.revisions[revisionKeys[0]]
+            const verificationResult = await aquafier.verifyAquaTreeRevision(data.aquaTree!, revision, revisionKeys[0], [fileObject])
+            expect(verificationResult.isOk()).toBe(true)
+        }
+    });
 
-    // test("should fetch files to be read", () => {
-    //     const mockAquaTree: AquaTree = mockAquaTreeOnerevision
+    test("should fetch files to be read", () => {
+        const mockAquaTree: AquaTree = mockAquaTreeOnerevision
 
-    //     const result = aquafier.fetchFilesToBeRead(mockAquaTree);
-    //     expect(result).toBeInstanceOf(Array);
-    // });
+        const result = aquafier.fetchFilesToBeRead(mockAquaTree);
+        expect(result).toBeInstanceOf(Array);
+    });
 
-    // test("should remove one revision", () => {
-    //     const mockAquaTree: AquaTree = mockAquaTreeTworevisions
+    test("should remove one revision", () => {
+        const mockAquaTree: AquaTree = mockAquaTreeTworevisions
 
-    //     const result = aquafier.removeLastRevision(mockAquaTree);
-    //     expect(result.isOk()).toBe(true);
-    //     if (result.isOk()) {
-    //         const data = result.data
-    //         expect(Object.keys(data.aquaTree!.revisions).length).toBe(1);
-    //     }
-    // });
+        const result = aquafier.removeLastRevision(mockAquaTree);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            const data = result.data
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(1);
+        }
+    });
 
-    // test("should sign aquatree via cli", async () => {
-    //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
-    //     const fileObject: FileObject = {
-    //         fileName: "test.txt",
-    //         fileContent: "Sample content",
-    //         path: "/fake/path/test.txt"
-    //     };
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: fileObject,
-    //         revision: ""
-    //     }
+    test("should sign aquatree via cli", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+        const fileObject: FileObject = {
+            fileName: "test.txt",
+            fileContent: "Sample content",
+            path: "/fake/path/test.txt"
+        };
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
 
-    //     // const filePath = "./../credentials.json";
-    //     // const content = await fs.readFile(filePath, "utf-8");
-    //     const creds: CredentialsData = credentialsData;
+        // const filePath = "./../credentials.json";
+        // const content = await fs.readFile(filePath, "utf-8");
+        const creds: CredentialsData = credentialsData;
 
-    //     const result = await aquafier.signAquaTree(aquaTreeWrapper, "cli", creds, true);
+        const result = await aquafier.signAquaTree(aquaTreeWrapper, "cli", creds, true);
 
-    //     expect(result.isOk()).toBe(true);
-    //     if (result.isOk()) {
-    //         const data = result.data
-    //         expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
-    //     }
-    // });
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            const data = result.data
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
+        }
+    });
 
-    // test("should sign aquatree via did", async () => {
-    //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
-    //     const fileObject: FileObject = {
-    //         fileName: "test.txt",
-    //         fileContent: "Sample content",
-    //         path: "/fake/path/test.txt"
-    //     };
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: fileObject,
-    //         revision: ""
-    //     }
+    test("should sign aquatree via did", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+        const fileObject: FileObject = {
+            fileName: "test.txt",
+            fileContent: "Sample content",
+            path: "/fake/path/test.txt"
+        };
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
 
-    //     // const filePath = "./../credentials.json";
-    //     // const content = await fs.readFile(filePath, "utf-8");
-    //     const creds: CredentialsData = credentialsData;
+        // const filePath = "./../credentials.json";
+        // const content = await fs.readFile(filePath, "utf-8");
+        const creds: CredentialsData = credentialsData;
 
-    //     const result = await aquafier.signAquaTree(aquaTreeWrapper, "did", creds, true);
+        const result = await aquafier.signAquaTree(aquaTreeWrapper, "did", creds, true);
 
-    //     expect(result.isOk()).toBe(true);
-    //     if (result.isOk()) {
-    //         const data = result.data
-    //         expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
-    //     }
-    // });
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            const data = result.data
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
+        }
+    });
 
-    // test("should witness aquatree via cli", async () => {
-    //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+    test("should witness aquatree via cli", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
 
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: {
-    //             fileName: "test.txt",
-    //             fileContent: "",
-    //             path: "/fake/path/test.txt"
-    //         },
-    //         revision: ""
-    //     }
-    //     const creds: CredentialsData = credentialsData;
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: {
+                fileName: "test.txt",
+                fileContent: "",
+                path: "/fake/path/test.txt"
+            },
+            revision: ""
+        }
+        const creds: CredentialsData = credentialsData;
 
-    //     const result = await aquafier.witnessAquaTree(aquaTreeWrapper, "eth", "sepolia", "cli", creds,);
+        const result = await aquafier.witnessAquaTree(aquaTreeWrapper, "eth", "sepolia", "cli", creds,);
 
-    //     expect(result.isOk()).toBe(true);
-    //     if (result.isOk()) {
-    //         const data = result.data
-    //         expect(Object.keys(data.aquaTree?.revisions || {}).length).toBe(2);
-    //     } else {
-    //         console.log(result.data)
-    //     }
-    // });
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            const data = result.data
+            expect(Object.keys(data.aquaTree?.revisions || {}).length).toBe(2);
+        } else {
+            console.log(result.data)
+        }
+    });
 
-    // // Uncomment if your IP is not blocked by TSA servers
-    // // test("should witness aquatree via tsa", async () => {
-    // //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
-
-    // //     const creds: CredentialsData = credentialsData;
-
-    // //     const result = await aquafier.witnessAquaTree(mockAquaTree, "tsa", "sepolia", "cli", creds, );
-
-    // //     expect(result.isOk()).toBe(true);
-    // //     if (result.isOk()) {
-    // //         const data = result.data
-    // //         expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
-    // //     }
-    // // });
-
-    // test("should witness aquatree via nostr", async () => {
+    // Uncomment if your IP is not blocked by TSA servers
+    // test("should witness aquatree via tsa", async () => {
     //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
 
     //     const creds: CredentialsData = credentialsData;
 
-
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: {
-    //             fileName: "test.txt",
-    //             fileContent: "",
-    //             path: "/fake/path/test.txt"
-    //         },
-    //         revision: ""
-    //     }
-
-    //     const result = await aquafier.witnessAquaTree(aquaTreeWrapper, "nostr", "sepolia", "cli", creds,);
+    //     const result = await aquafier.witnessAquaTree(mockAquaTree, "tsa", "sepolia", "cli", creds, );
 
     //     expect(result.isOk()).toBe(true);
     //     if (result.isOk()) {
     //         const data = result.data
-    //         expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
+    //         expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
     //     }
     // });
 
-    // test("should link aquatree", async () => {
-    //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+    test("should witness aquatree via nostr", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
 
-    //     const fileObject: FileObject = {
-    //         fileName: "test.txt",
-    //         fileContent: "Sample content",
-    //         path: "/fake/path/test.txt"
-    //     };
-
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: fileObject,
-    //         revision: ""
-    //     }
-
-    //     const linkaquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: fileObject,
-    //         revision: ""
-    //     }
-
-    //     const result = await aquafier.linkAquaTree(aquaTreeWrapper, linkaquaTreeWrapper);
-
-    //     expect(result.isOk()).toBe(true);
-    //     if (result.isOk()) {
-    //         const data = result.data
-    //         expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
-    //     }
-    // });
+        const creds: CredentialsData = credentialsData;
 
 
-    // test("should create a form revision", async () => {
-    //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
-    //     const fileObject: FileObject = {
-    //         fileName: "test.json",
-    //         fileContent: '{"name":"kenn","age":200}',
-    //         path: "/fake/path/test.json"
-    //     };
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: fileObject,
-    //         revision: ""
-    //     }
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: {
+                fileName: "test.txt",
+                fileContent: "",
+                path: "/fake/path/test.txt"
+            },
+            revision: ""
+        }
 
-    //     const result = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
-    //     expect(result.isOk()).toBe(true);
-    // });
+        const result = await aquafier.witnessAquaTree(aquaTreeWrapper, "nostr", "sepolia", "cli", creds,);
 
-    // test("should hide form in form revision item", async () => {
-    //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
-    //     const fileObject: FileObject = {
-    //         fileName: "test.json",
-    //         fileContent: '{"name":"kenn","age":200}',
-    //         path: "/fake/path/test.json"
-    //     };
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: fileObject,
-    //         revision: ""
-    //     }
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            const data = result.data
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
+        }
+    });
 
-    //     const resultFormRevision = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
-    //     expect(resultFormRevision.isOk()).toBe(true);
+    test("should link aquatree", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
 
-    //     const resultHide = await aquafier.hideFormElements(aquaTreeWrapper, "name");
-    //     expect(resultHide.isOk()).toBe(true);
+        const fileObject: FileObject = {
+            fileName: "test.txt",
+            fileContent: "Sample content",
+            path: "/fake/path/test.txt"
+        };
 
-    //     if (resultHide.isOk()) {
-    //         const data = resultHide.data
-    //         // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
-    //         expect(JSON.stringify(data.aquaTree)).toContain('.deleted');
-    //     } else {
-    //         expect(true).toBe(false);
-    //     }
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
 
+        const linkaquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
 
-    // });
+        const result = await aquafier.linkAquaTree(aquaTreeWrapper, linkaquaTreeWrapper);
 
-    // test("should hide form in form revision item then unhide it", async () => {
-    //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
-    //     const fileObject: FileObject = {
-    //         fileName: "test.json",
-    //         fileContent: '{"name":"kenn","age":200}',
-    //         path: "/fake/path/test.json"
-    //     };
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
-    //         aquaTree: mockAquaTree,
-    //         fileObject: fileObject,
-    //         revision: ""
-    //     }
-
-    //     const resultFormRevision = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
-    //     expect(resultFormRevision.isOk()).toBe(true);
-    //     if (resultFormRevision.isOk()) {
-    //         const aquaTreeWrapperToHideWrapper: AquaTreeWrapper = {
-    //             aquaTree: resultFormRevision.data.aquaTree!,
-    //             fileObject: fileObject,
-    //             revision: ""
-    //         }
-    //         const resultHide = await aquafier.hideFormElements(aquaTreeWrapperToHideWrapper, "name");
-    //         expect(resultHide.isOk()).toBe(true);
-
-    //         if (resultHide.isOk()) {
-    //             const data = resultHide.data
-    //             // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
-    //             expect(JSON.stringify(data.aquaTree)).toContain('.deleted');
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+            const data = result.data
+            expect(Object.keys(data.aquaTree!.revisions).length).toBe(2);
+        }
+    });
 
 
-    //             const aquaTreeWrapperHidenElementsWrapper: AquaTreeWrapper = {
-    //                 aquaTree: resultHide.data.aquaTree!,
-    //                 fileObject: fileObject,
-    //                 revision: ""
-    //             }
+    test("should create a form revision", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+        const fileObject: FileObject = {
+            fileName: "test.json",
+            fileContent: '{"name":"kenn","age":200}',
+            path: "/fake/path/test.json"
+        };
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
 
-    //             const resultUnHide = await aquafier.unHideFormElements(aquaTreeWrapperHidenElementsWrapper, "name", "arthur");
-    //             expect(resultUnHide.isOk()).toBe(true);
+        const result = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+        expect(result.isOk()).toBe(true);
+    });
 
-    //             if (resultUnHide.isOk()) {
-    //                 const data = resultUnHide.data
-    //                 // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
-    //                 expect(JSON.stringify(data.aquaTree)).not.toContain('.deleted');
-    //             } else {
-    //                 console.log(resultUnHide.data.forEach((e) => console.log(e)))
-    //                 expect(true).toBe(false
-    //                 );
-    //             }
+    test("should hide form in form revision item", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+        const fileObject: FileObject = {
+            fileName: "test.json",
+            fileContent: '{"name":"kenn","age":200}',
+            path: "/fake/path/test.json"
+        };
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
+
+        const resultFormRevision = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+        expect(resultFormRevision.isOk()).toBe(true);
+
+        const resultHide = await aquafier.hideFormElements(aquaTreeWrapper, "name");
+        expect(resultHide.isOk()).toBe(true);
+
+        if (resultHide.isOk()) {
+            const data = resultHide.data
+            // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+            expect(JSON.stringify(data.aquaTree)).toContain('.deleted');
+        } else {
+            expect(true).toBe(false);
+        }
 
 
-    //         } else {
-    //             console.log(resultHide.data.forEach((e) => console.log(e)))
-    //             expect(true).toBe(false);
-    //         }
+    });
 
-    //     } else {
-    //         console.log(resultFormRevision.data.forEach((e) => console.log(e)))
-    //         expect(true).toBe(false);
-    //     }
+    test("should hide form in form revision item then unhide it", async () => {
+        const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
+        const fileObject: FileObject = {
+            fileName: "test.json",
+            fileContent: '{"name":"kenn","age":200}',
+            path: "/fake/path/test.json"
+        };
+        const aquaTreeWrapper: AquaTreeWrapper = {
+            aquaTree: mockAquaTree,
+            fileObject: fileObject,
+            revision: ""
+        }
+
+        const resultFormRevision = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+        expect(resultFormRevision.isOk()).toBe(true);
+        if (resultFormRevision.isOk()) {
+            const aquaTreeWrapperToHideWrapper: AquaTreeWrapper = {
+                aquaTree: resultFormRevision.data.aquaTree!,
+                fileObject: fileObject,
+                revision: ""
+            }
+            const resultHide = await aquafier.hideFormElements(aquaTreeWrapperToHideWrapper, "name");
+            expect(resultHide.isOk()).toBe(true);
+
+            if (resultHide.isOk()) {
+                const data = resultHide.data
+                // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+                expect(JSON.stringify(data.aquaTree)).toContain('.deleted');
 
 
-    // });
+                const aquaTreeWrapperHidenElementsWrapper: AquaTreeWrapper = {
+                    aquaTree: resultHide.data.aquaTree!,
+                    fileObject: fileObject,
+                    revision: ""
+                }
+
+                const resultUnHide = await aquafier.unHideFormElements(aquaTreeWrapperHidenElementsWrapper, "name", "arthur");
+                expect(resultUnHide.isOk()).toBe(true);
+
+                if (resultUnHide.isOk()) {
+                    const data = resultUnHide.data
+                    // expect(Object.keys(data.aquaTree.revisions).length).toBe(2);
+                    expect(JSON.stringify(data.aquaTree)).not.toContain('.deleted');
+                } else {
+                    console.log(resultUnHide.data.forEach((e) => console.log(e)))
+                    expect(true).toBe(false
+                    );
+                }
+
+
+            } else {
+                console.log(resultHide.data.forEach((e) => console.log(e)))
+                expect(true).toBe(false);
+            }
+
+        } else {
+            console.log(resultFormRevision.data.forEach((e) => console.log(e)))
+            expect(true).toBe(false);
+        }
+
+
+    });
 
 
 });

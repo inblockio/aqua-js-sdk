@@ -396,55 +396,53 @@ export function OrderRevisionInAquaTree(params: AquaTree): AquaTree {
   let allHashes = Object.keys(params.revisions);
   let orderdHashes: Array<string> = [];
   if (allHashes.length == 1) {
-      return params
+    return params
   }
 
   //more than one  revision
   for (let hash of allHashes) {
-      let revision = params.revisions[hash];
-      if (revision.previous_verification_hash == "" ) {
-          orderdHashes.push(hash);
-          break;
-      }
+    let revision = params.revisions[hash];
+    if (revision.previous_verification_hash == "") {
+      orderdHashes.push(hash);
+      break;
+    }
   }
 
 
   while (true) {
-      // find next revision
-      let nextRevisionHash = findNextRevisionHash(orderdHashes[orderdHashes.length - 1], params);
-     
-      if (nextRevisionHash == "") {
-          break;
-      } else {
-          orderdHashes.push(nextRevisionHash)
-      }
+    // find next revision
+    let nextRevisionHash = findNextRevisionHash(orderdHashes[orderdHashes.length - 1], params);
+    if (nextRevisionHash == "") {
+      break;
+    } else {
+      orderdHashes.push(nextRevisionHash)
+    }
   }
 
   // construct the new aqua tree with orderd revision 
   let newAquaTree: AquaTree = {
-      ...params,
-      revisions: {}
+    ...params,
+    revisions: {}
   }
 
   for (let hash of orderdHashes) {
-      let revision = params.revisions[hash];
-      newAquaTree.revisions[hash] = revision
+    let revision = params.revisions[hash];
+    newAquaTree.revisions[hash] = revision
   }
 
   return newAquaTree;
 }
 
 function findNextRevisionHash(previousVerificationHash: string, aquaTree: AquaTree): string {
-  
   let hashOfRevision = "";
 
   let allHashes = Object.keys(aquaTree.revisions);
   for (let hash of allHashes) {
-      let revision = aquaTree.revisions[hash];
-      if (revision.previous_verification_hash == previousVerificationHash) {
-          hashOfRevision = hash
-          break;
-      }
+    let revision = aquaTree.revisions[hash];
+    if (revision.previous_verification_hash == previousVerificationHash) {
+      hashOfRevision = hash
+      break;
+    }
   }
   return hashOfRevision
 }
