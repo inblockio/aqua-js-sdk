@@ -134,7 +134,7 @@ export type WitnessEnvironment = 'node' | 'browser'
 export interface FormVerificationResponseData {
   isOk: boolean;
   logs: LogData[];
-  formKeysGraphData: FormKeyGraphData[]; 
+  formKeysGraphData: FormKeyGraphData[];
 }
 
 
@@ -142,7 +142,7 @@ export interface FileObject {
   fileName: string,
   fileContent: string | AquaTree,
   path: string
-  fileSize? : number
+  fileSize?: number
 }
 
 export enum LogType {
@@ -215,7 +215,7 @@ export interface Revision {
   signature_public_key?: string;
   signature_wallet_address?: string;
   signature_type?: string;
-  leaves?:string[],
+  leaves?: string[],
   [key: string]: any;
 
 }

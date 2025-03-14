@@ -1,6 +1,6 @@
 // import { RevisionTree } from "./model.js";
 
-import { AquaTree, RevisionTree } from "./types";
+import { AquaTree, Revision, RevisionTree } from "./types";
 
 function findNode(tree: RevisionTree, hash: string): RevisionTree | null {
     if (tree.hash === hash) {
@@ -104,23 +104,59 @@ export function logAquaTree(node: RevisionTree, prefix: string = "", isLast: boo
     });
 }
 
-// export function logAquaTree(node: RevisionTree, prefix: string = "", isLast: boolean = true): void {
-//     const PURPLE = "\x1b[35m"; // Purple for parent nodes
-//     const YELLOW = "\x1b[33m"; // Yellow for child nodes
-//     const RESET = "\x1b[0m"; // Reset color
+export function OrderRevisionInAquaTree(params: AquaTree): AquaTree {
 
-//     // Determine color based on depth
-//     const color = prefix === "" ? PURPLE : YELLOW;
 
-//     // Log the current node's hash with color
-//     console.log(color + prefix + (isLast ? "└── " : "├── ") + node.hash + RESET);
+    let allHashes = Object.keys(params.revisions);
+    let orderdHashes: Array<string> = [];
+    if (allHashes.length == 1) {
+        return params
+    }
 
-//     // Update the prefix for children
-//     const newPrefix = prefix + (isLast ? "    " : "│   ");
+    //more than one  revision
+    for (let hash in allHashes) {
+        let revision = params.revisions[hash];
+        if (revision.previous_verification_hash == "" || revision.previous_verification_hash.trim.length == 0) {
+            orderdHashes.push(hash);
+            break;
+        }
+    }
 
-//     // Recursively log each child
-//     node.children.forEach((child, index) => {
-//         const isChildLast = index === node.children.length - 1;
-//         logAquaTree(child, newPrefix, isChildLast);
-//     });
-// }
+
+    while (true) {
+        // find next revision
+        let nextRevisionHash = findNextRevisionHash(orderdHashes[orderdHashes.length - 1], params);
+        if (nextRevisionHash == "") {
+            break;
+        } else {
+            orderdHashes.push(nextRevisionHash)
+        }
+    }
+
+    // construct the new aqua tree with orderd revision 
+    let newAquaTree: AquaTree = {
+        ...params,
+        revisions: {}
+    }
+
+    for (let hash in orderdHashes) {
+        let revision = params.revisions[hash];
+        newAquaTree[hash] = revision
+    }
+
+    return newAquaTree;
+}
+
+function findNextRevisionHash(previousVerificationHash: string, aquaTree: AquaTree): string {
+    let hashOfRevision = "";
+
+    let allHashes = Object.keys(aquaTree.revisions);
+    for (let hash in allHashes) {
+        let revision = aquaTree.revisions[hash];
+        if (revision.previous_verification_hash == previousVerificationHash) {
+            hashOfRevision = hash
+            break;
+        }
+    }
+    return hashOfRevision
+}
