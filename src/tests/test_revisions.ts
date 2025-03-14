@@ -75,4 +75,33 @@ const mockAquaTreeTworevisions: AquaTree = {
     }
 }
 
-export { mockAquaTreeOnerevision, mockAquaTreeTworevisions }
+
+const mockAquaTreeTworevisionsReArranged: AquaTree = {
+    "revisions": {
+        "0x361adf930670771bdb0c1e2c4bc109e30047bb3a0c2b9f89704255a6f3000dae": {
+            "revision_type": "signature",
+            "previous_verification_hash": "0x6c5544021930b7887455e21F00b157b2FA572667_0xfcce86f9623438a7b1ad7f1c8b80a76bd5a188137e132de31161a86814450557",
+            "local_timestamp": "Fri Mar 14 2025",
+            "file_nonce": "",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar",
+            "signature": "0x059e1493dca223e8cf679f21b84f2a71b0339bd3f5656aa4b374c8ed8fe0db0d2b6c77f9ba2521baadbc116a701f865c0b0117722f69dd3389bbacc626c42e831b",
+            "signature_public_key": "0x04170e3af46328f743892d652a7e11faadb9800cc3023b00621bd9a06319ffcb0d02c86ce5d303028e5dea56291d38260a821061226f8e1197cec15dcbb0b887bc",
+            "signature_wallet_address": null,
+            "signature_type": "ethereum:eip-191"
+        },
+        "0xfcce86f9623438a7b1ad7f1c8b80a76bd5a188137e132de31161a86814450557": {
+            "revision_type": "file",
+            "previous_verification_hash": "",
+            "local_timestamp": "Fri Mar 14 2025",
+            "file_nonce": "cadb3750fe0d9ef66e31fdef15b6ee8d39b6a15e83088af494583a11aab2bb07",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar",
+            "file_hash": "31f2f715138fd28a45d0e567d952f98516d216ec135cf28ca9a07a49db487db0"
+        }
+    },
+    "file_index": {
+        "0xfcce86f9623438a7b1ad7f1c8b80a76bd5a188137e132de31161a86814450557": "sample.txt"
+    }
+
+}
+
+export { mockAquaTreeOnerevision, mockAquaTreeTworevisions , mockAquaTreeTworevisionsReArranged}

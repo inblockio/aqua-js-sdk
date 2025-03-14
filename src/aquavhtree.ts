@@ -1,6 +1,6 @@
 // import { RevisionTree } from "./model.js";
 
-import { AquaTree, Revision, RevisionTree } from "./types";
+import { AquaTree,  RevisionTree } from "./types";
 
 function findNode(tree: RevisionTree, hash: string): RevisionTree | null {
     if (tree.hash === hash) {

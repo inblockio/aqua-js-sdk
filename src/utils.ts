@@ -400,9 +400,9 @@ export function OrderRevisionInAquaTree(params: AquaTree): AquaTree {
   }
 
   //more than one  revision
-  for (let hash in allHashes) {
+  for (let hash of allHashes) {
       let revision = params.revisions[hash];
-      if (revision.previous_verification_hash == null ||revision.previous_verification_hash == "" || revision.previous_verification_hash.trim.length == 0) {
+      if (revision.previous_verification_hash == "" ) {
           orderdHashes.push(hash);
           break;
       }
@@ -412,6 +412,7 @@ export function OrderRevisionInAquaTree(params: AquaTree): AquaTree {
   while (true) {
       // find next revision
       let nextRevisionHash = findNextRevisionHash(orderdHashes[orderdHashes.length - 1], params);
+     
       if (nextRevisionHash == "") {
           break;
       } else {
@@ -425,19 +426,20 @@ export function OrderRevisionInAquaTree(params: AquaTree): AquaTree {
       revisions: {}
   }
 
-  for (let hash in orderdHashes) {
+  for (let hash of orderdHashes) {
       let revision = params.revisions[hash];
-      newAquaTree[hash] = revision
+      newAquaTree.revisions[hash] = revision
   }
 
   return newAquaTree;
 }
 
 function findNextRevisionHash(previousVerificationHash: string, aquaTree: AquaTree): string {
+  
   let hashOfRevision = "";
 
   let allHashes = Object.keys(aquaTree.revisions);
-  for (let hash in allHashes) {
+  for (let hash of allHashes) {
       let revision = aquaTree.revisions[hash];
       if (revision.previous_verification_hash == previousVerificationHash) {
           hashOfRevision = hash
