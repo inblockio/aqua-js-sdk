@@ -397,6 +397,49 @@ function printGraphData(node, prefix = "", _isLast = true) {
     printGraphData(child, newPrefix, false);
   });
 }
+function OrderRevisionInAquaTree(params) {
+  let allHashes = Object.keys(params.revisions);
+  let orderdHashes = [];
+  if (allHashes.length == 1) {
+    return params;
+  }
+  for (let hash of allHashes) {
+    let revision = params.revisions[hash];
+    if (revision.previous_verification_hash == "") {
+      orderdHashes.push(hash);
+      break;
+    }
+  }
+  while (true) {
+    let nextRevisionHash = findNextRevisionHash(orderdHashes[orderdHashes.length - 1], params);
+    if (nextRevisionHash == "") {
+      break;
+    } else {
+      orderdHashes.push(nextRevisionHash);
+    }
+  }
+  let newAquaTree = {
+    ...params,
+    revisions: {}
+  };
+  for (let hash of orderdHashes) {
+    let revision = params.revisions[hash];
+    newAquaTree.revisions[hash] = revision;
+  }
+  return newAquaTree;
+}
+function findNextRevisionHash(previousVerificationHash, aquaTree) {
+  let hashOfRevision = "";
+  let allHashes = Object.keys(aquaTree.revisions);
+  for (let hash of allHashes) {
+    let revision = aquaTree.revisions[hash];
+    if (revision.previous_verification_hash == previousVerificationHash) {
+      hashOfRevision = hash;
+      break;
+    }
+  }
+  return hashOfRevision;
+}
 
 // src/aquavhtree.ts
 function findNode(tree, hash) {
@@ -854,9 +897,7 @@ function fetchFilesToBeReadUtil(aquaTree) {
   });
   let filesWithoutContentInRevisions = [];
   hashAndfiles.forEach((value, key) => {
-    console.log(`key ${key}  and value ${value}`);
     const revision = aquaTree.revisions[key];
-    console.log(`revision ${JSON.stringify(revision, null, 4)}`);
     let fileName = value;
     if (revision != void 0 && revision.content != void 0) {
       console.warn(`\u2713 File ${fileName} skipped: content already exists in revision ${key}`);
@@ -3210,6 +3251,7 @@ export {
   NoneOption,
   Ok,
   OkResult,
+  OrderRevisionInAquaTree,
   Some,
   SomeOption,
   checkFileHashAlreadyNotarized,
