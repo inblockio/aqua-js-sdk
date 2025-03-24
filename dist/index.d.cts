@@ -368,6 +368,7 @@ declare function log_success(content: any): void;
  * @method getRevisionByHash
  * @method getLastRevision
  * @method getFileByHash
+ * @method getFileHash
  */
 declare class Aquafier {
     /**
