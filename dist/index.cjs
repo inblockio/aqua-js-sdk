@@ -3210,6 +3210,9 @@ var Aquafier = class {
     this.getFileByHash = async (aquaTree, hash) => {
       return getFileByHashUtil(aquaTree, hash);
     };
+    this.getFileHash = (fileContent) => {
+      return getHashSum(fileContent);
+    };
     this.getVersionFromPackageJson = () => {
       let version = "1.3.2.0";
       console.log(package_default.version);

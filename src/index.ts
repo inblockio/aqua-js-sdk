@@ -9,6 +9,7 @@ import { Result } from "./type_guards";
 import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData } from "./types"
 import { default as packageJson } from "./../package.json";
 import { logAquaTree } from "./aquavhtree";
+import { getHashSum } from "./utils";
 
 export * from "./utils";
 export * from "./types";
@@ -265,6 +266,10 @@ export default class Aquafier {
     // get file
     getFileByHash = async (aquaTree: AquaTree, hash: string): Promise<Result<string, LogData[]>> => {
         return getFileByHashUtil(aquaTree, hash)
+    }
+
+    getFileHash = (fileContent: string): string => {
+        return getHashSum(fileContent)
     }
 
     getVersionFromPackageJson = (): string => {

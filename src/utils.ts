@@ -1,10 +1,6 @@
 
 import { AnObject, AquaTree, CredentialsData, GasEstimateResult, LogData, LogType, LogTypeEmojis, Revision, RevisionTree, TreeMapping, VerificationGraphData } from './types';
 import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers";
-// import crypto from 'crypto-browserify';
-// import { createHash } from 'crypto';
-// import sha3 from "js-sha3"
-// import { sha256 } from 'ethers';
 import shajs from 'sha.js';
 import { MerkleTree } from 'merkletreejs';
 import { Err, Ok, Result } from './type_guards';

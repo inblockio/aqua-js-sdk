@@ -517,6 +517,7 @@ declare class Aquafier {
     getRevisionByHash: (aquaTree: AquaTree, hash: string) => Result<Revision, LogData[]>;
     getLastRevision: (aquaTree: AquaTree) => Result<Revision, LogData[]>;
     getFileByHash: (aquaTree: AquaTree, hash: string) => Promise<Result<string, LogData[]>>;
+    getFileHash: (fileContent: string) => string;
     getVersionFromPackageJson: () => string;
     renderTree: (aquaTree: AquaTree) => void;
 }
