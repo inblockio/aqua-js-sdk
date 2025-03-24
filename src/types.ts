@@ -215,6 +215,9 @@ export interface Revision {
   signature_public_key?: string;
   signature_wallet_address?: string;
   signature_type?: string;
+  link_type?:string,
+  link_verification_hashes?:string[],
+  link_file_hashes?: string[],
   leaves?: string[],
   [key: string]: any;
 
