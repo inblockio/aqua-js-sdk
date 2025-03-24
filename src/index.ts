@@ -43,6 +43,7 @@ export * from "./core/formatter"
  * @method getRevisionByHash
  * @method getLastRevision
  * @method getFileByHash
+ * @method getFileHash
  */
 export default class Aquafier {
 
