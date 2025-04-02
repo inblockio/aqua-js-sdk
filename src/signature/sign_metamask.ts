@@ -48,12 +48,14 @@ export class MetaMaskSigner {
     private createHtml(message: string): string {
         return `
         <html>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.6.3/ethers.umd.min.js" type="text/javascript"></script>
           <script>
           const message = "${message}";
           const localServerUrl = window.location.href;
           
           const doSignProcess = async () => {
             const wallet_address = window.ethereum.selectedAddress;
+            const correctedWalletAddress = ethers.utils.getAddress(wallet_address)
             const signature = await window.ethereum.request({
               method: 'personal_sign',
               params: [message, window.ethereum.selectedAddress],
@@ -64,7 +66,7 @@ export class MetaMaskSigner {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({signature, wallet_address})
+              body: JSON.stringify({signature, wallet_address: correctedWalletAddress})
             });
           }
           
