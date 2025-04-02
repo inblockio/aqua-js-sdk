@@ -7,8 +7,26 @@ import ws from 'ws';
 
 
 
+/**
+ * Handles Nostr-based witnessing operations for Aqua Protocol
+ * 
+ * This class provides functionality to witness and verify Aqua Tree revisions
+ * using the Nostr protocol. It supports both browser and Node.js environments
+ * and uses the nostr-tools library for Nostr operations.
+ */
 export class WitnessNostr {
-    waitForEventAuthor = async (relay: Relay, pk: string): Promise<Event> => {
+    /**
+ * Waits for an event from a specific author on a Nostr relay
+ * 
+ * @param relay - Connected Nostr relay instance
+ * @param pk - Public key of the author to watch
+ * @returns Promise resolving to the received Nostr event
+ * 
+ * This method:
+ * - Subscribes to kind 1 events from specific author
+ * - Returns first matching event received
+ */
+waitForEventAuthor = async (relay: Relay, pk: string): Promise<Event> => {
         return new Promise((resolve) => {
             relay.subscribe([
                 {
@@ -23,7 +41,18 @@ export class WitnessNostr {
         })
     }
 
-    waitForEventId = async (relay: Relay, id: string): Promise<Event> => {
+    /**
+ * Waits for a specific event by ID on a Nostr relay
+ * 
+ * @param relay - Connected Nostr relay instance
+ * @param id - Event ID to watch for
+ * @returns Promise resolving to the received Nostr event
+ * 
+ * This method:
+ * - Subscribes to events with specific ID
+ * - Returns first matching event received
+ */
+waitForEventId = async (relay: Relay, id: string): Promise<Event> => {
         return new Promise((resolve) => {
             relay.subscribe([
                 {
@@ -37,7 +66,23 @@ export class WitnessNostr {
         })
     }
 
-    witness = async (witnessEventVerificationHash: string, credentials: CredentialsData): Promise<[string, string, number]> => {
+    /**
+ * Creates a witness event on Nostr network
+ * 
+ * @param witnessEventVerificationHash - Hash to be witnessed
+ * @param credentials - Credentials containing Nostr secret key
+ * @returns Promise resolving to [nevent, npub, timestamp]
+ * 
+ * This method:
+ * - Validates Nostr credentials
+ * - Creates and signs Nostr event
+ * - Publishes event to relay
+ * - Returns event details and timestamp
+ * 
+ * Uses damus.io relay and supports both browser and Node.js
+ * environments with appropriate WebSocket handling.
+ */
+witness = async (witnessEventVerificationHash: string, credentials: CredentialsData): Promise<[string, string, number]> => {
 
 
 
@@ -104,7 +149,21 @@ export class WitnessNostr {
 
 
 
-    verify = async (
+    /**
+ * Verifies a Nostr witness event
+ * 
+ * @param transactionHash - Nostr event identifier (nevent)
+ * @param expectedMR - Expected Merkle root
+ * @param expectedTimestamp - Expected event timestamp
+ * @returns Promise resolving to boolean indicating verification success
+ * 
+ * This method:
+ * - Decodes Nostr event identifier
+ * - Retrieves event from relay
+ * - Verifies timestamp and content match
+ * - Supports both browser and Node.js environments
+ */
+verify = async (
         transactionHash: string,
         expectedMR: string,
         expectedTimestamp: number

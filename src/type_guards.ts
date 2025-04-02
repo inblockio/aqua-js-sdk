@@ -1,6 +1,17 @@
-// Result type definition
+/**
+ * Result type for handling success/error cases
+ * 
+ * @typeParam T - Type of success value
+ * @typeParam E - Type of error value
+ */
 export type Result<T, E> = OkResult<T, E> | ErrResult<T, E>;
 
+/**
+ * Represents a successful Result containing a value
+ * 
+ * @typeParam T - Type of success value
+ * @typeParam E - Type of error value (unused in Ok case)
+ */
 export class OkResult<T, E> {
     readonly tag: 'ok' = 'ok';
     constructor(readonly data: T) {}
@@ -27,6 +38,12 @@ export class OkResult<T, E> {
     }
 }
 
+/**
+ * Represents a failed Result containing an error
+ * 
+ * @typeParam T - Type of success value (unused in Err case)
+ * @typeParam E - Type of error value
+ */
 export class ErrResult<T, E> {
     readonly tag: 'err' = 'err';
     constructor(readonly data: E) {}
@@ -54,26 +71,59 @@ export class ErrResult<T, E> {
 }
 
 // Helper functions for Result
+/**
+ * Creates a successful Result
+ * 
+ * @param value - Value to wrap in Ok
+ * @returns Result containing success value
+ */
 export function Ok<T, E>(value: T): Result<T, E> {
     return new OkResult(value);
 }
 
+/**
+ * Creates a failed Result
+ * 
+ * @param error - Error to wrap in Err
+ * @returns Result containing error value
+ */
 export function Err<T, E>(error: E): Result<T, E> {
     return new ErrResult(error);
 }
 
 // Type guards for Result
+/**
+ * Type guard for checking if Result is Ok
+ * 
+ * @param result - Result to check
+ * @returns True if Result is Ok, false otherwise
+ */
 export function isOk<T, E>(result: Result<T, E>): result is OkResult<T, E> {
     return result.isOk();
 }
 
+/**
+ * Type guard for checking if Result is Err
+ * 
+ * @param result - Result to check
+ * @returns True if Result is Err, false otherwise
+ */
 export function isErr<T, E>(result: Result<T, E>): result is ErrResult<T, E> {
     return result.isErr();
 }
 
-// Option type definition
+/**
+ * Option type for handling optional values
+ * 
+ * @typeParam T - Type of contained value
+ */
 export type Option<T> = SomeOption<T> | NoneOption<T>;
 
+/**
+ * Represents an Option containing a value
+ * 
+ * @typeParam T - Type of contained value
+ */
 export class SomeOption<T> {
     readonly tag: 'some' = 'some';
     constructor(readonly value: T) {}
@@ -100,6 +150,11 @@ export class SomeOption<T> {
     }
 }
 
+/**
+ * Represents an empty Option
+ * 
+ * @typeParam T - Type of value (unused in None case)
+ */
 export class NoneOption<T> {
     readonly tag: 'none' = 'none';
 
@@ -126,19 +181,42 @@ export class NoneOption<T> {
 }
 
 // Helper functions for Option
+/**
+ * Creates an Option containing a value
+ * 
+ * @param value - Value to wrap in Some
+ * @returns Option containing value
+ */
 export function Some<T>(value: T): Option<T> {
     return new SomeOption(value);
 }
 
+/**
+ * Creates an empty Option
+ * 
+ * @returns Empty Option
+ */
 export function None<T>(): Option<T> {
     return new NoneOption();
 }
 
 // Type guards for Option
+/**
+ * Type guard for checking if Option contains value
+ * 
+ * @param option - Option to check
+ * @returns True if Option is Some, false otherwise
+ */
 export function isSome<T>(option: Option<T>): option is SomeOption<T> {
     return option.isSome();
 }
 
+/**
+ * Type guard for checking if Option is empty
+ * 
+ * @param option - Option to check
+ * @returns True if Option is None, false otherwise
+ */
 export function isNone<T>(option: Option<T>): option is NoneOption<T> {
     return option.isNone();
 }

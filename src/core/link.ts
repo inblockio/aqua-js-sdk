@@ -7,6 +7,21 @@ import { Err, isOk, Ok, Result } from "../type_guards";
 
 
 
+/**
+ * Links one Aqua Tree to another by creating a link revision
+ * 
+ * @param aquaTreeWrapper - Source Aqua Tree wrapper to create link from
+ * @param linkAquaTreeWrapper - Target Aqua Tree wrapper to link to
+ * @param enableScalar - Flag to use scalar mode instead of tree mode
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Creates a link revision with metadata
+ * - Validates link targets
+ * - Creates verification data with Merkle tree or scalar hash
+ * - Updates the source Aqua Tree with new link revision
+ * - Updates file index with linked tree information
+ */
 export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     const timestamp = getTimestamp()
@@ -96,6 +111,19 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
     return Ok(resutData)
 }
 
+/**
+ * Links multiple target Aqua Trees to a single source Aqua Tree
+ * 
+ * @param aquaTreeWrappers - Source Aqua Tree wrapper
+ * @param linkAquaTreeWrapper - Array of target Aqua Tree wrappers to link to
+ * @param enableScalar - Flag to use scalar mode instead of tree mode
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Iteratively links each target tree to the source tree
+ * - Accumulates logs from each linking operation
+ * - Updates the source tree with all link revisions
+ */
 export async function linkAquaTreesToMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper[], enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
 
 
@@ -130,6 +158,19 @@ export async function linkAquaTreesToMultipleAquaTreesUtil(aquaTreeWrappers: Aqu
 
 }
 
+/**
+ * Links a single target Aqua Tree to multiple source Aqua Trees
+ * 
+ * @param aquaTreeWrappers - Array of source Aqua Tree wrappers
+ * @param linkAquaTreeWrapper - Target Aqua Tree wrapper to link to
+ * @param enableScalar - Flag to use scalar mode instead of tree mode
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Iteratively links the target tree to each source tree
+ * - Accumulates logs from each linking operation
+ * - Returns array of updated Aqua Trees
+ */
 export async function linkMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
 
 

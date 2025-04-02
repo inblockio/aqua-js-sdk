@@ -2,28 +2,67 @@ import { ethers } from 'ethers';
 import { LogData, LogType, TransactionResult, WitnessConfig, WitnessEnvironment, WitnessNetwork, WitnessTransactionData } from '../types';
 import http from "http";
 
+/**
+ * Handles Ethereum-based witnessing operations for Aqua Protocol
+ * 
+ * This class provides functionality to witness Aqua Tree revisions
+ * on Ethereum networks (mainnet, sepolia, holesky) using MetaMask.
+ * Supports both browser and Node.js environments with appropriate
+ * adaptations for each context.
+ */
 export class WitnessEth {
   // Internal Configuration Maps
-  private static readonly ethChainIdMap: Record<WitnessNetwork, string> = {
+  /**
+ * Maps witness networks to their corresponding Ethereum chain IDs
+ * 
+ * @private
+ * @readonly
+ */
+private static readonly ethChainIdMap: Record<WitnessNetwork, string> = {
     mainnet: '0x1',
     sepolia: '0xaa36a7',
     holesky: '0x4268',
   };
 
   // Utility Methods
-  private static sleep(ms: number): Promise<void> {
+  /**
+ * Utility method to pause execution
+ * 
+ * @param ms - Number of milliseconds to sleep
+ * @returns Promise that resolves after the specified delay
+ */
+private static sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   // Environment detection
-  private static detectEnvironment(): WitnessEnvironment {
+  /**
+ * Detects the current runtime environment
+ * 
+ * @returns WitnessEnvironment indicating 'browser' or 'node'
+ * 
+ * Checks for presence of window.ethereum to determine if running
+ * in a browser environment with MetaMask available
+ */
+private static detectEnvironment(): WitnessEnvironment {
     //@ts-ignore
     return typeof window !== 'undefined' && window.ethereum
       ? "browser"
       : 'node'
   };
 
-  static async witnessMetamask(config: WitnessConfig) {
+  /**
+ * Main entry point for MetaMask-based witnessing
+ * 
+ * @param config - Configuration for witness operation
+ * @returns Promise resolving to witness transaction data
+ * 
+ * This method:
+ * - Detects environment (browser/node)
+ * - Routes to appropriate witness implementation
+ * - Handles error cases
+ */
+static async witnessMetamask(config: WitnessConfig) {
     const environment = this.detectEnvironment();
 
     try {
@@ -41,7 +80,18 @@ export class WitnessEth {
     }
   };
 
-  static async commonPrepareListener(htmlContent: string) {
+  /**
+ * Creates common HTTP request listener for witness server
+ * 
+ * @param htmlContent - HTML content to serve for witness page
+ * @returns Request listener function
+ * 
+ * This method handles:
+ * - GET / - Serves witness page
+ * - GET /result - Returns current transaction status
+ * - POST / - Receives transaction data from browser
+ */
+static async commonPrepareListener(htmlContent: string) {
     let output = "{}"
     const requestListener = async (req: any, res: any) => {
       if (req.method == "POST") {
@@ -70,7 +120,21 @@ export class WitnessEth {
   }
 
   // Metamask Witness Method
-  static async nodeWitnessMetamask(
+  /**
+ * Handles witnessing in Node.js environment
+ * 
+ * @param config - Witness configuration
+ * @param port - Port for local server (default: 8420)
+ * @param host - Host for local server (default: 'localhost')
+ * @returns Promise resolving to witness transaction data
+ * 
+ * This method:
+ * - Creates local HTTP server
+ * - Serves witness page for MetaMask interaction
+ * - Polls for transaction completion
+ * - Returns transaction hash and wallet address
+ */
+static async nodeWitnessMetamask(
     config: WitnessConfig,
     port: number = 8420,
     host: string = 'localhost'
@@ -151,7 +215,20 @@ export class WitnessEth {
   }
 
   // Browser-specific implementation
-  static async browserWitness(config: WitnessConfig): Promise<WitnessTransactionData> {
+  /**
+ * Handles witnessing in browser environment
+ * 
+ * @param config - Witness configuration
+ * @returns Promise resolving to witness transaction data
+ * 
+ * This method:
+ * - Verifies MetaMask presence
+ * - Requests account access
+ * - Ensures correct network chain
+ * - Sends witness transaction
+ * - Returns transaction details
+ */
+static async browserWitness(config: WitnessConfig): Promise<WitnessTransactionData> {
     const ethChainIdMap: Record<string, string> = {
       'mainnet': '0x1',
       'sepolia': '0xaa36a7',

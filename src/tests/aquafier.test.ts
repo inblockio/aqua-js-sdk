@@ -113,7 +113,7 @@ describe("Aquafier", () => {
         // const content = await fs.readFile(filePath, "utf-8");
         const creds: CredentialsData = credentialsData;
 
-        const result = await aquafier.signAquaTree(aquaTreeWrapper, "cli", creds, true);
+        const result = await aquafier.signAquaTree(aquaTreeWrapper, "metamask", creds, true);
 
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
