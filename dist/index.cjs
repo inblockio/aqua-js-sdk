@@ -1145,7 +1145,7 @@ function getLastRevisionUtil(aquaTree) {
 // src/signature/sign_metamask.ts
 var MetaMaskSigner = class {
   constructor(options = {}) {
-    this.port = options.port || 3e3;
+    this.port = options.port || 3001;
     this.host = options.host || "localhost";
     this.serverUrl = `http://${this.host}:${this.port}`;
     this.maxAttempts = options.maxAttempts || 24;
@@ -1153,18 +1153,38 @@ var MetaMaskSigner = class {
     this.server = null;
     this.lastResult = null;
   }
+  /**
+  * Creates a standardized message for signing
+  * 
+  * @param verificationHash - Hash of the revision to sign
+  * @returns Formatted message string
+  */
   createMessage(verificationHash) {
     return `I sign this revision: [${verificationHash}]`;
   }
+  /**
+  * Creates HTML page for MetaMask interaction
+  * 
+  * @param message - Message to be signed
+  * @returns HTML string with embedded MetaMask integration
+  * 
+  * This method creates a self-contained HTML page that:
+  * - Detects MetaMask presence
+  * - Requests account access
+  * - Signs message using personal_sign
+  * - Posts signature back to local server
+  */
   createHtml(message) {
     return `
         <html>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.6.3/ethers.umd.min.js" type="text/javascript"></script>
           <script>
           const message = "${message}";
           const localServerUrl = window.location.href;
           
           const doSignProcess = async () => {
             const wallet_address = window.ethereum.selectedAddress;
+            const correctedWalletAddress = ethers.utils.getAddress(wallet_address)
             const signature = await window.ethereum.request({
               method: 'personal_sign',
               params: [message, window.ethereum.selectedAddress],
@@ -1175,7 +1195,7 @@ var MetaMaskSigner = class {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({signature, wallet_address})
+              body: JSON.stringify({signature, wallet_address: correctedWalletAddress})
             });
           }
           
@@ -1200,6 +1220,18 @@ var MetaMaskSigner = class {
         </html>
       `;
   }
+  /**
+  * Handles signing process in browser environment
+  * 
+  * @param verificationHash - Hash of the revision to sign
+  * @returns Promise resolving to [signature, wallet address, public key]
+  * 
+  * This method:
+  * - Checks for MetaMask presence
+  * - Requests account access
+  * - Signs message using MetaMask
+  * - Recovers public key from signature
+  */
   async signInBrowser(verificationHash) {
     if (!window.ethereum || !window.ethereum.isMetaMask) {
       throw new Error("MetaMask not detected");
@@ -1221,6 +1253,18 @@ var MetaMaskSigner = class {
       throw error;
     }
   }
+  /**
+  * Handles signing process in Node.js environment
+  * 
+  * @param verificationHash - Hash of the revision to sign
+  * @returns Promise resolving to [signature, wallet address, public key]
+  * 
+  * This method:
+  * - Creates local HTTP server
+  * - Serves HTML page for MetaMask interaction
+  * - Polls for signature completion
+  * - Cleans up server after signing
+  */
   async signInNode(verificationHash) {
     const { createServer } = await import("http");
     const message = this.createMessage(verificationHash);
@@ -1241,6 +1285,17 @@ var MetaMaskSigner = class {
       }
     });
   }
+  /**
+  * Creates HTTP request listener for local server
+  * 
+  * @param html - HTML content to serve
+  * @returns Request listener function
+  * 
+  * This method handles:
+  * - GET / - Serves signing page
+  * - GET /result - Returns current signature status
+  * - POST / - Receives signature from browser
+  */
   createRequestListener(html) {
     return (req, res) => {
       if (req.method === "GET" && req.url === "/") {
@@ -1260,6 +1315,17 @@ var MetaMaskSigner = class {
       }
     };
   }
+  /**
+  * Polls for signature completion
+  * 
+  * @param message - Original message being signed
+  * @returns Promise resolving to [signature, wallet address, public key]
+  * 
+  * This method:
+  * - Checks for signature at regular intervals
+  * - Times out after maxAttempts
+  * - Recovers public key when signature is received
+  */
   async pollForSignature(message) {
     let attempts = 0;
     while (attempts < this.maxAttempts) {
@@ -1274,6 +1340,16 @@ var MetaMaskSigner = class {
     }
     throw new Error("Signature timeout: No response from MetaMask");
   }
+  /**
+  * Recovers public key from signature
+  * 
+  * @param message - Original signed message
+  * @param signature - Ethereum signature
+  * @returns Promise resolving to public key
+  * 
+  * Uses ethers.js to recover the public key from
+  * the signature and message hash.
+  */
   async recoverPublicKey(message, signature) {
     const { ethers: ethers4 } = await import("ethers");
     return ethers4.SigningKey.recoverPublicKey(
@@ -1284,6 +1360,17 @@ var MetaMaskSigner = class {
   sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+  /**
+  * Signs a verification hash using MetaMask
+  * 
+  * @param verificationHash - Hash of the revision to sign
+  * @returns Promise resolving to [signature, wallet address, public key]
+  * 
+  * This method:
+  * - Detects environment (Node.js or browser)
+  * - Routes to appropriate signing method
+  * - Returns complete signature information
+  */
   async sign(verificationHash) {
     const isNode = typeof window === "undefined";
     return isNode ? this.signInNode(verificationHash) : this.signInBrowser(verificationHash);
@@ -1292,6 +1379,18 @@ var MetaMaskSigner = class {
 
 // src/signature/sign_cli.ts
 var CLISigner = class {
+  /**
+  * Signs a verification hash using the provided wallet
+  * 
+  * @param wallet - HDNodeWallet instance for signing
+  * @param verificationHash - Hash of the revision to sign
+  * @returns Promise resolving to the signature string
+  * 
+  * This method:
+  * - Creates a standardized message with the verification hash
+  * - Signs the message using the wallet's private key
+  * - Returns the resulting signature
+  */
   async doSign(wallet, verificationHash) {
     const message = "I sign this revision: [" + verificationHash + "]";
     const signature = await wallet.signMessage(message);
@@ -1304,6 +1403,19 @@ var import_dids = require("dids");
 var import_key_did_provider_ed25519 = require("key-did-provider-ed25519");
 var KeyResolver = __toESM(require("key-did-resolver"), 1);
 var DIDSigner = class {
+  /**
+  * Verifies a DID-signed JWS against a verification hash
+  * 
+  * @param jws - JSON Web Signature to verify
+  * @param key - DID key used for signing
+  * @param hash - Verification hash that was signed
+  * @returns Promise resolving to boolean indicating signature validity
+  * 
+  * This method:
+  * - Constructs the expected signature payload
+  * - Verifies the JWS using DID resolver
+  * - Validates payload message and key match
+  */
   async verify(jws, key, hash) {
     const expected = { message: `I sign this revision: [${hash}]` };
     try {
@@ -1317,6 +1429,19 @@ var DIDSigner = class {
     }
     return true;
   }
+  /**
+  * Signs a verification hash using DID with Ed25519 provider
+  * 
+  * @param verificationHash - Hash of the revision to sign
+  * @param privateKey - Ed25519 private key as Uint8Array
+  * @returns Promise resolving to SignatureResult containing JWS and DID
+  * 
+  * This method:
+  * - Creates a standardized signature payload
+  * - Initializes Ed25519 DID provider with private key
+  * - Authenticates the DID
+  * - Creates and returns a JSON Web Signature
+  */
   async sign(verificationHash, privateKey) {
     const payload = {
       message: `I sign this revision: [${verificationHash}]`
@@ -1503,13 +1628,38 @@ var import_ethers3 = require("ethers");
 var import_http = __toESM(require("http"), 1);
 var WitnessEth = class {
   // Utility Methods
+  /**
+  * Utility method to pause execution
+  * 
+  * @param ms - Number of milliseconds to sleep
+  * @returns Promise that resolves after the specified delay
+  */
   static sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   // Environment detection
+  /**
+  * Detects the current runtime environment
+  * 
+  * @returns WitnessEnvironment indicating 'browser' or 'node'
+  * 
+  * Checks for presence of window.ethereum to determine if running
+  * in a browser environment with MetaMask available
+  */
   static detectEnvironment() {
     return typeof window !== "undefined" && window.ethereum ? "browser" : "node";
   }
+  /**
+  * Main entry point for MetaMask-based witnessing
+  * 
+  * @param config - Configuration for witness operation
+  * @returns Promise resolving to witness transaction data
+  * 
+  * This method:
+  * - Detects environment (browser/node)
+  * - Routes to appropriate witness implementation
+  * - Handles error cases
+  */
   static async witnessMetamask(config) {
     const environment = this.detectEnvironment();
     try {
@@ -1526,6 +1676,17 @@ var WitnessEth = class {
       throw error;
     }
   }
+  /**
+  * Creates common HTTP request listener for witness server
+  * 
+  * @param htmlContent - HTML content to serve for witness page
+  * @returns Request listener function
+  * 
+  * This method handles:
+  * - GET / - Serves witness page
+  * - GET /result - Returns current transaction status
+  * - POST / - Receives transaction data from browser
+  */
   static async commonPrepareListener(htmlContent) {
     let output = "{}";
     const requestListener = async (req, res) => {
@@ -1554,6 +1715,20 @@ var WitnessEth = class {
     return requestListener;
   }
   // Metamask Witness Method
+  /**
+  * Handles witnessing in Node.js environment
+  * 
+  * @param config - Witness configuration
+  * @param port - Port for local server (default: 8420)
+  * @param host - Host for local server (default: 'localhost')
+  * @returns Promise resolving to witness transaction data
+  * 
+  * This method:
+  * - Creates local HTTP server
+  * - Serves witness page for MetaMask interaction
+  * - Polls for transaction completion
+  * - Returns transaction hash and wallet address
+  */
   static async nodeWitnessMetamask(config, port = 8420, host = "localhost") {
     const serverUrl = `http://${host}:${port}`;
     const html = this.generateWitnessHtml(config);
@@ -1582,6 +1757,19 @@ var WitnessEth = class {
     }
   }
   // Browser-specific implementation
+  /**
+  * Handles witnessing in browser environment
+  * 
+  * @param config - Witness configuration
+  * @returns Promise resolving to witness transaction data
+  * 
+  * This method:
+  * - Verifies MetaMask presence
+  * - Requests account access
+  * - Ensures correct network chain
+  * - Sends witness transaction
+  * - Returns transaction details
+  */
   static async browserWitness(config) {
     const ethChainIdMap = {
       "mainnet": "0x1",
@@ -1757,6 +1945,12 @@ var WitnessEth = class {
   }
 };
 // Internal Configuration Maps
+/**
+* Maps witness networks to their corresponding Ethereum chain IDs
+* 
+* @private
+* @readonly
+*/
 WitnessEth.ethChainIdMap = {
   mainnet: "0x1",
   sepolia: "0xaa36a7",
@@ -1768,10 +1962,30 @@ var asn1js = __toESM(require("asn1js"), 1);
 var pkijs = __toESM(require("pkijs"), 1);
 var WitnessTSA = class {
   constructor() {
+    /**
+    * Converts ISO date to Unix timestamp
+    * 
+    * @param t - Date object or ISO date string
+    * @returns Unix timestamp (seconds since epoch)
+    * 
+    * This method normalizes dates to Unix timestamps for
+    * consistent timestamp handling across the system.
+    */
     this.isoDate2unix = (t) => {
       const date = t instanceof Date ? t : new Date(t);
       return Math.floor(date.getTime() / 1e3);
     };
+    /**
+    * Extracts generation time from TSA response
+    * 
+    * @param resp - TSA response object
+    * @returns Unix timestamp of when TSA generated the timestamp
+    * 
+    * This method:
+    * - Extracts signed data from TSA response
+    * - Parses TSTInfo structure
+    * - Converts TSA generation time to Unix timestamp
+    */
     this.extractGenTimeFromResp = (resp) => {
       const signedData = new pkijs.SignedData({
         schema: resp?.timeStampToken?.content
@@ -1782,6 +1996,20 @@ var WitnessTSA = class {
       const tstInfo = new pkijs.TSTInfo({ schema: tstInfoAsn1.result });
       return this.isoDate2unix(tstInfo.genTime);
     };
+    /**
+    * Creates a timestamp request and submits to TSA
+    * 
+    * @param hash - Hash to be timestamped
+    * @param tsaUrl - URL of the Time Stamp Authority service
+    * @returns Promise resolving to [base64 response, provider name, timestamp]
+    * 
+    * This method:
+    * - Creates SHA-256 hash of input
+    * - Constructs TSP request according to RFC 3161
+    * - Submits request to TSA service
+    * - Validates TSA response
+    * - Returns encoded response and timestamp
+    */
     this.witness = async (hash, tsaUrl) => {
       const hashHex = getHashSum(hash);
       const hashBuffer = Uint8Array.from(Buffer.from(hashHex, "hex"));
@@ -1818,6 +2046,20 @@ var WitnessTSA = class {
       const witnessTimestamp = this.extractGenTimeFromResp(tspResponse);
       return [base64EncodedResp, "DigiCert", witnessTimestamp];
     };
+    /**
+    * Verifies a TSA timestamp response
+    * 
+    * @param transactionHash - Base64 encoded TSA response
+    * @param expectedMR - Expected Merkle root hash
+    * @param expectedTimestamp - Expected timestamp
+    * @returns Promise resolving to boolean indicating verification success
+    * 
+    * This method:
+    * - Decodes TSA response
+    * - Verifies timestamp matches expected time
+    * - Verifies hashed content matches expected Merkle root
+    * - Uses SHA-256 for hash verification
+    */
     this.verify = async (transactionHash, expectedMR, expectedTimestamp) => {
       const tspResponseBuffer = Buffer.from(transactionHash, "base64");
       const tspResponseAsn1 = asn1js.fromBER(tspResponseBuffer);
@@ -1883,6 +2125,17 @@ var nip19 = __toESM(require("nostr-tools/nip19"), 1);
 var import_ws = __toESM(require("ws"), 1);
 var WitnessNostr = class {
   constructor() {
+    /**
+    * Waits for an event from a specific author on a Nostr relay
+    * 
+    * @param relay - Connected Nostr relay instance
+    * @param pk - Public key of the author to watch
+    * @returns Promise resolving to the received Nostr event
+    * 
+    * This method:
+    * - Subscribes to kind 1 events from specific author
+    * - Returns first matching event received
+    */
     this.waitForEventAuthor = async (relay, pk) => {
       return new Promise((resolve) => {
         relay.subscribe([
@@ -1897,6 +2150,17 @@ var WitnessNostr = class {
         });
       });
     };
+    /**
+    * Waits for a specific event by ID on a Nostr relay
+    * 
+    * @param relay - Connected Nostr relay instance
+    * @param id - Event ID to watch for
+    * @returns Promise resolving to the received Nostr event
+    * 
+    * This method:
+    * - Subscribes to events with specific ID
+    * - Returns first matching event received
+    */
     this.waitForEventId = async (relay, id) => {
       return new Promise((resolve) => {
         relay.subscribe([
@@ -1910,6 +2174,22 @@ var WitnessNostr = class {
         });
       });
     };
+    /**
+    * Creates a witness event on Nostr network
+    * 
+    * @param witnessEventVerificationHash - Hash to be witnessed
+    * @param credentials - Credentials containing Nostr secret key
+    * @returns Promise resolving to [nevent, npub, timestamp]
+    * 
+    * This method:
+    * - Validates Nostr credentials
+    * - Creates and signs Nostr event
+    * - Publishes event to relay
+    * - Returns event details and timestamp
+    * 
+    * Uses damus.io relay and supports both browser and Node.js
+    * environments with appropriate WebSocket handling.
+    */
     this.witness = async (witnessEventVerificationHash, credentials) => {
       const skHex = credentials.nostr_sk;
       const relayUrl = "wss://relay.damus.io";
@@ -1950,6 +2230,20 @@ var WitnessNostr = class {
       console.log(`got event https://snort.social/${nevent}`);
       return [nevent, npub, witnessTimestamp];
     };
+    /**
+    * Verifies a Nostr witness event
+    * 
+    * @param transactionHash - Nostr event identifier (nevent)
+    * @param expectedMR - Expected Merkle root
+    * @param expectedTimestamp - Expected event timestamp
+    * @returns Promise resolving to boolean indicating verification success
+    * 
+    * This method:
+    * - Decodes Nostr event identifier
+    * - Retrieves event from relay
+    * - Verifies timestamp and content match
+    * - Supports both browser and Node.js environments
+    */
     this.verify = async (transactionHash, expectedMR, expectedTimestamp) => {
       const decoded = nip19.decode(transactionHash);
       const relayUrl = "wss://relay.damus.io";
@@ -2966,6 +3260,7 @@ var package_default = {
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.24",
     "@types/pkijs": "^3.0.1",
+    "@types/sha.js": "^2.4.4",
     "@types/ws": "^8.5.14",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
@@ -3226,12 +3521,25 @@ var Aquafier = class {
   }
 };
 var AquafierChainable = class {
+  /**
+  * Creates a new chainable Aqua operation sequence
+  * 
+  * @param initialValue - Optional initial Aqua Tree
+  */
   constructor(initialValue) {
+    /** Collected operation logs */
     this.logs = [];
     if (initialValue) {
       this.value = initialValue;
     }
   }
+  /**
+  * Extracts Aqua Tree from operation result
+  * 
+  * @param result - Result to unwrap
+  * @returns Aqua Tree from result
+  * @throws If result is Err
+  */
   unwrap(result) {
     if (result.isErr()) {
       console.log(result.data);
@@ -3242,6 +3550,15 @@ var AquafierChainable = class {
     }
     return result.data.aquaTree;
   }
+  /**
+  * Creates a genesis revision for file notarization
+  * 
+  * @param fileObject - File to notarize
+  * @param isForm - Whether file is a form
+  * @param enableContent - Whether to include content
+  * @param enableScalar - Whether to enable scalar values
+  * @returns This instance for chaining
+  */
   async notarize(fileObject, isForm = false, enableContent = false, enableScalar = true) {
     let data = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
     if (data.isOk()) {
@@ -3252,6 +3569,14 @@ var AquafierChainable = class {
     }
     return this;
   }
+  /**
+  * Signs the current Aqua Tree state
+  * 
+  * @param signType - Type of signature (cli, metamask, did)
+  * @param credentials - Signing credentials
+  * @param enableScalar - Whether to enable scalar values
+  * @returns This instance for chaining
+  */
   async sign(signType = "metamask", credentials = {
     mnemonic: "",
     nostr_sk: "",
@@ -3277,6 +3602,16 @@ var AquafierChainable = class {
     }
     return this;
   }
+  /**
+  * Witnesses the current Aqua Tree state
+  * 
+  * @param witnessType - Type of witness (eth, tsa, nostr)
+  * @param witnessNetwork - Network for witnessing
+  * @param witnessPlatform - Platform for witnessing
+  * @param credentials - Witness credentials
+  * @param enableScalar - Whether to enable scalar values
+  * @returns This instance for chaining
+  */
   async witness(witnessType = "eth", witnessNetwork = "sepolia", witnessPlatform = "metamask", credentials = {
     mnemonic: "",
     nostr_sk: "",
@@ -3298,6 +3633,12 @@ var AquafierChainable = class {
     }
     return this;
   }
+  /**
+  * Verifies the current Aqua Tree state
+  * 
+  * @param linkedFileObject - Linked files for verification
+  * @returns This instance for chaining
+  */
   async verify(linkedFileObject = []) {
     let data = await verifyAquaTreeUtil(this.value, linkedFileObject);
     if (data.isOk()) {
@@ -3308,12 +3649,27 @@ var AquafierChainable = class {
     this.verificationResult = data;
     return this;
   }
+  /**
+  * Gets the current Aqua Tree state
+  * 
+  * @returns Current Aqua Tree
+  */
   getValue() {
     return this.value;
   }
+  /**
+  * Gets the result of last verification
+  * 
+  * @returns Verification result
+  */
   getVerificationValue() {
     return this.verificationResult;
   }
+  /**
+  * Gets all collected operation logs
+  * 
+  * @returns Array of log entries
+  */
   getLogs() {
     return this.logs;
   }
