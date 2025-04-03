@@ -200,6 +200,9 @@ interface Revision {
     signature_public_key?: string;
     signature_wallet_address?: string;
     signature_type?: string;
+    link_type?: string;
+    link_verification_hashes?: string[];
+    link_file_hashes?: string[];
     leaves?: string[];
     [key: string]: any;
 }
@@ -518,7 +521,7 @@ declare class Aquafier {
     getRevisionByHash: (aquaTree: AquaTree, hash: string) => Result<Revision, LogData[]>;
     getLastRevision: (aquaTree: AquaTree) => Result<Revision, LogData[]>;
     getFileByHash: (aquaTree: AquaTree, hash: string) => Promise<Result<string, LogData[]>>;
-    getFileHash: (fileContent: string) => string;
+    getFileHash: (fileContent: string | Uint8Array) => string;
     getVersionFromPackageJson: () => string;
     renderTree: (aquaTree: AquaTree) => void;
 }

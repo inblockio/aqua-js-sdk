@@ -269,7 +269,7 @@ export default class Aquafier {
         return getFileByHashUtil(aquaTree, hash)
     }
 
-    getFileHash = (fileContent: string): string => {
+    getFileHash = (fileContent: string | Uint8Array): string => {
         return getHashSum(fileContent)
     }
 
