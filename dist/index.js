@@ -209,8 +209,7 @@ function getFileHashSum(fileContent) {
   return getHashSum(fileContent);
 }
 function getHashSum(data) {
-  const input = data instanceof Uint8Array ? new TextDecoder().decode(data) : data;
-  let hash = shajs("sha256").update(input).digest("hex");
+  let hash = shajs("sha256").update(data).digest("hex");
   return hash;
 }
 function createNewAquaTree() {
