@@ -9,6 +9,23 @@ import { Err, isErr, Ok, Result } from "../type_guards";
 
 
 
+/**
+ * Creates a witness revision for an Aqua Tree
+ * 
+ * @param aquaTreeWrapper - Wrapper containing the Aqua Tree to witness
+ * @param witnessType - Type of witness (nostr, tsa, etc.)
+ * @param witnessNetwork - Network to witness on (e.g., sepolia)
+ * @param witnessPlatform - Platform type for witnessing
+ * @param credentials - Credentials data required for witnessing
+ * @param enableScalar - Optional flag to use scalar mode instead of tree mode
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Creates witness revision with metadata
+ * - Prepares witness data based on type and network
+ * - Creates verification data with Merkle tree or scalar hash
+ * - Updates Aqua Tree with witness revision
+ */
 export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
@@ -80,6 +97,23 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
     return Ok(result)
 }
 
+/**
+ * Creates witness revisions for multiple Aqua Trees in a batch
+ * 
+ * @param aquaTrees - Array of Aqua Tree wrappers to witness
+ * @param witnessType - Type of witness (nostr, tsa, etc.)
+ * @param witnessNetwork - Network to witness on
+ * @param witnessPlatform - Platform type for witnessing
+ * @param credentials - Credentials data required for witnessing
+ * @param enableScalar - Optional flag to use scalar mode
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Collects revision hashes from all trees
+ * - Creates a single witness for all trees using Merkle root
+ * - Updates each tree with witness revision
+ * - Handles batch witnessing efficiently
+ */
 export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     let lastRevisionOrSpecifiedHashes: string[] = [];
@@ -164,6 +198,16 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
     return Ok(resutData)
 }
 
+/**
+ * Determines the appropriate witness network based on witness type
+ * 
+ * @param witnessType - Type of witness (nostr, tsa, etc.)
+ * @param witnessNetwork - Default network name
+ * @returns Resolved witness network name
+ * 
+ * This function maps witness types to their corresponding networks,
+ * with special handling for nostr and TSA witnesses
+ */
 function getWitnessNetwork(witnessType: WitnessType, witnessNetwork: string) {
     let witness_network = witnessNetwork
     switch (witnessType) {
@@ -179,6 +223,22 @@ function getWitnessNetwork(witnessType: WitnessType, witnessNetwork: string) {
     return witness_network
 }
 
+/**
+ * Prepares witness data based on witness type and platform
+ * 
+ * @param verificationHash - Hash to be witnessed
+ * @param witnessType - Type of witness (nostr, tsa, etc.)
+ * @param WitnessPlatformType - Platform type for witnessing
+ * @param credentials - Credentials data required for witnessing
+ * @param witness_network - Optional network name (default: 'sepolia')
+ * @returns Promise resolving to either WitnessResult on success or array of LogData on failure
+ * 
+ * This function:
+ * - Handles different witness types (nostr, tsa, ethereum)
+ * - Prepares witness-specific data
+ * - Manages witness transactions and timestamps
+ * - Validates witness results
+ */
 const prepareWitness = async (
     verificationHash: string,
     witnessType: WitnessType,
@@ -362,6 +422,21 @@ const prepareWitness = async (
 };
 
 
+/**
+ * Verifies a witness revision
+ * 
+ * @param witnessData - The witness revision data to verify
+ * @param verificationHash - Hash to verify against
+ * @param doVerifyMerkleProof - Flag to verify Merkle proof
+ * @param indentCharacter - Character for log indentation
+ * @returns Promise resolving to tuple of [verification success boolean, array of logs]
+ * 
+ * This function:
+ * - Verifies witness data integrity
+ * - Validates witness timestamps
+ * - Checks witness signatures and proofs
+ * - Verifies network-specific witness data
+ */
 export async function verifyWitness(
     witnessData: Revision,
     verificationHash: string,

@@ -5,6 +5,21 @@ import { AquaOperationData, LogData, AquaTreeWrapper, LogType, FileObject } from
 import { checkFileHashAlreadyNotarized, dict2Leaves, findFormKey, getHashSum, getLatestVH, getMerkleRoot, getTimestamp, maybeUpdateFileIndex, prepareNonce } from "../utils";
 
 
+/**
+ * Creates a new form revision in the Aqua Tree
+ * 
+ * @param aquaTreeWrapper - Wrapper containing the Aqua Tree data structure
+ * @param fileObject - Object containing form data as JSON content
+ * @param enableScalar - Optional flag to use scalar mode instead of tree mode (default: false)
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Validates and processes JSON form data
+ * - Generates form revision with metadata
+ * - Checks if form is already notarized
+ * - Creates verification data with Merkle tree or scalar hash
+ * - Updates the Aqua Tree with new form revision
+ */
 export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
 
     let logs: Array<LogData> = [];
@@ -121,6 +136,18 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     return Ok(result);
 
 }
+/**
+ * Hides (soft deletes) a form element by marking it as deleted
+ * 
+ * @param aquaTreeWrapper - Wrapper containing the Aqua Tree data structure
+ * @param keyToHide - Key of the form element to hide
+ * @returns Result containing either updated AquaOperationData or error logs
+ * 
+ * This function:
+ * - Finds the target revision
+ * - Locates the form key to hide
+ * - Creates a new revision with the element marked as deleted
+ */
 export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide: string): Result<AquaOperationData, LogData[]> {
 
     let logs: Array<LogData> = [];
@@ -184,6 +211,19 @@ export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide
 
 
 
+/**
+ * Restores a previously hidden form element
+ * 
+ * @param aquaTreeWrapper - Wrapper containing the Aqua Tree data structure
+ * @param keyToUnHide - Key of the form element to restore
+ * @param content - New content to set for the restored element
+ * @returns Result containing either updated AquaOperationData or error logs
+ * 
+ * This function:
+ * - Finds the target revision
+ * - Locates the deleted form key
+ * - Creates a new revision with the element restored and updated content
+ */
 export function unHideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToUnHide: string, content: string): Result<AquaOperationData, LogData[]> {
 
     let logs: Array<LogData> = [];

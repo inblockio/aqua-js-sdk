@@ -5,6 +5,13 @@ import { createAquaTree } from "../aquavhtree";
 import { Err, isErr, Ok, Result } from "../type_guards";
 
 
+/**
+ * Checks if a file has already been notarized in the Aqua Tree
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @param fileObject - File object containing content to check
+ * @returns boolean indicating if file is already notarized
+ */
 export function checkIfFileAlreadyNotarizedUtil(aquaTree: AquaTree, fileObject: FileObject): boolean {
 
     let keys = Object.keys(aquaTree.revisions);
@@ -17,6 +24,17 @@ export function checkIfFileAlreadyNotarizedUtil(aquaTree: AquaTree, fileObject: 
 
 }
 
+/**
+ * Retrieves a list of files that need to be read into the Aqua Tree
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @returns Array of filenames that need content to be loaded
+ * 
+ * This function:
+ * - Maps file hashes to filenames from the file index
+ * - Checks which files don't have content in their revisions
+ * - Returns list of files needing content to be loaded
+ */
 export function fetchFilesToBeReadUtil(aquaTree: AquaTree): string[] {
 
     let hashAndfiles: Map<string, string> = new Map();
@@ -47,6 +65,18 @@ export function fetchFilesToBeReadUtil(aquaTree: AquaTree): string[] {
 
 }
 
+/**
+ * Removes the most recent revision from the Aqua Tree
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @returns Result containing either updated AquaOperationData or error logs
+ * 
+ * This function:
+ * - Identifies the last revision
+ * - Removes appropriate entries from file index based on revision type
+ * - Updates the Aqua Tree structure
+ * - Handles cleanup if all revisions are removed
+ */
 export function removeLastRevisionUtil(aquaTree: AquaTree): Result<AquaOperationData, LogData[]> {
     let logs: Array<LogData> = [];
 
@@ -101,6 +131,22 @@ export function removeLastRevisionUtil(aquaTree: AquaTree): Result<AquaOperation
 }
 
 // improve this function t work with form as genesis
+/**
+ * Creates the initial (genesis) revision for a new Aqua Tree
+ * 
+ * @param fileObject - File object containing content for the genesis revision
+ * @param isForm - Flag indicating if the genesis revision is a form
+ * @param enableContent - Flag to include file content in the revision
+ * @param enableScalar - Flag to use scalar mode instead of tree mode
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Creates initial revision with metadata
+ * - Handles both file and form type genesis revisions
+ * - Processes form data if applicable
+ * - Creates verification data with Merkle tree or scalar hash
+ * - Initializes new Aqua Tree with genesis revision
+ */
 export async function createGenesisRevision(fileObject: FileObject, isForm: boolean, enableContent: boolean, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     //timestamp: string, revisionType: RevisionType,
     let logs: Array<LogData> = [];
@@ -230,6 +276,13 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
 }
 
 
+/**
+ * Retrieves a specific revision from the Aqua Tree by its hash
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @param revisionHash - Hash of the revision to retrieve
+ * @returns Result containing either the requested Revision or error logs
+ */
 export function getRevisionByHashUtil(aquaTree: AquaTree, revisionHash: string): Result<Revision, LogData[]> {
     let logs: Array<LogData> = [];
 
@@ -248,6 +301,12 @@ export function getRevisionByHashUtil(aquaTree: AquaTree, revisionHash: string):
 
 }
 
+/**
+ * Retrieves the most recent revision from the Aqua Tree
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @returns Result containing either the latest Revision or error logs
+ */
 export function getLastRevisionUtil(aquaTree: AquaTree): Result<Revision, LogData[]> {
     let logs: Array<LogData> = [];
 

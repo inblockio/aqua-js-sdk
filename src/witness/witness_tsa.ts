@@ -6,13 +6,40 @@ import {getHashSum}  from "../utils"
 
 
 
+/**
+ * Handles Time Stamp Authority (TSA) witnessing operations for Aqua Protocol
+ * 
+ * This class provides functionality to create and verify timestamps using
+ * a Time Stamp Authority service (e.g., DigiCert TSA). It implements the
+ * Time-Stamp Protocol (TSP) as defined in RFC 3161 using ASN.1 encoding.
+ */
 export class WitnessTSA {
-  isoDate2unix = (t: Date | string): number => {
+  /**
+ * Converts ISO date to Unix timestamp
+ * 
+ * @param t - Date object or ISO date string
+ * @returns Unix timestamp (seconds since epoch)
+ * 
+ * This method normalizes dates to Unix timestamps for
+ * consistent timestamp handling across the system.
+ */
+isoDate2unix = (t: Date | string): number => {
     const date = t instanceof Date ? t : new Date(t)
     return Math.floor(date.getTime() / 1000)
   }
 
-  extractGenTimeFromResp = (resp: pkijs.TimeStampResp): number => {
+  /**
+ * Extracts generation time from TSA response
+ * 
+ * @param resp - TSA response object
+ * @returns Unix timestamp of when TSA generated the timestamp
+ * 
+ * This method:
+ * - Extracts signed data from TSA response
+ * - Parses TSTInfo structure
+ * - Converts TSA generation time to Unix timestamp
+ */
+extractGenTimeFromResp = (resp: pkijs.TimeStampResp): number => {
     const signedData = new pkijs.SignedData({
       schema: resp?.timeStampToken?.content,
     })
@@ -23,7 +50,21 @@ export class WitnessTSA {
     return this.isoDate2unix(tstInfo.genTime)
   }
 
-  witness = async (hash: string, tsaUrl: string): Promise<[string, string, number]> => {
+  /**
+ * Creates a timestamp request and submits to TSA
+ * 
+ * @param hash - Hash to be timestamped
+ * @param tsaUrl - URL of the Time Stamp Authority service
+ * @returns Promise resolving to [base64 response, provider name, timestamp]
+ * 
+ * This method:
+ * - Creates SHA-256 hash of input
+ * - Constructs TSP request according to RFC 3161
+ * - Submits request to TSA service
+ * - Validates TSA response
+ * - Returns encoded response and timestamp
+ */
+witness = async (hash: string, tsaUrl: string): Promise<[string, string, number]> => {
     // console.log("Hash before: ", hash)
     // DigiCert only supports up to SHA256
     const hashHex = getHashSum(hash) //createHash("sha256").update(hash).digest("hex")
@@ -76,7 +117,21 @@ export class WitnessTSA {
     return [base64EncodedResp, "DigiCert", witnessTimestamp]
   }
 
-  verify = async (
+  /**
+ * Verifies a TSA timestamp response
+ * 
+ * @param transactionHash - Base64 encoded TSA response
+ * @param expectedMR - Expected Merkle root hash
+ * @param expectedTimestamp - Expected timestamp
+ * @returns Promise resolving to boolean indicating verification success
+ * 
+ * This method:
+ * - Decodes TSA response
+ * - Verifies timestamp matches expected time
+ * - Verifies hashed content matches expected Merkle root
+ * - Uses SHA-256 for hash verification
+ */
+verify = async (
     transactionHash: string,
     expectedMR: string,
     expectedTimestamp: number

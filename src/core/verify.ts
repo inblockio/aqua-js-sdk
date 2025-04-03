@@ -4,6 +4,20 @@ import { verifySignature } from "./signature";
 import { verifyWitness } from "./witness";
 import { Err, isErr, Ok, Result } from "../type_guards";
 
+/**
+ * Verifies a single revision in an Aqua Tree
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @param revision - The revision to verify
+ * @param revisionItemHash - Hash of the revision
+ * @param fileObject - Array of file objects referenced by the revision
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Determines if scalar or tree verification should be used
+ * - Verifies the revision's integrity and content
+ * - Returns verification results and logs
+ */
 export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = []
 
@@ -29,6 +43,20 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
 }
 
 
+/**
+ * Verifies all revisions in an Aqua Tree
+ * 
+ * @param aquaTree - The Aqua Tree data structure to verify
+ * @param fileObject - Array of file objects referenced by the tree
+ * @param identCharacter - Optional identifier character for logging
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Iterates through all revisions in the tree
+ * - Identifies and logs revision types (form, file, signature, witness, link)
+ * - Verifies each revision's integrity and content
+ * - Accumulates verification results and logs
+ */
 export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<FileObject>, identCharacter: string = ""): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
@@ -120,6 +148,13 @@ export async function verifyAquaTreeUtil(aquaTree: AquaTree, fileObject: Array<F
 }
 
 
+/**
+ * Recursively searches for a node in the verification graph by its hash
+ * 
+ * @param tree - The verification graph data structure to search
+ * @param hash - Hash to search for
+ * @returns Matching VerificationGraphData node or null if not found
+ */
 function findNode(tree: VerificationGraphData, hash: string): VerificationGraphData | null {
     if (tree.hash === hash) {
         return tree;
@@ -137,6 +172,20 @@ function findNode(tree: VerificationGraphData, hash: string): VerificationGraphD
 
 
 
+/**
+ * Verifies a revision and generates its verification graph data
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @param revision - The revision to verify and graph
+ * @param revisionItemHash - Hash of the revision
+ * @param fileObject - Array of file objects referenced by the revision
+ * @returns Promise resolving to either VerificationGraphData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Verifies the revision's integrity
+ * - Creates a graph representation of the verification results
+ * - Includes metadata like timestamps and previous hashes
+ */
 export async function verifyAndGetGraphDataRevisionUtil(aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<VerificationGraphData, LogData[]>> {
     const logs: LogData[] = []
 
@@ -169,6 +218,20 @@ export async function verifyAndGetGraphDataRevisionUtil(aquaTree: AquaTree, revi
 }
 
 
+/**
+ * Verifies an entire Aqua Tree and generates a complete verification graph
+ * 
+ * @param aquaTree - The Aqua Tree data structure to verify and graph
+ * @param fileObject - Array of file objects referenced by the tree
+ * @param identCharacter - Optional identifier character for logging
+ * @returns Promise resolving to either VerificationGraphData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Verifies the genesis revision
+ * - Handles different revision types (form, file)
+ * - Creates a hierarchical graph of verification results
+ * - Includes all verification metadata and relationships
+ */
 export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: Array<FileObject>, identCharacter: string = ""): Promise<Result<VerificationGraphData, LogData[]>> {
     let verificationHashes = Object.keys(aquaTree.revisions)
     const logs: LogData[] = [];
@@ -391,6 +454,23 @@ export async function verifyAndGetGraphDataUtil(aquaTree: AquaTree, fileObject: 
     return Ok(verificationResults);
 }
 
+/**
+ * Core function for verifying a single revision
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @param revision - The revision to verify
+ * @param verificationHash - Hash of the revision
+ * @param fileObjects - Array of file objects referenced by the revision
+ * @param isScalar - Flag indicating if scalar verification should be used
+ * @param identCharacter - Optional identifier character for logging
+ * @returns Promise resolving to tuple of [verification success boolean, array of logs]
+ * 
+ * This function:
+ * - Verifies revision structure and integrity
+ * - Handles different revision types (file, form, signature, witness, link)
+ * - Validates hashes and signatures
+ * - Verifies file content when applicable
+ */
 async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificationHash: string, fileObjects: Array<FileObject>, isScalar: boolean, identCharacter: string = ""): Promise<[boolean, Array<LogData>]> {
     let logs: Array<LogData> = [];
     let doVerifyMerkleProof = false; // todo to be improved rather than hard coded
@@ -642,6 +722,19 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 }
 
 
+/**
+ * Verifies a form revision's structure and content
+ * 
+ * @param input - The form revision data to verify
+ * @param leaves - Merkle tree leaves of the form data
+ * @param identCharacter - Optional identifier character for logging
+ * @returns FormVerificationResponseData containing verification results
+ * 
+ * This function:
+ * - Validates form structure
+ * - Verifies form field values
+ * - Tracks form key states (active/deleted)
+ */
 function verifyFormRevision(input: any, leaves: any, identCharacter: string = ""): FormVerificationResponseData {
     let logs: Array<LogData> = [];
     let contains_deleted_fields = false;
@@ -716,6 +809,18 @@ function verifyFormRevision(input: any, leaves: any, identCharacter: string = ""
 
 }
 
+/**
+ * Verifies the Merkle tree structure of a revision
+ * 
+ * @param input - The revision to verify
+ * @param verificationHash - Hash to verify against
+ * @returns Tuple of [verification success boolean, array of logs]
+ * 
+ * This function:
+ * - Validates Merkle tree structure
+ * - Verifies leaf node hashes
+ * - Ensures hash consistency
+ */
 function verifyRevisionMerkleTreeStructure(input: Revision, verificationHash: string): [boolean, Array<LogData>] {
     // console.log("verification hash: ", verificationHash)
 

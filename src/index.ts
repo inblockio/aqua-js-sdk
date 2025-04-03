@@ -289,18 +289,49 @@ export default class Aquafier {
 }
 
 
+/**
+ * Chainable API for Aqua operations
+ * 
+ * This class provides a fluent interface for performing operations on Aqua Trees.
+ * It allows chaining multiple operations like notarization, signing, witnessing,
+ * and verification while maintaining state and collecting logs.
+ * 
+ * @example
+ * ```typescript
+ * const aqua = new AquafierChainable(tree)
+ *   .notarize(file)
+ *   .sign("metamask", credentials)
+ *   .witness("eth", "sepolia")
+ *   .verify();
+ * ```
+ */
 export class AquafierChainable {
-    private value: AquaTree;
-    private verificationResult: Result<AquaOperationData, LogData[]>;
-    private logs: LogData[] = [];
+    /** Current Aqua Tree state */
+private value: AquaTree;
+    /** Result of last verification operation */
+private verificationResult: Result<AquaOperationData, LogData[]>;
+    /** Collected operation logs */
+private logs: LogData[] = [];
 
-    constructor(initialValue: AquaTree | null) {
+    /**
+ * Creates a new chainable Aqua operation sequence
+ * 
+ * @param initialValue - Optional initial Aqua Tree
+ */
+constructor(initialValue: AquaTree | null) {
         if (initialValue) {
             this.value = initialValue;
         }
     }
 
-    unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
+    /**
+ * Extracts Aqua Tree from operation result
+ * 
+ * @param result - Result to unwrap
+ * @returns Aqua Tree from result
+ * @throws If result is Err
+ */
+unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
         if (result.isErr()) {
             console.log(result.data)
             this.logs.push(...result.data)
@@ -312,7 +343,16 @@ export class AquafierChainable {
         return result.data.aquaTree!
     }
 
-    async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = true): Promise<this> {
+    /**
+ * Creates a genesis revision for file notarization
+ * 
+ * @param fileObject - File to notarize
+ * @param isForm - Whether file is a form
+ * @param enableContent - Whether to include content
+ * @param enableScalar - Whether to enable scalar values
+ * @returns This instance for chaining
+ */
+async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = true): Promise<this> {
         let data = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
 
         if (data.isOk()) {
@@ -326,7 +366,15 @@ export class AquafierChainable {
         return this;
     }
 
-    async sign(signType: SignType = "metamask", credentials: CredentialsData = {
+    /**
+ * Signs the current Aqua Tree state
+ * 
+ * @param signType - Type of signature (cli, metamask, did)
+ * @param credentials - Signing credentials
+ * @param enableScalar - Whether to enable scalar values
+ * @returns This instance for chaining
+ */
+async sign(signType: SignType = "metamask", credentials: CredentialsData = {
         mnemonic: "",
         nostr_sk: "",
         "did_key": "",
@@ -356,7 +404,17 @@ export class AquafierChainable {
         return this;
     }
 
-    async witness(witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
+    /**
+ * Witnesses the current Aqua Tree state
+ * 
+ * @param witnessType - Type of witness (eth, tsa, nostr)
+ * @param witnessNetwork - Network for witnessing
+ * @param witnessPlatform - Platform for witnessing
+ * @param credentials - Witness credentials
+ * @param enableScalar - Whether to enable scalar values
+ * @returns This instance for chaining
+ */
+async witness(witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
         mnemonic: "",
         nostr_sk: "",
         "did_key": "",
@@ -381,7 +439,13 @@ export class AquafierChainable {
         return this;
     }
 
-    async verify(linkedFileObject: Array<FileObject> = []): Promise<this> {
+    /**
+ * Verifies the current Aqua Tree state
+ * 
+ * @param linkedFileObject - Linked files for verification
+ * @returns This instance for chaining
+ */
+async verify(linkedFileObject: Array<FileObject> = []): Promise<this> {
         let data = await verifyAquaTreeUtil(this.value, linkedFileObject)
         if (data.isOk()) {
             this.logs.push(...data.data.logData)
@@ -392,13 +456,28 @@ export class AquafierChainable {
         return this;
     }
 
-    getValue(): AquaTree {
+    /**
+ * Gets the current Aqua Tree state
+ * 
+ * @returns Current Aqua Tree
+ */
+getValue(): AquaTree {
         return this.value;
     }
-    getVerificationValue(): Result<AquaOperationData, LogData[]> {
+    /**
+ * Gets the result of last verification
+ * 
+ * @returns Verification result
+ */
+getVerificationValue(): Result<AquaOperationData, LogData[]> {
         return this.verificationResult;
     }
-    getLogs(): LogData[] {
+    /**
+ * Gets all collected operation logs
+ * 
+ * @returns Array of log entries
+ */
+getLogs(): LogData[] {
         return this.logs;
     }
 }

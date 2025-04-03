@@ -6,6 +6,21 @@ import { createAquaTree } from "../aquavhtree";
 import { Err, Ok, Result } from "../type_guards";
 
 
+/**
+ * Creates a new content revision in the Aqua Tree
+ * 
+ * @param aquaTreeWrapper - Wrapper containing the Aqua Tree data structure
+ * @param fileObject - Object containing file information (fileName and fileContent)
+ * @param enableScalar - Boolean flag to determine if scalar mode should be used instead of tree mode
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Generates timestamp and revision metadata
+ * - Checks if file is already notarized
+ * - Creates verification data including file hash and nonce
+ * - Updates the Aqua Tree with new revision
+ * - Updates file index if needed
+ */
 export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
@@ -80,6 +95,13 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
     return Ok(result)
 }
 
+/**
+ * Retrieves a file from the Aqua Tree using its hash
+ * 
+ * @param aquaTree - The Aqua Tree data structure
+ * @param hash - Revisio hash of the file to retrieve
+ * @returns Promise resolving to either the file content as string on success or array of LogData on failure
+ */
 export async function getFileByHashUtil(aquaTree: AquaTree, hash: string): Promise<Result<string, LogData[]>> {
     let logs: Array<LogData> = [];
 

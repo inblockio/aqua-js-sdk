@@ -8,6 +8,22 @@ import { createAquaTree } from "../aquavhtree";
 import { ethers } from "ethers";
 import { Err, Ok, Result } from "../type_guards";
 
+/**
+ * Signs an Aqua Tree revision using specified signature method
+ * 
+ * @param aquaTreeWrapper - Wrapper containing the Aqua Tree to sign
+ * @param signType - Type of signature to use (metamask, cli, or did)
+ * @param credentials - Credentials data required for signing
+ * @param enableScalar - Optional flag to use scalar mode instead of tree mode
+ * @param identCharacter - Optional identifier character for logging
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ * 
+ * This function:
+ * - Determines target revision to sign
+ * - Handles different signature types (MetaMask, CLI, DID)
+ * - Creates signature revision with metadata
+ * - Updates Aqua Tree with signature information
+ */
 export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = false, identCharacter: string = ""): Promise<Result<AquaOperationData, LogData[]>> {
     let aquaTree = aquaTreeWrapper.aquaTree
     let logs: Array<LogData> = [];
@@ -135,6 +151,16 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
     return Ok(result)
 }
 
+/**
+ * Signs multiple Aqua Trees (Currently unimplemented)
+ * 
+ * @param _aquaTrees - Array of Aqua Tree wrappers to sign
+ * @param _signType - Type of signature to use
+ * @param _credentials - Credentials data required for signing
+ * @param _enableScalar - Optional flag to use scalar mode
+ * @param identCharacter - Optional identifier character for logging
+ * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
+ */
 export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _signType: SignType, _credentials: CredentialsData, _enableScalar: boolean = false, identCharacter: string = ""): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     logs.push({
@@ -147,6 +173,18 @@ export async function signMultipleAquaTreesUtil(_aquaTrees: AquaTreeWrapper[], _
 }
 
 
+/**
+ * Recovers the Ethereum wallet address from a signature
+ * 
+ * @param verificationHash - Hash of the verification data that was signed
+ * @param signature - Signature to recover address from
+ * @returns Recovered Ethereum wallet address
+ * 
+ * This function:
+ * - Creates the original signed message
+ * - Recovers the signer's address using ethers.js
+ * @throws Error if signature or message is invalid
+ */
 export function recoverWalletAddress(verificationHash: string, signature: string): string {
     try {
         const message = `I sign this revision: [${verificationHash}]`
@@ -160,6 +198,20 @@ export function recoverWalletAddress(verificationHash: string, signature: string
 }
 
 
+/**
+ * Verifies a signature on an Aqua Tree revision
+ * 
+ * @param data - Revision data containing signature information
+ * @param verificationHash - Hash to verify signature against
+ * @param identCharacter - Optional identifier character for logging
+ * @returns Promise resolving to tuple of [verification success boolean, array of logs]
+ * 
+ * This function:
+ * - Validates verification hash
+ * - Handles different signature types (DID, Ethereum)
+ * - Verifies signature using appropriate method
+ * - Logs verification results
+ */
 export async function verifySignature(data: Revision, verificationHash: string, identCharacter: string = ""): Promise<[boolean, LogData[]]> {
 
     let logs: Array<LogData> = [];
