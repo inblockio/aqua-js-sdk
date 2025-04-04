@@ -102,7 +102,7 @@ export async function createContentRevisionUtil(aquaTreeWrapper: AquaTreeWrapper
  * @param hash - Revisio hash of the file to retrieve
  * @returns Promise resolving to either the file content as string on success or array of LogData on failure
  */
-export async function getFileByHashUtil(aquaTree: AquaTree, hash: string): Promise<Result<string, LogData[]>> {
+export  function getFileByHashUtil(aquaTree: AquaTree, hash: string): Result<string, LogData[]> {
     let logs: Array<LogData> = [];
 
     let res = aquaTree.file_index[hash]
