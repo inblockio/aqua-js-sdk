@@ -222,7 +222,7 @@ export interface FormVerificationResponseData {
  */
 export interface FileObject {
   fileName: string,
-  fileContent: string | AquaTree,
+  fileContent: string | AquaTree | Uint8Array,
   path: string
   fileSize?: number
 }
