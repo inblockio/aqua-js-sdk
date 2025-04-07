@@ -459,6 +459,62 @@ export const getTimestamp = () => {
 }
 
 
+/**
+ * Checks if the system has an internet connection
+ * Works in both browser and Node.js environments
+ * @returns Promise<boolean> indicating if internet is available
+ */
+export async function checkInternetConnection(): Promise<boolean> {
+  // Check if we're in a browser environment
+  if (typeof window !== 'undefined' && window.navigator) {
+    // Browser environment check
+    return new Promise<boolean>((resolve) => {
+      // Navigator.onLine is a quick check but not always reliable
+      const isOnline = window.navigator.onLine;
+      
+      if (!isOnline) {
+        // If navigator.onLine reports offline, we can be confident there's no connection
+        resolve(false);
+        return;
+      }
+      
+      // If navigator.onLine reports online, perform a fetch to confirm
+      // Use a small endpoint that's likely to be available
+      fetch('https://www.google.com/favicon.ico', { 
+        mode: 'no-cors',
+        cache: 'no-store'
+      })
+        .then(() => resolve(true))
+        .catch(() => resolve(false));
+        
+      // Set a timeout in case the fetch hangs
+      setTimeout(() => resolve(false), 5000);
+    });
+  } else {
+    // Node.js environment check
+    try {
+      // Dynamic import for Node.js modules to maintain browser compatibility
+      const { request } = await import('https');
+      
+      return new Promise<boolean>((resolve) => {
+        const req = request('https://www.google.com', { method: 'HEAD', timeout: 5000 }, (res) => {
+          resolve(res.statusCode >= 200 && res.statusCode < 300);
+          res.resume();
+        });
+        
+        req.on('error', () => resolve(false));
+        req.on('timeout', () => {
+          req.destroy();
+          resolve(false);
+        });
+        
+        req.end();
+      });
+    } catch (error) {
+      return false;
+    }
+  }
+}
 
 
 export function printLogs(logs: LogData[], enableVerbose: boolean = true) {

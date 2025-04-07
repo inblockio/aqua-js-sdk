@@ -1,5 +1,5 @@
 import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
-import { dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, verifyMerkleIntegrity } from "../utils";
+import { checkInternetConnection, dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
@@ -446,6 +446,19 @@ export async function verifyWitness(
     let logs: Array<LogData> = [];
     
     let isValid: boolean = false;
+
+    // Check for internet connection first
+    const hasInternet = await checkInternetConnection();
+    if (!hasInternet) {
+        logs.push({
+            log: `No internet connection available. Witness verification requires internet access.`,
+            logType: LogType.ERROR,
+            ident: indentCharacter
+        });
+        return [false, logs];
+    }
+    
+    
     if (verificationHash === "") {
 
         logs.push({
@@ -455,6 +468,10 @@ export async function verifyWitness(
         })
         return [isValid, logs]
     }
+
+
+    
+
 
     if (witnessData.witness_network === "nostr") {
         let witnessNostr = new WitnessNostr();
