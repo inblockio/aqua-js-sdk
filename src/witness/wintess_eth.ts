@@ -248,7 +248,7 @@ export class WitnessEth {
     const wallet = accounts[0];
     const { ethers } = await import('ethers');
     const walletAddress = ethers.getAddress(wallet)
-    
+
     // Chain ID check and switch if needed
     //@ts-ignore
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -287,12 +287,17 @@ export class WitnessEth {
     return `
     <html>
       <script type="module">
+       import { getAddress } from 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js';
+    
         const witnessNetwork = "${config.witnessNetwork}"
         const smart_contract_address = "${config.smartContractAddress}"
         const witness_event_verification_hash = "${config.witnessEventVerificationHash}"
         const localServerUrl = window.location.href;
 
         const doWitness = async (wallet_address) => {
+        // Apply ethers.js checksumming to the address
+        wallet_address = getAddress(wallet_address);
+
           const chainId = await window.ethereum.request({ method: 'eth_chainId' })
           const requestedChainId = ${JSON.stringify(this.ethChainIdMap)}[witnessNetwork]
           
