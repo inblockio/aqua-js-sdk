@@ -224,7 +224,7 @@ export function prepareNonce(): string {
 export function getWallet(mnemonic: string): [HDNodeWallet, string, string, string] {
   // Always trim the last new line
   const wallet = Wallet.fromPhrase(mnemonic.trim())
-  const walletAddress = wallet.address.toLowerCase()
+  const walletAddress = wallet.address //.toLowerCase()
   return [wallet, walletAddress, wallet.publicKey, wallet.privateKey]
 }
 

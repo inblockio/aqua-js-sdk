@@ -160,8 +160,6 @@ export class MetaMaskSigner {
                 throw new Error("No wallet address selected");
             }
 
-            // Convert to proper checksummed format using ethers.js
-            // Import at the top: import { getAddress } from 'ethers';
             const { ethers } = await import('ethers');
 
             const walletAddress = ethers.getAddress(rawWalletAddress);
