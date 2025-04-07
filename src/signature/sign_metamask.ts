@@ -91,6 +91,7 @@ export class MetaMaskSigner {
           const doSignProcess = async () => {
             const wallet_address = window.ethereum.selectedAddress;
             const correctedWalletAddress = ethers.utils.getAddress(wallet_address)
+            console.log("correctedWalletAddress  (case sensetive )=="+correctedWalletAddress)
             const signature = await window.ethereum.request({
               method: 'personal_sign',
               params: [message, window.ethereum.selectedAddress],
@@ -148,7 +149,24 @@ export class MetaMaskSigner {
 
         try {
             await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const walletAddress = window.ethereum.selectedAddress;
+            // const walletAddress = window.ethereum.selectedAddress;
+            // console.log(`walletAddress ${walletAddress} if has caps`)
+
+
+            // Get the raw address from MetaMask
+            const rawWalletAddress = window.ethereum.selectedAddress;
+
+            if (!rawWalletAddress) {
+                throw new Error("No wallet address selected");
+            }
+
+            // Convert to proper checksummed format using ethers.js
+            // Import at the top: import { getAddress } from 'ethers';
+            const { ethers } = await import('ethers');
+
+            const walletAddress = ethers.getAddress(rawWalletAddress);
+
+            console.log(`walletAddress ${walletAddress} with proper checksum`);
 
             if (!walletAddress) {
                 throw new Error("No wallet address selected");

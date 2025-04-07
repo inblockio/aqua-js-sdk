@@ -142,11 +142,6 @@ export function getFileHashSum(fileContent: string): string {
  * - Returns hex-encoded hash
  */
 export function getHashSum(data: string | Uint8Array): string {
-  // If data is Uint8Array, convert it to string
-  // const input = data instanceof Uint8Array ?
-  //   new TextDecoder().decode(data) :
-    // data;
-  // return sha3.sha3_256(input);
 
   let hash = shajs('sha256').update(data).digest('hex')
   return hash;
@@ -596,3 +591,5 @@ function findNextRevisionHash(previousVerificationHash: string, aquaTree: AquaTr
   }
   return hashOfRevision
 }
+
+
