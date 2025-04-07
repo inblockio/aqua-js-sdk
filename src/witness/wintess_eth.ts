@@ -18,7 +18,7 @@ export class WitnessEth {
  * @private
  * @readonly
  */
-private static readonly ethChainIdMap: Record<WitnessNetwork, string> = {
+  private static readonly ethChainIdMap: Record<WitnessNetwork, string> = {
     mainnet: '0x1',
     sepolia: '0xaa36a7',
     holesky: '0x4268',
@@ -31,7 +31,7 @@ private static readonly ethChainIdMap: Record<WitnessNetwork, string> = {
  * @param ms - Number of milliseconds to sleep
  * @returns Promise that resolves after the specified delay
  */
-private static sleep(ms: number): Promise<void> {
+  private static sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
@@ -44,7 +44,7 @@ private static sleep(ms: number): Promise<void> {
  * Checks for presence of window.ethereum to determine if running
  * in a browser environment with MetaMask available
  */
-private static detectEnvironment(): WitnessEnvironment {
+  private static detectEnvironment(): WitnessEnvironment {
     //@ts-ignore
     return typeof window !== 'undefined' && window.ethereum
       ? "browser"
@@ -62,7 +62,7 @@ private static detectEnvironment(): WitnessEnvironment {
  * - Routes to appropriate witness implementation
  * - Handles error cases
  */
-static async witnessMetamask(config: WitnessConfig) {
+  static async witnessMetamask(config: WitnessConfig) {
     const environment = this.detectEnvironment();
 
     try {
@@ -91,7 +91,7 @@ static async witnessMetamask(config: WitnessConfig) {
  * - GET /result - Returns current transaction status
  * - POST / - Receives transaction data from browser
  */
-static async commonPrepareListener(htmlContent: string) {
+  static async commonPrepareListener(htmlContent: string) {
     let output = "{}"
     const requestListener = async (req: any, res: any) => {
       if (req.method == "POST") {
@@ -134,7 +134,7 @@ static async commonPrepareListener(htmlContent: string) {
  * - Polls for transaction completion
  * - Returns transaction hash and wallet address
  */
-static async nodeWitnessMetamask(
+  static async nodeWitnessMetamask(
     config: WitnessConfig,
     port: number = 8420,
     host: string = 'localhost'
@@ -228,7 +228,7 @@ static async nodeWitnessMetamask(
  * - Sends witness transaction
  * - Returns transaction details
  */
-static async browserWitness(config: WitnessConfig): Promise<WitnessTransactionData> {
+  static async browserWitness(config: WitnessConfig): Promise<WitnessTransactionData> {
     const ethChainIdMap: Record<string, string> = {
       'mainnet': '0x1',
       'sepolia': '0xaa36a7',
@@ -244,8 +244,11 @@ static async browserWitness(config: WitnessConfig): Promise<WitnessTransactionDa
     await window.ethereum.enable();
     //@ts-ignore
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const walletAddress = accounts[0];
 
+    const wallet = accounts[0];
+    const { ethers } = await import('ethers');
+    const walletAddress = ethers.getAddress(wallet)
+    
     // Chain ID check and switch if needed
     //@ts-ignore
     const chainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -451,7 +454,7 @@ static async browserWitness(config: WitnessConfig): Promise<WitnessTransactionDa
     actual = actual.slice(0, 128);
 
     await this.sleep(200); // prevent overloading free endpoint
-    
+
     const actualMrSans0x = actual.startsWith('0x') ? actual.slice(2) : actual;
     const mrSans0x = expectedMR.startsWith('0x') ? expectedMR.slice(2) : expectedMR;
     return [actualMrSans0x === mrSans0x, `${actualMrSans0x === mrSans0x ? 'On-Chain Witness hash verified' : 'On-Chain Witness verification failed'}`];
