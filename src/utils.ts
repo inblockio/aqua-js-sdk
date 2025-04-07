@@ -221,10 +221,12 @@ export function prepareNonce(): string {
  * - Returns wallet and its credentials
  * - Ensures address is lowercase
  */
-export function getWallet(mnemonic: string): [HDNodeWallet, string, string, string] {
+ export async function getWallet(mnemonic: string): Promise<[HDNodeWallet, string, string, string]> {
   // Always trim the last new line
   const wallet = Wallet.fromPhrase(mnemonic.trim())
-  const walletAddress = wallet.address //.toLowerCase()
+  // const walletAddress = wallet.address //.toLowerCase()
+  const { ethers } = await import('ethers');
+  const walletAddress = ethers.getAddress(wallet.address)
   return [wallet, walletAddress, wallet.publicKey, wallet.privateKey]
 }
 

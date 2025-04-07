@@ -56,7 +56,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
                     })
                     return Err(logs);
                 }
-                let [wallet, _walletAddress, _publicKey] = getWallet(credentials.mnemonic)
+                let [wallet, _walletAddress, _publicKey] = await  getWallet(credentials.mnemonic)
 
                 let sign = new CLISigner();
                 signature = await sign.doSign(wallet, targetRevisionHash)

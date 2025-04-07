@@ -295,7 +295,7 @@ const prepareWitness = async (
                     return Err(logs)
                 }
 
-                let [_wallet, walletAddress, _publicKey] = getWallet(credentials.mnemonic);
+                let [_wallet, walletAddress, _publicKey] = await getWallet(credentials.mnemonic);
 
 
                 logs.push({
