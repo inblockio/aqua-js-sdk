@@ -43,6 +43,7 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
             let sign = new MetaMaskSigner();
             [signature, walletAddress, publicKey] = await sign.sign(targetRevisionHash)
             signature_type = "ethereum:eip-191"
+            console.log("We found this wallet address after doing the signature: ", walletAddress)
             break
         case "cli":
             try {
