@@ -43,7 +43,6 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
             let sign = new MetaMaskSigner();
             [signature, walletAddress, publicKey] = await sign.sign(targetRevisionHash)
             signature_type = "ethereum:eip-191"
-            console.log("We found this wallet address after doing the signature: ", walletAddress)
             break
         case "cli":
             try {
@@ -101,7 +100,6 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
 
     const now = new Date().toISOString()
     const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
-    console.log("This is the wallet address to save to revision: ", walletAddress)
     let verificationData: Revision = {
         previous_verification_hash: targetRevisionHash, //previousVerificationHash,
         local_timestamp: timestamp,
