@@ -100,7 +100,6 @@ export async function signAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, signTyp
 
     const now = new Date().toISOString()
     const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
-
     let verificationData: Revision = {
         previous_verification_hash: targetRevisionHash, //previousVerificationHash,
         local_timestamp: timestamp,

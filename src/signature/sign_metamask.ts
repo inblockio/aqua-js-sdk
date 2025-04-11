@@ -1,3 +1,4 @@
+import { ethers } from 'ethers';
 
 /**
  * Configuration options for MetaMask signer
@@ -164,8 +165,6 @@ export class MetaMaskSigner {
 
             const walletAddress = ethers.getAddress(rawWalletAddress);
 
-            console.log(`walletAddress ${walletAddress} with proper checksum`);
-
             if (!walletAddress) {
                 throw new Error("No wallet address selected");
             }
@@ -270,8 +269,9 @@ export class MetaMaskSigner {
         while (attempts < this.maxAttempts) {
             if (this.lastResult && this.lastResult.signature) {
                 const { signature, wallet_address } = this.lastResult;
+                const cleanedAddress = ethers.getAddress(wallet_address)
                 const publicKey = await this.recoverPublicKey(message, signature);
-                return [signature, wallet_address, publicKey];
+                return [signature, cleanedAddress, publicKey];
             }
 
             console.log("Waiting for the signature...");
