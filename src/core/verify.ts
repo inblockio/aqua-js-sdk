@@ -26,10 +26,10 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
 
     result[1].forEach((e) => logs.push(e));
     if (!result[0]) {
-        console.log("Errr ...")
+        console.log(`hash ${revisionItemHash} Errr ...`)
         Err(logs)
     }
-console.log("Ok")
+    console.log(`Ok hash ${revisionItemHash}`)
     // logs.push({
     //     log: `AquaTree verified succesfully`,
     //     logType: LogType.SUCCESS
@@ -725,9 +725,9 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         return [false, logs]
     }
 
-   
 
-    
+
+
 }
 
 
