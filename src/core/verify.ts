@@ -22,6 +22,7 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
     let logs: Array<LogData> = []
 
     const isScalar = !revision.hasOwnProperty('leaves');
+    console.log(`is sclar ${isScalar}`)
     let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
     // console.log(`Result of  revisionItemHash :${revisionItemHash} is  ${JSON.stringify(result, null, 4)}`)
     result[1].forEach((e) => logs.push(e));
@@ -488,7 +489,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
     // remove  verifyWitnessMerkleProof which is hard coded.
     // verify scalar should be minimal
     if (isScalar && !verifyWitnessMerkleProof) {
-        ``
+        
         // logs.push({
         //     logType: LogType.SCALAR,
         //     log: "Scalar revision detected."
