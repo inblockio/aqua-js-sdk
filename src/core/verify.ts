@@ -704,21 +704,29 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
 
         }
 
+        logs.push({
+            log: `\n`,
+            logType: LogType.EMPTY
+        })
 
+        return [true, logs]
     } else {
         logs.push({
             log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash}`,
             logType: LogType.ERROR,
             ident: `${identCharacter}\t`
         })
+
+        logs.push({
+            log: `\n`,
+            logType: LogType.EMPTY
+        })
+        return [false, logs]
     }
 
-    logs.push({
-        log: `\n`,
-        logType: LogType.EMPTY
-    })
+   
 
-    return [isSuccess && isScalarSuccess, logs]
+    
 }
 
 
