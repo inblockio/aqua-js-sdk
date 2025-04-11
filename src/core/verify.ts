@@ -23,9 +23,9 @@ export async function verifyAquaTreeRevisionUtil(aquaTree: AquaTree, revision: R
 
     const isScalar = !revision.hasOwnProperty('leaves');
     let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
-
+    console.log(`Result of  revisionItemHash :${revisionItemHash} is  ${JSON.stringify(result, null, 4)}`)
     result[1].forEach((e) => logs.push(e));
-    if (!result[0]) {
+    if (result[0] == false) {
         console.log(`hash ${revisionItemHash} Errr ...`)
         Err(logs)
     }
@@ -724,8 +724,6 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         })
         return [false, logs]
     }
-
-
 
 
 }
