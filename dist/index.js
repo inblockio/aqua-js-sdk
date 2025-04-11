@@ -233,9 +233,10 @@ function checkFileHashAlreadyNotarized(fileHash, aquaTree) {
 function prepareNonce() {
   return getHashSum(Date.now().toString());
 }
-function getWallet(mnemonic) {
+async function getWallet(mnemonic) {
   const wallet = Wallet.fromPhrase(mnemonic.trim());
-  const walletAddress = wallet.address.toLowerCase();
+  const { ethers: ethers4 } = await import("ethers");
+  const walletAddress = ethers4.getAddress(wallet.address);
   return [wallet, walletAddress, wallet.publicKey, wallet.privateKey];
 }
 function getEntropy() {
@@ -342,6 +343,40 @@ var getTimestamp = () => {
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")));
   return timestamp;
 };
+async function checkInternetConnection() {
+  if (typeof window !== "undefined" && window.navigator) {
+    return new Promise((resolve) => {
+      const isOnline = window.navigator.onLine;
+      if (!isOnline) {
+        resolve(false);
+        return;
+      }
+      fetch("https://www.google.com/favicon.ico", {
+        mode: "no-cors",
+        cache: "no-store"
+      }).then(() => resolve(true)).catch(() => resolve(false));
+      setTimeout(() => resolve(false), 5e3);
+    });
+  } else {
+    try {
+      const { request } = await import("https");
+      return new Promise((resolve) => {
+        const req = request("https://www.google.com", { method: "HEAD", timeout: 5e3 }, (res) => {
+          resolve(res.statusCode >= 200 && res.statusCode < 300);
+          res.resume();
+        });
+        req.on("error", () => resolve(false));
+        req.on("timeout", () => {
+          req.destroy();
+          resolve(false);
+        });
+        req.end();
+      });
+    } catch (error) {
+      return false;
+    }
+  }
+}
 function printLogs(logs, enableVerbose = true) {
   if (enableVerbose) {
     logs.forEach((element) => {
@@ -575,7 +610,7 @@ async function createContentRevisionUtil(aquaTreeWrapper, fileObject, enableScal
   };
   return Ok(result);
 }
-async function getFileByHashUtil(aquaTree, hash) {
+function getFileByHashUtil(aquaTree, hash) {
   let logs = [];
   let res = aquaTree.file_index[hash];
   if (res) {
@@ -1110,6 +1145,7 @@ var MetaMaskSigner = class {
           const doSignProcess = async () => {
             const wallet_address = window.ethereum.selectedAddress;
             const correctedWalletAddress = ethers.utils.getAddress(wallet_address)
+            console.log("correctedWalletAddress  (case sensetive )=="+correctedWalletAddress)
             const signature = await window.ethereum.request({
               method: 'personal_sign',
               params: [message, window.ethereum.selectedAddress],
@@ -1164,7 +1200,13 @@ var MetaMaskSigner = class {
     const message = this.createMessage(verificationHash);
     try {
       await window.ethereum.request({ method: "eth_requestAccounts" });
-      const walletAddress = window.ethereum.selectedAddress;
+      const rawWalletAddress = window.ethereum.selectedAddress;
+      if (!rawWalletAddress) {
+        throw new Error("No wallet address selected");
+      }
+      const { ethers: ethers4 } = await import("ethers");
+      const walletAddress = ethers4.getAddress(rawWalletAddress);
+      console.log(`walletAddress ${walletAddress} with proper checksum`);
       if (!walletAddress) {
         throw new Error("No wallet address selected");
       }
@@ -1410,7 +1452,7 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
           });
           return Err(logs);
         }
-        let [wallet, _walletAddress, _publicKey] = getWallet(credentials.mnemonic);
+        let [wallet, _walletAddress, _publicKey] = await getWallet(credentials.mnemonic);
         let sign2 = new CLISigner();
         signature = await sign2.doSign(wallet, targetRevisionHash);
         walletAddress = _walletAddress;
@@ -1706,7 +1748,9 @@ var WitnessEth = class {
     }
     await window.ethereum.enable();
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-    const walletAddress = accounts[0];
+    const wallet = accounts[0];
+    const { ethers: ethers4 } = await import("ethers");
+    const walletAddress = ethers4.getAddress(wallet);
     const chainId = await window.ethereum.request({ method: "eth_chainId" });
     const requestedChainId = ethChainIdMap[config.witnessNetwork];
     if (requestedChainId !== chainId) {
@@ -1734,12 +1778,17 @@ var WitnessEth = class {
     return `
     <html>
       <script type="module">
+       import { getAddress } from 'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js';
+    
         const witnessNetwork = "${config.witnessNetwork}"
         const smart_contract_address = "${config.smartContractAddress}"
         const witness_event_verification_hash = "${config.witnessEventVerificationHash}"
         const localServerUrl = window.location.href;
 
         const doWitness = async (wallet_address) => {
+        // Apply ethers.js checksumming to the address
+        wallet_address = getAddress(wallet_address);
+
           const chainId = await window.ethereum.request({ method: 'eth_chainId' })
           const requestedChainId = ${JSON.stringify(this.ethChainIdMap)}[witnessNetwork]
           
@@ -2362,7 +2411,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
           });
           return Err(logs);
         }
-        let [_wallet, walletAddress, _publicKey] = getWallet(credentials.mnemonic);
+        let [_wallet, walletAddress, _publicKey] = await getWallet(credentials.mnemonic);
         logs.push({
           log: `Wallet address: ${_wallet}`,
           logType: "signature" /* SIGNATURE */
@@ -2462,6 +2511,15 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
 async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof, indentCharacter) {
   let logs = [];
   let isValid = false;
+  const hasInternet = await checkInternetConnection();
+  if (!hasInternet) {
+    logs.push({
+      log: `No internet connection available. Witness verification requires internet access.`,
+      logType: "error" /* ERROR */,
+      ident: indentCharacter
+    });
+    return [false, logs];
+  }
   if (verificationHash === "") {
     logs.push({
       log: `The verification Hash MUST NOT be empty`,
@@ -2526,8 +2584,10 @@ async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, 
   let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
   result[1].forEach((e) => logs.push(e));
   if (!result[0]) {
+    console.log("err");
     Err(logs);
   }
+  console.log("ok");
   let data = {
     aquaTree,
     aquaTrees: [],
@@ -3613,6 +3673,7 @@ export {
   Some,
   SomeOption,
   checkFileHashAlreadyNotarized,
+  checkInternetConnection,
   cliGreenify,
   cliRedify,
   cliYellowfy,
