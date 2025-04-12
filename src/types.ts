@@ -306,9 +306,9 @@ export interface Revision {
   previous_verification_hash: string
   local_timestamp: string
   revision_type: "file" | "witness" | "signature" | "form" | "link"
+  version: string
   file_hash?: string
   file_nonce?: string
-  version: string
   content?: string
   witness_merkle_root?: string
   witness_timestamp?: number

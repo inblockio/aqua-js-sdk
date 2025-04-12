@@ -163,6 +163,51 @@ function isNone(option) {
 }
 
 // src/utils.ts
+function reorderAquaTreeRevisionsProperties(aquaTree) {
+  const keyOrder = [
+    "previous_verification_hash",
+    "local_timestamp",
+    "revision_type",
+    "version",
+    "file_hash",
+    "file_nonce",
+    "content",
+    "witness_merkle_root",
+    "witness_timestamp",
+    "witness_network",
+    "witness_smart_contract_address",
+    "witness_transaction_hash",
+    "witness_sender_account_address",
+    "witness_merkle_proof",
+    "signature",
+    "signature_public_key",
+    "signature_wallet_address",
+    "signature_type",
+    "link_type",
+    "link_verification_hashes",
+    "link_file_hashes",
+    "leaves"
+  ];
+  const reorderedRevisions = {};
+  for (const [hash, revision] of Object.entries(aquaTree.revisions)) {
+    const reordered = {};
+    for (const key of keyOrder) {
+      if (key in revision) {
+        reordered[key] = revision[key];
+      }
+    }
+    for (const key of Object.keys(revision)) {
+      if (!keyOrder.includes(key)) {
+        reordered[key] = revision[key];
+      }
+    }
+    reorderedRevisions[hash] = reordered;
+  }
+  return {
+    ...aquaTree,
+    revisions: reorderedRevisions
+  };
+}
 function getPreviousVerificationHash(aquaTree, currentHash) {
   let previousHash = "";
   let hashes = Object.keys(aquaTree.revisions);
@@ -174,7 +219,9 @@ function getPreviousVerificationHash(aquaTree, currentHash) {
 }
 function findFormKey(revision, key) {
   const keys = Object.keys(revision);
-  return keys.find((k) => k === key || k === `forms_${key}` || k.startsWith(`forms_${key}`));
+  return keys.find(
+    (k) => k === key || k === `forms_${key}` || k.startsWith(`forms_${key}`)
+  );
 }
 function maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, aquaFileName, formFileName, linkVerificationHash, linkFileName) {
   let logs = [];
@@ -255,7 +302,7 @@ function createCredentials() {
   let credentialsObject = {
     mnemonic: mnemonic.phrase,
     nostr_sk: "",
-    "did_key": "",
+    did_key: "",
     alchemy_key: "ZaQtnup49WhU7fxrujVpkFdRz4JaFRtZ",
     // project defualt key
     witness_eth_network: "sepolia",
@@ -310,7 +357,16 @@ var estimateWitnessGas = async (wallet_address, witness_event_verification_hash,
       logType: "debug_data" /* DEBUGDATA */
     });
     const hasEnoughBalance = balance >= gasCost;
-    return [{ error: null, gasEstimate: estimatedGas.toString(), gasFee: gasCostInEth, balance: balanceInEth, hasEnoughBalance }, logData];
+    return [
+      {
+        error: null,
+        gasEstimate: estimatedGas.toString(),
+        gasFee: gasCostInEth,
+        balance: balanceInEth,
+        hasEnoughBalance
+      },
+      logData
+    ];
   } catch (error) {
     logData.push({
       log: `Error estimating gas: ", ${error}`,
@@ -362,10 +418,14 @@ async function checkInternetConnection() {
     try {
       const { request } = await import("https");
       return new Promise((resolve) => {
-        const req = request("https://www.google.com", { method: "HEAD", timeout: 5e3 }, (res) => {
-          resolve(res.statusCode >= 200 && res.statusCode < 300);
-          res.resume();
-        });
+        const req = request(
+          "https://www.google.com",
+          { method: "HEAD", timeout: 5e3 },
+          (res) => {
+            resolve(res.statusCode >= 200 && res.statusCode < 300);
+            res.resume();
+          }
+        );
         req.on("error", () => resolve(false));
         req.on("timeout", () => {
           req.destroy();
@@ -381,14 +441,18 @@ async function checkInternetConnection() {
 function printLogs(logs, enableVerbose = true) {
   if (enableVerbose) {
     logs.forEach((element) => {
-      console.log(`${element.ident ? element.ident : ""} ${LogTypeEmojis[element.logType]} ${element.log}`);
+      console.log(
+        `${element.ident ? element.ident : ""} ${LogTypeEmojis[element.logType]} ${element.log}`
+      );
     });
   } else {
     let containsError = logs.filter((element) => element.logType == "error");
     if (containsError.length > 0) {
       logs.forEach((element) => {
         if (element.logType == "error") {
-          console.log(`${element.ident ? element.ident : ""} ${LogTypeEmojis[element.logType]} ${element.log}`);
+          console.log(
+            `${element.ident ? element.ident : ""} ${LogTypeEmojis[element.logType]} ${element.log}`
+          );
         }
       });
     } else {
@@ -402,7 +466,9 @@ function printLogs(logs, enableVerbose = true) {
 function printlinkedGraphData(node, prefix = "", _isLast = true) {
   let revisionTypeEmoji = LogTypeEmojis[node.revisionType];
   let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis["success"] : LogTypeEmojis["error"];
-  console.log(`${prefix}\u2514${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+  console.log(
+    `${prefix}\u2514${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`
+  );
   if (node.revisionType === "link") {
     console.log(`${prefix}	Tree ${node.hash.slice(-4)}`);
     for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
@@ -419,7 +485,9 @@ function printlinkedGraphData(node, prefix = "", _isLast = true) {
 function printGraphData(node, prefix = "", _isLast = true) {
   let revisionTypeEmoji = LogTypeEmojis[node.revisionType];
   let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis["success"] : LogTypeEmojis["error"];
-  console.log(`\u2514${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+  console.log(
+    `\u2514${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`
+  );
   if (node.revisionType === "link") {
     console.log(`${prefix}	Tree ${node.hash.slice(-4)}`);
     for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
@@ -446,7 +514,10 @@ function OrderRevisionInAquaTree(params) {
     }
   }
   while (true) {
-    let nextRevisionHash = findNextRevisionHash(orderdHashes[orderdHashes.length - 1], params);
+    let nextRevisionHash = findNextRevisionHash(
+      orderdHashes[orderdHashes.length - 1],
+      params
+    );
     if (nextRevisionHash == "") {
       break;
     } else {
@@ -544,10 +615,11 @@ function createAquaTree(aquaTree) {
   if (!aquaTree.revisions || aquaTree.revisions === null || Object.keys(aquaTree.revisions).length === 0) {
     return null;
   }
-  let tree = createAquaTreeTree(aquaTree);
+  let aquaTreeWithReorderdRevisionPrperties = reorderAquaTreeRevisionsProperties(aquaTree);
+  let tree = createAquaTreeTree(aquaTreeWithReorderdRevisionPrperties);
   let pathResult = findHashWithLongestPath(tree);
   return {
-    ...aquaTree,
+    ...aquaTreeWithReorderdRevisionPrperties,
     tree,
     treeMapping: pathResult
   };
@@ -576,7 +648,10 @@ async function createContentRevisionUtil(aquaTreeWrapper, fileObject, enableScal
     revision_type: revisionType
   };
   let fileHash = getHashSum(fileObject.fileContent);
-  let alreadyNotarized = checkFileHashAlreadyNotarized(fileHash, aquaTreeWrapper.aquaTree);
+  let alreadyNotarized = checkFileHashAlreadyNotarized(
+    fileHash,
+    aquaTreeWrapper.aquaTree
+  );
   if (alreadyNotarized) {
     logs.push({
       log: `File ${fileObject.fileName} has already been notarized.`,
@@ -598,8 +673,19 @@ async function createContentRevisionUtil(aquaTreeWrapper, fileObject, enableScal
   }
   const revisions = aquaTreeWrapper.aquaTree.revisions;
   revisions[verification_hash] = verificationData;
-  maybeUpdateFileIndex(aquaTreeWrapper.aquaTree, verificationData, revisionType, fileObject.fileName, "", "", "");
-  let aquaTreeWithTree = createAquaTree(aquaTreeWrapper.aquaTree);
+  maybeUpdateFileIndex(
+    aquaTreeWrapper.aquaTree,
+    verificationData,
+    revisionType,
+    fileObject.fileName,
+    "",
+    "",
+    ""
+  );
+  let aquaTreeWithOrderdRevision = reorderAquaTreeRevisionsProperties(
+    aquaTreeWrapper.aquaTree
+  );
+  let aquaTreeWithTree = createAquaTree(aquaTreeWithOrderdRevision);
   logs.push({
     log: `content revision created succesfully`,
     logType: "success" /* SUCCESS */
@@ -1479,7 +1565,9 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
           });
           return Err(logs);
         }
-        let [wallet, _walletAddress, _publicKey] = await getWallet(credentials.mnemonic);
+        let [wallet, _walletAddress, _publicKey] = await getWallet(
+          credentials.mnemonic
+        );
         let sign2 = new CLISigner();
         signature = await sign2.doSign(wallet, targetRevisionHash);
         walletAddress = _walletAddress;
@@ -1524,9 +1612,9 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
     signature,
     signature_public_key: publicKey,
     signature_wallet_address: walletAddress,
-    signature_type
+    signature_type,
+    version: `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`
   };
-  verificationData["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`;
   const leaves = dict2Leaves(verificationData);
   let verification_hash = "";
   if (enableScalar) {
@@ -1596,7 +1684,11 @@ async function verifySignature(data, verificationHash, identCharacter = "") {
   let signerDID = new DIDSigner();
   switch (data.signature_type) {
     case "did_key":
-      signatureOk = await signerDID.verify(data.signature, data.signature_public_key, verificationHash);
+      signatureOk = await signerDID.verify(
+        data.signature,
+        data.signature_public_key,
+        verificationHash
+      );
       break;
     case "ethereum:eip-191":
       const paddedMessage = `I sign this revision: [${verificationHash}]`;
@@ -3802,6 +3894,7 @@ export {
   printLogs,
   printlinkedGraphData,
   recoverWalletAddress,
+  reorderAquaTreeRevisionsProperties,
   verifyMerkleIntegrity
 };
 /*! Bundled license information:
