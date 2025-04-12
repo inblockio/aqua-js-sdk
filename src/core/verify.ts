@@ -47,7 +47,6 @@ export async function verifyAquaTreeRevisionUtil(
   let logs: Array<LogData> = []
 
   const isScalar = !revision.hasOwnProperty("leaves")
-  console.log(`is sclar ${isScalar}`)
   let result = await verifyRevision(
     aquaTree,
     revision,
@@ -55,17 +54,11 @@ export async function verifyAquaTreeRevisionUtil(
     fileObject,
     isScalar,
   )
-  // console.log(`Result of  revisionItemHash :${revisionItemHash} is  ${JSON.stringify(result, null, 4)}`)
   result[1].forEach((e) => logs.push(e))
   if (result[0] == false) {
-    // console.log(`hash ${revisionItemHash} Errr ...`)
     return Err(logs)
   }
-  console.log(`Ok hash ${revisionItemHash}`)
-  // logs.push({
-  //     log: `AquaTree verified succesfully`,
-  //     logType: LogType.SUCCESS
-  // });
+
   let data: AquaOperationData = {
     aquaTree: aquaTree,
     aquaTrees: [],
@@ -655,8 +648,6 @@ async function verifyRevision(
       if (!!revision.content) {
         fileContent = Buffer.from(revision.content, "utf8")
       } else {
-        // console.log("File index", JSON.stringify(aquaTree.file_index));
-        // console.log("Has needed  ", verificationHash);
         let fileName = aquaTree.file_index[verificationHash]
         let fileObjectItem = fileObjects.find((e) => e.fileName == fileName)
         if (fileObjectItem == undefined) {
@@ -696,7 +687,6 @@ async function verifyRevision(
         doVerifyMerkleProof,
         `${identCharacter}\t`,
       )
-      // console.log(`Witness  result ${isSuccessResult} ---  data ${JSON.stringify(logsResultData)}`)
       logsResult = logsResultData
       isSuccess = isSuccessResult
 
@@ -913,7 +903,6 @@ function verifyRevisionMerkleTreeStructure(
   input: Revision,
   verificationHash: string,
 ): [boolean, Array<LogData>] {
-  // console.log("verification hash: ", verificationHash)
 
   let logs: Array<LogData> = []
 
@@ -969,9 +958,7 @@ function verifyRevisionMerkleTreeStructure(
     const hexRoot = getMerkleRoot(witnessMerkleProofLeaves) // tree.getHexRoot()
     vhOk = hexRoot === input.witness_merkle_root
 
-    // console.log(`1. test vh ${vhOk} \n hexRoot  ${hexRoot} \n input.witness_merkle_root ${input.witness_merkle_root} `);
   } else {
-    // console.log(`\n all data ${JSON.stringify(input, null, 4)}`)
     // Verify leaves
     for (const [i, claim] of Object.keys(input).sort().entries()) {
       const actual = getHashSum(`${claim}:${input[claim]}`)
@@ -987,7 +974,6 @@ function verifyRevisionMerkleTreeStructure(
     const hexRoot = getMerkleRoot(leaves2) // tree.getHexRoot()
     vhOk = hexRoot === verificationHash
 
-    // console.log(`2. test vh ${vhOk} -- \n new data ${hexRoot} \n  hahaha ${verificationHash} `);
   }
 
   ok = ok && vhOk

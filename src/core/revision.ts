@@ -61,9 +61,7 @@ export function fetchFilesToBeReadUtil(aquaTree: AquaTree): string[] {
   //const allRevisionHashes = Object.keys(aquaTree.revisions);
 
   hashAndfiles.forEach((value, key) => {
-    // console.log(`key ${key}  and value ${value}`)
     const revision = aquaTree.revisions[key]
-    // console.log(`revision ${JSON.stringify(revision, null, 4)}`)
     let fileName = value //hashAndfiles.get(revisionHash)
     if (revision != undefined && revision.content != undefined) {
       console.warn(
@@ -246,7 +244,6 @@ export async function createGenesisRevision(
     let hashSumData = getHashSum(stringifiedData)
 
     //todo remoev this log
-    // console.log(`Genesi scalar  hashSumData ${hashSumData} \n input ${stringifiedData} `)
     // logs.push({
     //   logType: LogType.DEBUGDATA,
     //   log: `Genesi scalar  hashSumData ${hashSumData} \n input ${stringifiedData} `,
