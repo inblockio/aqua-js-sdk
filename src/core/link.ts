@@ -1,6 +1,6 @@
 
 import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, LogType } from "../types";
-import { dict2Leaves, getHashSum, getLatestVH, getMerkleRoot, getTimestamp } from "../utils";
+import { dict2Leaves, getHashSum, getLatestVH, getMerkleRoot, getTimestamp, reorderAquaTreeRevisionsProperties } from "../utils";
 
 import { createAquaTree } from "../aquavhtree";
 import { Err, isOk, Ok, Result } from "../type_guards";
@@ -35,9 +35,9 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
         previous_verification_hash: previous_verification_hash,
         local_timestamp: timestamp,
         revision_type: "link",
+        version : `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
     }
 
-    newRevision["version"] =`https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
 
     const linkVHs = [getLatestVH(linkAquaTreeWrapper.aquaTree)]
 
@@ -66,7 +66,7 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
         ...linkData
     }
 
-
+ 
     const leaves = dict2Leaves(newRevision)
 
     let verificationHash = "";
@@ -97,13 +97,15 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
 
     // Tree creation
     let aquaTreeWithTree = createAquaTree(updatedAquaTree)
+
+    let orderedAquaTreeWithTree = reorderAquaTreeRevisionsProperties(aquaTreeWithTree)
     logs.push({
         log: "Linking successful",
         logType: LogType.LINK
     })
 
     let resutData: AquaOperationData = {
-        aquaTree: aquaTreeWithTree,
+        aquaTree: orderedAquaTreeWithTree,
         logData: logs,
         aquaTrees: []
     };
