@@ -1,5 +1,5 @@
 import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
-import { checkInternetConnection, dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, verifyMerkleIntegrity } from "../utils";
+import { checkInternetConnection, dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
@@ -41,12 +41,12 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
     const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
     const revisionType = "witness";
 
-    let verificationData: any = {
+    let verificationDataBasic: any = {
         previous_verification_hash: lastRevisionHash,
         local_timestamp: timestamp,
         revision_type: revisionType,
     }
-    verificationData["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
+    verificationDataBasic["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
 
 
     const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials!!, witnessNetwork)
@@ -58,9 +58,10 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
 
     let witness: WitnessResult = revisionResultData.data;
 
-    verificationData = { ...verificationData, ...witness }
+    let verificationDataRaw = { ...verificationDataBasic, ...witness }
 
 
+    let verificationData = reorderRevisionsProperties(verificationDataRaw)
     // Merklelize the dictionary
     const leaves = dict2Leaves(verificationData)
 
@@ -173,7 +174,8 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
 
         item.aquaTree.revisions = revisions
 
-        let aquaTreeUpdated = createAquaTree(item.aquaTree)
+        let aquaTreeUpdatedData = createAquaTree(item.aquaTree)
+        let aquaTreeUpdated = reorderAquaTreeRevisionsProperties(aquaTreeUpdatedData)
 
         if (aquaTreeUpdated) {
             aquaTreesResult.push(aquaTreeUpdated);
@@ -444,7 +446,7 @@ export async function verifyWitness(
     indentCharacter: string,
 ): Promise<[boolean, LogData[]]> {
     let logs: Array<LogData> = [];
-    
+
     let isValid: boolean = false;
 
     // Check for internet connection first
@@ -457,8 +459,8 @@ export async function verifyWitness(
         });
         return [false, logs];
     }
-    
-    
+
+
     if (verificationHash === "") {
 
         logs.push({
@@ -470,7 +472,7 @@ export async function verifyWitness(
     }
 
 
-    
+
 
 
     if (witnessData.witness_network === "nostr") {

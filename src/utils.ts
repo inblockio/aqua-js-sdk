@@ -17,33 +17,58 @@ import shajs from "sha.js"
 import { MerkleTree } from "merkletreejs"
 import { Err, Ok, Result } from "./type_guards"
 
+const keyOrder: (keyof Revision)[] = [
+  "previous_verification_hash",
+  "local_timestamp",
+  "revision_type",
+  "version",
+  "file_hash",
+  "file_nonce",
+  "content",
+  "witness_merkle_root",
+  "witness_timestamp",
+  "witness_network",
+  "witness_smart_contract_address",
+  "witness_transaction_hash",
+  "witness_sender_account_address",
+  "witness_merkle_proof",
+  "signature",
+  "signature_public_key",
+  "signature_wallet_address",
+  "signature_type",
+  "link_type",
+  "link_verification_hashes",
+  "link_file_hashes",
+  "leaves",
+]
+
+export function reorderRevisionsProperties(
+  revision: Revision,
+): Revision {
+
+  const reordered: Revision = {} as Revision
+
+  // First, add properties in the specified order
+  for (const key of keyOrder) {
+    if (key in revision) {
+      reordered[key] = revision[key]
+    }
+  }
+
+  // Then, add any remaining properties not in the keyOrder
+  for (const key of Object.keys(revision)) {
+    if (!keyOrder.includes(key as keyof Revision)) {
+      reordered[key] = revision[key]
+    }
+  }
+
+  return reordered
+
+}
 export function reorderAquaTreeRevisionsProperties(
   aquaTree: AquaTree,
 ): AquaTree {
-  const keyOrder: (keyof Revision)[] = [
-    "previous_verification_hash",
-    "local_timestamp",
-    "revision_type",
-    "version",
-    "file_hash",
-    "file_nonce",
-    "content",
-    "witness_merkle_root",
-    "witness_timestamp",
-    "witness_network",
-    "witness_smart_contract_address",
-    "witness_transaction_hash",
-    "witness_sender_account_address",
-    "witness_merkle_proof",
-    "signature",
-    "signature_public_key",
-    "signature_wallet_address",
-    "signature_type",
-    "link_type",
-    "link_verification_hashes",
-    "link_file_hashes",
-    "leaves",
-  ]
+
 
   const reorderedRevisions: Revisions = {}
 

@@ -16,6 +16,7 @@ import {
   getHashSum,
   getMerkleRoot,
   getWallet,
+  reorderRevisionsProperties,
 } from "../utils"
 import { DIDSigner } from "../signature/sign_did"
 import { createAquaTree } from "../aquavhtree"
@@ -132,17 +133,19 @@ export async function signAquaTreeUtil(
 
   const now = new Date().toISOString()
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
-  let verificationData: Revision = {
+  let verificationDataRaw: Revision = {
     previous_verification_hash: targetRevisionHash, //previousVerificationHash,
     local_timestamp: timestamp,
+    version: `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`,
     revision_type: "signature",
     signature: signature,
     signature_public_key: publicKey,
     signature_wallet_address: walletAddress,
     signature_type: signature_type,
-    version: `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`,
   }
 
+  let verificationData = reorderRevisionsProperties(verificationDataRaw)
+  
   // Merklelize the dictionary
   const leaves = dict2Leaves(verificationData)
 
