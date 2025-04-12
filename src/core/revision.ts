@@ -233,7 +233,10 @@ export async function createGenesisRevision(fileObject: FileObject, isForm: bool
         });
         let stringifiedData = JSON.stringify(verificationData)
 
-        verificationHash = "0x" + getHashSum(stringifiedData);
+        let hashSumData = getHashSum(stringifiedData);
+
+        console.log(`Genesi scalar  hashSumData ${hashSumData} \n input ${stringifiedData} `)
+        verificationHash = "0x" + hashSumData;
     } else {
         verificationData.leaves = leaves
         verificationHash = getMerkleRoot(leaves);

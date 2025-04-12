@@ -507,6 +507,7 @@ async function verifyRevision(aquaTree: AquaTree, revision: Revision, verificati
         // const leaves = dict2Leaves(revision)
         // const actualVH = getMerkleRoot(leaves);
 
+        // const actualVH = "0x" + getHashSum(JSON.stringify(revision))
         const actualVH = "0x" + getHashSum(JSON.stringify(revision))
         isScalarSuccess = actualVH === verificationHash
 
