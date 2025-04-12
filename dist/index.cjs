@@ -284,6 +284,7 @@ function getFileHashSum(fileContent) {
   return getHashSum(fileContent);
 }
 function getHashSum(data) {
+  console.log(`getHashSum Data ${data}`);
   let hash = (0, import_sha.default)("sha256").update(data).digest("hex");
   return hash;
 }
@@ -310,8 +311,8 @@ function prepareNonce() {
 }
 async function getWallet(mnemonic) {
   const wallet = import_ethers.Wallet.fromPhrase(mnemonic.trim());
-  const { ethers: ethers4 } = await import("ethers");
-  const walletAddress = ethers4.getAddress(wallet.address);
+  const { ethers: ethers5 } = await import("ethers");
+  const walletAddress = ethers5.getAddress(wallet.address);
   return [wallet, walletAddress, wallet.publicKey, wallet.privateKey];
 }
 function getEntropy() {
@@ -1009,7 +1010,9 @@ function fetchFilesToBeReadUtil(aquaTree) {
     const revision = aquaTree.revisions[key];
     let fileName = value;
     if (revision != void 0 && revision.content != void 0) {
-      console.warn(`\u2713 File ${fileName} skipped: content already exists in revision ${key}`);
+      console.warn(
+        `\u2713 File ${fileName} skipped: content already exists in revision ${key}`
+      );
     } else {
       filesWithoutContentInRevisions.push(fileName);
     }
@@ -1119,7 +1122,14 @@ async function createGenesisRevision(fileObject, isForm, enableContent, enableSc
       logType: "scalar" /* SCALAR */
     });
     let stringifiedData = JSON.stringify(verificationData);
-    verificationHash = "0x" + getHashSum(stringifiedData);
+    let hashSumData = getHashSum(stringifiedData);
+    logs.push({
+      logType: "debug_data" /* DEBUGDATA */,
+      log: `Genesi scalar  hashSumData ${hashSumData} 
+ input ${stringifiedData} `,
+      ident: `	`
+    });
+    verificationHash = "0x" + hashSumData;
   } else {
     verificationData.leaves = leaves;
     verificationHash = getMerkleRoot(leaves);
@@ -1128,9 +1138,25 @@ async function createGenesisRevision(fileObject, isForm, enableContent, enableSc
   aquaTree.revisions[verificationHash] = verificationData;
   let aquaTreeUpdatedResult;
   if (revisionType == "file") {
-    aquaTreeUpdatedResult = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, fileObject.fileName, "", "", "");
+    aquaTreeUpdatedResult = maybeUpdateFileIndex(
+      aquaTree,
+      verificationHash,
+      revisionType,
+      fileObject.fileName,
+      "",
+      "",
+      ""
+    );
   } else {
-    aquaTreeUpdatedResult = maybeUpdateFileIndex(aquaTree, verificationHash, revisionType, "", fileObject.fileName, "", "");
+    aquaTreeUpdatedResult = maybeUpdateFileIndex(
+      aquaTree,
+      verificationHash,
+      revisionType,
+      "",
+      fileObject.fileName,
+      "",
+      ""
+    );
   }
   if (isErr(aquaTreeUpdatedResult)) {
     logs.push(...aquaTreeUpdatedResult.data);
@@ -1178,6 +1204,7 @@ function getLastRevisionUtil(aquaTree) {
 }
 
 // src/signature/sign_metamask.ts
+var import_ethers2 = require("ethers");
 var MetaMaskSigner = class {
   constructor(options = {}) {
     this.port = options.port || 3001;
@@ -1279,9 +1306,8 @@ var MetaMaskSigner = class {
       if (!rawWalletAddress) {
         throw new Error("No wallet address selected");
       }
-      const { ethers: ethers4 } = await import("ethers");
-      const walletAddress = ethers4.getAddress(rawWalletAddress);
-      console.log(`walletAddress ${walletAddress} with proper checksum`);
+      const { ethers: ethers5 } = await import("ethers");
+      const walletAddress = ethers5.getAddress(rawWalletAddress);
       if (!walletAddress) {
         throw new Error("No wallet address selected");
       }
@@ -1373,8 +1399,9 @@ var MetaMaskSigner = class {
     while (attempts < this.maxAttempts) {
       if (this.lastResult && this.lastResult.signature) {
         const { signature, wallet_address } = this.lastResult;
+        const cleanedAddress = import_ethers2.ethers.getAddress(wallet_address);
         const publicKey = await this.recoverPublicKey(message, signature);
-        return [signature, wallet_address, publicKey];
+        return [signature, cleanedAddress, publicKey];
       }
       console.log("Waiting for the signature...");
       attempts++;
@@ -1393,9 +1420,9 @@ var MetaMaskSigner = class {
   * the signature and message hash.
   */
   async recoverPublicKey(message, signature) {
-    const { ethers: ethers4 } = await import("ethers");
-    return ethers4.SigningKey.recoverPublicKey(
-      ethers4.hashMessage(message),
+    const { ethers: ethers5 } = await import("ethers");
+    return ethers5.SigningKey.recoverPublicKey(
+      ethers5.hashMessage(message),
       signature
     );
   }
@@ -1498,7 +1525,7 @@ var DIDSigner = class {
 };
 
 // src/core/signature.ts
-var import_ethers2 = require("ethers");
+var import_ethers3 = require("ethers");
 async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableScalar = false, identCharacter = "") {
   let aquaTree = aquaTreeWrapper.aquaTree;
   let logs = [];
@@ -1618,8 +1645,8 @@ async function signMultipleAquaTreesUtil(_aquaTrees, _signType, _credentials, _e
 function recoverWalletAddress(verificationHash, signature) {
   try {
     const message = `I sign this revision: [${verificationHash}]`;
-    const messageHash = import_ethers2.ethers.hashMessage(message);
-    const recoveredAddress = import_ethers2.ethers.recoverAddress(messageHash, signature);
+    const messageHash = import_ethers3.ethers.hashMessage(message);
+    const recoveredAddress = import_ethers3.ethers.recoverAddress(messageHash, signature);
     return recoveredAddress;
   } catch (error) {
     console.error("Error recovering wallet address:", error);
@@ -1649,8 +1676,8 @@ async function verifySignature(data, verificationHash, identCharacter = "") {
     case "ethereum:eip-191":
       const paddedMessage = `I sign this revision: [${verificationHash}]`;
       try {
-        const recoveredAddress = import_ethers2.ethers.recoverAddress(
-          import_ethers2.ethers.hashMessage(paddedMessage),
+        const recoveredAddress = import_ethers3.ethers.recoverAddress(
+          import_ethers3.ethers.hashMessage(paddedMessage),
           data.signature
         );
         signatureOk = recoveredAddress.toLowerCase() === data.signature_wallet_address.toLowerCase();
@@ -1666,7 +1693,7 @@ async function verifySignature(data, verificationHash, identCharacter = "") {
 }
 
 // src/witness/wintess_eth.ts
-var import_ethers3 = require("ethers");
+var import_ethers4 = require("ethers");
 var import_http = __toESM(require("http"), 1);
 var WitnessEth = class {
   // Utility Methods
@@ -1824,8 +1851,8 @@ var WitnessEth = class {
     await window.ethereum.enable();
     const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
     const wallet = accounts[0];
-    const { ethers: ethers4 } = await import("ethers");
-    const walletAddress = ethers4.getAddress(wallet);
+    const { ethers: ethers5 } = await import("ethers");
+    const walletAddress = ethers5.getAddress(wallet);
     const chainId = await window.ethereum.request({ method: "eth_chainId" });
     const requestedChainId = ethChainIdMap[config.witnessNetwork];
     if (requestedChainId !== chainId) {
@@ -1913,8 +1940,8 @@ var WitnessEth = class {
   static async witnessCli(walletPrivateKey, witnessEventVerificationHash, smartContractAddress, WitnessNetwork3, providerUrl) {
     const logData = [];
     try {
-      const provider = providerUrl ? new import_ethers3.ethers.JsonRpcProvider(providerUrl) : import_ethers3.ethers.getDefaultProvider(WitnessNetwork3);
-      const wallet = new import_ethers3.ethers.Wallet(walletPrivateKey, provider);
+      const provider = providerUrl ? new import_ethers4.ethers.JsonRpcProvider(providerUrl) : import_ethers4.ethers.getDefaultProvider(WitnessNetwork3);
+      const wallet = new import_ethers4.ethers.Wallet(walletPrivateKey, provider);
       const sender = wallet.address;
       console.log(`Using wallet: ${sender}`);
       if (!witnessEventVerificationHash.startsWith("0x")) {
@@ -1926,7 +1953,7 @@ var WitnessEth = class {
         data: `0x9cef4ea1${witnessEventVerificationHash.slice(2)}`
       };
       const balance = await provider.getBalance(sender);
-      const balanceInEth = import_ethers3.ethers.formatEther(balance);
+      const balanceInEth = import_ethers4.ethers.formatEther(balance);
       logData.push({
         log: `Sender Balance: ${balanceInEth} ETH`,
         logType: "debug_data" /* DEBUGDATA */
@@ -1943,11 +1970,11 @@ var WitnessEth = class {
       });
       const gasPrice = feeData.gasPrice ? feeData.gasPrice : BigInt(0);
       logData.push({
-        log: `Gas Price: ${import_ethers3.ethers.formatUnits(gasPrice, "gwei")} Gwei`,
+        log: `Gas Price: ${import_ethers4.ethers.formatUnits(gasPrice, "gwei")} Gwei`,
         logType: "debug_data" /* DEBUGDATA */
       });
       const gasCost = estimatedGas * gasPrice;
-      const gasCostInEth = import_ethers3.ethers.formatEther(gasCost);
+      const gasCostInEth = import_ethers4.ethers.formatEther(gasCost);
       logData.push({
         log: `Estimated Gas Fee: ${gasCostInEth} ETH`,
         logType: "debug_data" /* DEBUGDATA */
@@ -1979,7 +2006,7 @@ var WitnessEth = class {
   }
   // Verify Transaction Method
   static async verify(WitnessNetwork3, transactionHash, expectedMR, _expectedTimestamp) {
-    const provider = import_ethers3.ethers.getDefaultProvider(WitnessNetwork3);
+    const provider = import_ethers4.ethers.getDefaultProvider(WitnessNetwork3);
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {
       return [false, "Transaction not found"];
@@ -2656,13 +2683,19 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
 async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject) {
   let logs = [];
   const isScalar = !revision.hasOwnProperty("leaves");
-  let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
+  console.log(`is sclar ${isScalar}`);
+  let result = await verifyRevision(
+    aquaTree,
+    revision,
+    revisionItemHash,
+    fileObject,
+    isScalar
+  );
   result[1].forEach((e) => logs.push(e));
-  if (!result[0]) {
-    console.log("err");
-    Err(logs);
+  if (result[0] == false) {
+    return Err(logs);
   }
-  console.log("ok");
+  console.log(`Ok hash ${revisionItemHash}`);
   let data = {
     aquaTree,
     aquaTrees: [],
@@ -2728,7 +2761,14 @@ async function verifyAquaTreeUtil(aquaTree, fileObject, identCharacter = "") {
         });
     }
     const isScalar = !revision.hasOwnProperty("leaves");
-    let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar, identCharacter);
+    let result = await verifyRevision(
+      aquaTree,
+      revision,
+      revisionItemHash,
+      fileObject,
+      isScalar,
+      identCharacter
+    );
     if (result[1].length > 0) {
       logs.push(...result[1]);
     }
@@ -2762,7 +2802,13 @@ function findNode2(tree, hash) {
 async function verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionItemHash, fileObject) {
   const logs = [];
   const isScalar = !revision.hasOwnProperty("leaves");
-  let [isGenesisOkay, genesisLogData] = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar);
+  let [isGenesisOkay, genesisLogData] = await verifyRevision(
+    aquaTree,
+    revision,
+    revisionItemHash,
+    fileObject,
+    isScalar
+  );
   genesisLogData.forEach((e) => logs.push(e));
   if (!isGenesisOkay) {
     Err(logs);
@@ -2773,7 +2819,10 @@ async function verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionIte
   };
   const verificationResults = {
     hash: revisionItemHash,
-    previous_verification_hash: getPreviousVerificationHash(aquaTree, revisionItemHash),
+    previous_verification_hash: getPreviousVerificationHash(
+      aquaTree,
+      revisionItemHash
+    ),
     timestamp: revision.local_timestamp,
     isValidationSucessful: isGenesisOkay,
     revisionType: genesisRevisionType,
@@ -2796,10 +2845,20 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
   let genesisRevisionData = aquaTree.revisions[verificationHashes[0]];
   let infoGraphData = null;
   const isScalar = !genesisRevisionData.hasOwnProperty("leaves");
-  let [isGenesisOkay, _genesisVerificationLogs] = await verifyRevision(aquaTree, genesisRevisionData, verificationHashes[0], fileObject, isScalar, identCharacter);
+  let [isGenesisOkay, _genesisVerificationLogs] = await verifyRevision(
+    aquaTree,
+    genesisRevisionData,
+    verificationHashes[0],
+    fileObject,
+    isScalar,
+    identCharacter
+  );
   const genesisRevisionType = aquaTree.revisions[verificationHashes[0]].revision_type;
   if (genesisRevisionData.revision_type === "form") {
-    let { formKeysGraphData } = verifyFormRevision(genesisRevisionData, genesisRevisionData.leaves);
+    let { formKeysGraphData } = verifyFormRevision(
+      genesisRevisionData,
+      genesisRevisionData.leaves
+    );
     let formData = {
       formKeys: formKeysGraphData
     };
@@ -2878,8 +2937,18 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
         });
     }
     const isScalar2 = !revision.hasOwnProperty("leaves");
-    let result = await verifyRevision(aquaTree, revision, revisionItemHash, fileObject, isScalar2, identCharacter);
-    let verificationResultsNode = findNode2(verificationResults, revision.previous_verification_hash);
+    let result = await verifyRevision(
+      aquaTree,
+      revision,
+      revisionItemHash,
+      fileObject,
+      isScalar2,
+      identCharacter
+    );
+    let verificationResultsNode = findNode2(
+      verificationResults,
+      revision.previous_verification_hash
+    );
     if (verificationResultsNode === null) {
       logs.push({
         logType: "error" /* ERROR */,
@@ -2891,7 +2960,9 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
     let linkedVerificationGraphData = [];
     if (revision.revision_type === "link") {
       let aqtreeFilename = aquaTree.file_index[revision.link_verification_hashes[0]];
-      let linkedAquaTree = fileObject.find((el) => el.fileName === `${aqtreeFilename}.aqua.json`);
+      let linkedAquaTree = fileObject.find(
+        (el) => el.fileName === `${aqtreeFilename}.aqua.json`
+      );
       if (!linkedAquaTree) {
         logs.push({
           logType: "error" /* ERROR */,
@@ -2899,7 +2970,11 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
         });
         break;
       }
-      let result2 = await verifyAndGetGraphDataUtil(linkedAquaTree.fileContent, fileObject, `${identCharacter}	`);
+      let result2 = await verifyAndGetGraphDataUtil(
+        linkedAquaTree.fileContent,
+        fileObject,
+        `${identCharacter}	`
+      );
       if (result2.isOk()) {
         linkedVerificationGraphData = [result2.data];
       } else {
@@ -2977,8 +3052,13 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
     verifyWitnessMerkleProof = true;
   }
   if (isScalar && !verifyWitnessMerkleProof) {
-    ``;
-    const actualVH = "0x" + getHashSum(JSON.stringify(revision));
+    let revData = JSON.stringify(revision);
+    logs.push({
+      logType: "debug_data" /* DEBUGDATA */,
+      log: `revison data   ${revData} `,
+      ident: `${identCharacter}	`
+    });
+    const actualVH = "0x" + getHashSum(revData);
     isScalarSuccess = actualVH === verificationHash;
     if (!isScalarSuccess) {
       logs.push({
@@ -3005,7 +3085,10 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
         log: "Verifying revision merkle tree .",
         ident: `${identCharacter}	`
       });
-      let [ok, result] = verifyRevisionMerkleTreeStructure(revision, verificationHash);
+      let [ok, result] = verifyRevisionMerkleTreeStructure(
+        revision,
+        verificationHash
+      );
       if (!ok) {
         return [ok, result];
       }
@@ -3015,11 +3098,7 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
   let logsResult = [];
   switch (revision.revision_type) {
     case "form":
-      let res = verifyFormRevision(
-        revision,
-        revision.leaves,
-        identCharacter
-      );
+      let res = verifyFormRevision(revision, revision.leaves, identCharacter);
       isSuccess = res.isOk;
       logsResult = logs;
       logs.push(...res.logs);
@@ -3045,6 +3124,7 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
       isSuccess = fileHash === revision.file_hash;
       break;
     case "signature":
+      ;
       [isSuccess, logsResult] = await verifySignature(
         revision,
         revision.previous_verification_hash,
@@ -3070,7 +3150,9 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
       for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
         const fileUri = aquaTree.file_index[vh];
         const aquaFileUri = `${fileUri}.aqua.json`;
-        let fileObj = fileObjects.find((fileObj2) => fileObj2.fileName === aquaFileUri);
+        let fileObj = fileObjects.find(
+          (fileObj2) => fileObj2.fileName === aquaFileUri
+        );
         if (!fileObj) {
           linkOk = false;
           logs.push({
@@ -3086,7 +3168,11 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
           });
           try {
             const linkAquaTree = fileObj.fileContent;
-            let linkVerificationResult = await verifyAquaTreeUtil(linkAquaTree, fileObjects, `${linkIdentChar}	`);
+            let linkVerificationResult = await verifyAquaTreeUtil(
+              linkAquaTree,
+              fileObjects,
+              `${linkIdentChar}	`
+            );
             if (isErr(linkVerificationResult)) {
               linkOk = false;
               logs.push(...linkVerificationResult.data);
@@ -3133,19 +3219,25 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
         ident: identCharacter.length == 0 ? "	" : `${linkIdentChar}`
       });
     }
+    logs.push({
+      log: `
+`,
+      logType: "empty" /* EMPTY */
+    });
+    return [true, logs];
   } else {
     logs.push({
       log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash}`,
       logType: "error" /* ERROR */,
       ident: `${identCharacter}	`
     });
-  }
-  logs.push({
-    log: `
+    logs.push({
+      log: `
 `,
-    logType: "empty" /* EMPTY */
-  });
-  return [isSuccess && isScalarSuccess, logs];
+      logType: "empty" /* EMPTY */
+    });
+    return [false, logs];
+  }
 }
 function verifyFormRevision(input, leaves, identCharacter = "") {
   let logs = [];
@@ -3224,7 +3316,11 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
     witness: ["witness_merkle_root"],
     form: []
   }[input.revision_type];
-  const mandatoryClaims = ["previous_verification_hash", "local_timestamp", ...mandatory];
+  const mandatoryClaims = [
+    "previous_verification_hash",
+    "local_timestamp",
+    ...mandatory
+  ];
   for (const claim of mandatoryClaims) {
     if (!(claim in input)) {
       logs.push({
