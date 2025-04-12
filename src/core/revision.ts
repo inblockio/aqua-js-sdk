@@ -247,11 +247,11 @@ export async function createGenesisRevision(
 
     //todo remoev this log
     // console.log(`Genesi scalar  hashSumData ${hashSumData} \n input ${stringifiedData} `)
-    logs.push({
-      logType: LogType.DEBUGDATA,
-      log: `Genesi scalar  hashSumData ${hashSumData} \n input ${stringifiedData} `,
-      ident: `\t`,
-    })
+    // logs.push({
+    //   logType: LogType.DEBUGDATA,
+    //   log: `Genesi scalar  hashSumData ${hashSumData} \n input ${stringifiedData} `,
+    //   ident: `\t`,
+    // })
     verificationHash = "0x" + hashSumData
   } else {
     verificationData.leaves = leaves

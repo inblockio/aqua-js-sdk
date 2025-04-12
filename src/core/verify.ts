@@ -591,11 +591,11 @@ async function verifyRevision(
     // const actualVH = "0x" + getHashSum(JSON.stringify(revision))
     let revData = JSON.stringify(revision)
     //todo remove this log
-    logs.push({
-      logType: LogType.DEBUGDATA,
-      log: `revison data   ${revData} `,
-      ident: `${identCharacter}\t`,
-    })
+    // logs.push({
+    //   logType: LogType.DEBUGDATA,
+    //   log: `revison data   ${revData} `,
+    //   ident: `${identCharacter}\t`,
+    // })
     const actualVH = "0x" + getHashSum(revData)
     isScalarSuccess = actualVH === verificationHash
 
