@@ -1160,9 +1160,9 @@ async function createGenesisRevision(fileObject, isForm, enableContent, enableSc
     local_timestamp: timestamp,
     revision_type: revisionType
   };
+  verificationData["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`;
   verificationData["file_hash"] = getHashSum(fileObject.fileContent);
   verificationData["file_nonce"] = prepareNonce();
-  verificationData["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`;
   switch (revisionType) {
     case "file":
       if (enableContent) {
