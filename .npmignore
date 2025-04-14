@@ -1,5 +1,8 @@
 node_modules/
 tests/
+example/
+new_docs/
+.zed
 .github/
 .git/
 .gitignore
