@@ -14,6 +14,7 @@ import {
   getMerkleRoot,
   maybeUpdateFileIndex,
   prepareNonce,
+  reorderRevisionsProperties,
 } from "../utils"
 import { createAquaTree } from "../aquavhtree"
 import { Err, isErr, Ok, Result } from "../type_guards"
@@ -231,7 +232,9 @@ export async function createGenesisRevision(
       return Err(logs)
   }
 
-  const leaves = dict2Leaves(verificationData)
+  let sortedVerificationData = reorderRevisionsProperties(verificationData)
+
+  const leaves = dict2Leaves(sortedVerificationData)
 
   let verificationHash = ""
   if (enableScalar) {
@@ -239,7 +242,7 @@ export async function createGenesisRevision(
       log: `Scalar enabled`,
       logType: LogType.SCALAR,
     })
-    let stringifiedData = JSON.stringify(verificationData)
+    let stringifiedData = JSON.stringify(sortedVerificationData)
 
     let hashSumData = getHashSum(stringifiedData)
 
@@ -251,12 +254,12 @@ export async function createGenesisRevision(
     // })
     verificationHash = "0x" + hashSumData
   } else {
-    verificationData.leaves = leaves
+    sortedVerificationData.leaves = leaves
     verificationHash = getMerkleRoot(leaves)
   }
 
   const aquaTree = createNewAquaTree()
-  aquaTree.revisions[verificationHash] = verificationData
+  aquaTree.revisions[verificationHash] = sortedVerificationData
 
   let aquaTreeUpdatedResult: Result<AquaTree, LogData[]>
 

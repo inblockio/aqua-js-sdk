@@ -19,6 +19,7 @@ import {
   getHashSum,
   getMerkleRoot,
   getPreviousVerificationHash,
+  reorderRevisionsProperties,
 } from "../utils"
 import { verifySignature } from "./signature"
 import { verifyWitness } from "./witness"
@@ -540,7 +541,7 @@ export async function verifyAndGetGraphDataUtil(
  */
 async function verifyRevision(
   aquaTree: AquaTree,
-  revision: Revision,
+  revisionPar: Revision,
   verificationHash: string,
   fileObjects: Array<FileObject>,
   isScalar: boolean,
@@ -553,6 +554,8 @@ async function verifyRevision(
 
   let verifyWitnessMerkleProof = false
 
+  let revision = reorderRevisionsProperties(revisionPar);
+  
   if (
     revision.revision_type === "witness" &&
     revision.witness_merkle_proof.length > 1
