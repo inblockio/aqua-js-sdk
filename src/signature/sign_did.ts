@@ -59,7 +59,6 @@ export class DIDSigner {
 
     // If you need to generate a random private key:
     // const seed = randomBytes(32)
-    // console.log(Buffer.from(seed).toString("hex"))
 
     const provider = new Ed25519Provider(privateKey)
     const resolver = KeyResolver.getResolver()

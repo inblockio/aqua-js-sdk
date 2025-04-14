@@ -336,7 +336,6 @@ constructor(initialValue: AquaTree | null) {
  */
 unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
         if (result.isErr()) {
-            console.log(result.data)
             this.logs.push(...result.data)
             throw Error("an error occured")
 

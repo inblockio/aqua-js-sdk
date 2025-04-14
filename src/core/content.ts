@@ -41,8 +41,6 @@ export async function createContentRevisionUtil(
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let logs: Array<LogData> = []
 
-  console.log("File object: ", fileObject)
-
   const now = new Date().toISOString()
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
   let revisionType = "file"
