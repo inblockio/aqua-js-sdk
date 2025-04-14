@@ -1,6 +1,6 @@
 
 import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, LogType } from "../types";
-import { dict2Leaves, getHashSum, getLatestVH, getMerkleRoot, getTimestamp, reorderAquaTreeRevisionsProperties } from "../utils";
+import { dict2Leaves, getHashSum, getLatestVH, getMerkleRoot, getTimestamp, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties } from "../utils";
 
 import { createAquaTree } from "../aquavhtree";
 import { Err, isOk, Ok, Result } from "../type_guards";
@@ -66,8 +66,11 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
         ...linkData
     }
 
+    let revisionData = reorderRevisionsProperties(newRevision)
+
  
-    const leaves = dict2Leaves(newRevision)
+
+    const leaves = dict2Leaves(revisionData)
 
     let verificationHash = "";
     if (enableScalar) {
@@ -76,18 +79,18 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
             log: `Scalar enabled`,
             logType: LogType.SCALAR
         });
-        let stringifiedData = JSON.stringify(newRevision)
+        let stringifiedData = JSON.stringify(revisionData)
 
         verificationHash = "0x" + getHashSum(stringifiedData);
     } else {
-        newRevision.leaves = leaves
+        revisionData.leaves = leaves
         verificationHash = getMerkleRoot(leaves);
     }
 
     let updatedAquaTree: AquaTree = {
         revisions: {
             ...aquaTreeWrapper.aquaTree.revisions,
-            [verificationHash]: newRevision
+            [verificationHash]: revisionData
         },
         file_index: {
             ...aquaTreeWrapper.aquaTree.file_index,
