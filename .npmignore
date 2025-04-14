@@ -7,3 +7,14 @@ new_docs/
 .git/
 .gitignore
 .travis.yml
+docs/
+dist/
+.vscode/
+src/
+typedoc.json
+tsconfig.json
+tsconfig.node.json
+tsconfig.json
+tsconfig.node.json
+tsconfig.json
+tsconfig.node.json

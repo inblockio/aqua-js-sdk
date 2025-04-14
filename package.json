@@ -1,6 +1,6 @@
 {
   "name": "aqua-js-sdk",
-  "version": "3.2.1-1",
+  "version": "3.2.1-2",
   "description": "A TypeScript library for managing revision trees",
   "type": "module",
   "repository": {
