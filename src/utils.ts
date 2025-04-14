@@ -17,81 +17,28 @@ import shajs from "sha.js"
 import { MerkleTree } from "merkletreejs"
 import { Err, Ok, Result } from "./type_guards"
 
-const keyOrder: (keyof Revision)[] = [
-  "previous_verification_hash",
-  "local_timestamp",
-  "revision_type",
-  "version",
-  "file_hash",
-  "file_nonce",
-  "content",
-  "witness_merkle_root",
-  "witness_timestamp",
-  "witness_network",
-  "witness_smart_contract_address",
-  "witness_transaction_hash",
-  "witness_sender_account_address",
-  "witness_merkle_proof",
-  "signature",
-  "signature_public_key",
-  "signature_wallet_address",
-  "signature_type",
-  "link_type",
-  "link_verification_hashes",
-  "link_file_hashes",
-  "leaves",
-]
-
-export function reorderRevisionsProperties(
-  revision: Revision,
-): Revision {
-
+export function reorderRevisionsProperties(revision: Revision): Revision {
   const reordered: Revision = {} as Revision
-
-  // First, add properties in the specified order
-  for (const key of keyOrder) {
-    if (key in revision) {
-      reordered[key] = revision[key]
-    }
+  
+  // Sort keys alphabetically
+  const sortedKeys = Object.keys(revision).sort() as (keyof Revision)[]
+  
+  // Add all properties in alphabetical order
+  for (const key of sortedKeys) {
+    reordered[key] = revision[key]
   }
-
-  // Then, add any remaining properties not in the keyOrder
-  for (const key of Object.keys(revision)) {
-    if (!keyOrder.includes(key as keyof Revision)) {
-      reordered[key] = revision[key]
-    }
-  }
-
+  
   return reordered
-
 }
-export function reorderAquaTreeRevisionsProperties(
-  aquaTree: AquaTree,
-): AquaTree {
 
-
+export function reorderAquaTreeRevisionsProperties(aquaTree: AquaTree): AquaTree {
   const reorderedRevisions: Revisions = {}
-
+  
   for (const [hash, revision] of Object.entries(aquaTree.revisions)) {
-    const reordered: Revision = {} as Revision
-
-    // First, add properties in the specified order
-    for (const key of keyOrder) {
-      if (key in revision) {
-        reordered[key] = revision[key]
-      }
-    }
-
-    // Then, add any remaining properties not in the keyOrder
-    for (const key of Object.keys(revision)) {
-      if (!keyOrder.includes(key as keyof Revision)) {
-        reordered[key] = revision[key]
-      }
-    }
-
-    reorderedRevisions[hash] = reordered
+    // Reorder each revision's properties alphabetically
+    reorderedRevisions[hash] = reorderRevisionsProperties(revision)
   }
-
+  
   return {
     ...aquaTree,
     revisions: reorderedRevisions,
