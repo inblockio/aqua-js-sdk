@@ -192,7 +192,6 @@ export function getFileHashSum(fileContent: string): string {
  * - Returns hex-encoded hash
  */
 export function getHashSum(data: string | Uint8Array): string {
-  console.log(`getHashSum Data ${data}`)
   let hash = shajs("sha256").update(data).digest("hex")
   return hash
 }
