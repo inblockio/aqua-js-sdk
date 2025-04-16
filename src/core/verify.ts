@@ -16,9 +16,11 @@ import {
 } from "../types"
 import {
   dict2Leaves,
+  getGenesisHash,
   getHashSum,
   getMerkleRoot,
   getPreviousVerificationHash,
+  OrderRevisionInAquaTree,
   reorderRevisionsProperties,
 } from "../utils"
 import { verifySignature } from "./signature"
@@ -698,12 +700,89 @@ async function verifyRevision(
         )
 
         if (!fileObj) {
-          linkOk = false
-          logs.push({
-            log: `File ${fileUri} not found in file objects`,
-            logType: LogType.ERROR,
-            ident: `${identCharacter}\t`,
-          })
+
+          let throwError = true
+
+          //we are sure the file name is not in the file index
+          // we can asume a complex case of revision.link_verification_hashes is a revision in  an aquq tree
+          // loop through fileObjects if its an aqua tree check if a revision hash == revision.link_verification_hashes
+          // find the genesis 
+
+          for (let fileObjectItem of fileObjects) {
+            if (fileObjectItem.fileName.endsWith(".aqua.json")) {
+              let aquaTree: AquaTree = fileObjectItem.fileContent as AquaTree
+              let revisionHashes = Object.keys(aquaTree.revisions)
+
+              if (revisionHashes.includes(vh)) {
+                let genesisHash = getGenesisHash(aquaTree);
+                let fileName = aquaTree.file_index[genesisHash]
+
+                let fileUriObj = fileObjects.find(
+                  (fileObj) => fileObj.fileName === fileName,
+                )
+                let fileUri = fileUriObj.fileName;
+                const aquaFileUri = `${fileUri}.aqua.json`
+
+                // fix me
+                logs.push({
+                  log: `Deep Linking Verifying linked File ${aquaFileUri}.`,
+                  logType: LogType.INFO,
+                  ident: `${identCharacter}\t`,
+                })
+
+                try {
+                  const linkAquaTree = fileObj.fileContent as AquaTree //JSON.parse(fileObj.fileContent)  as AquaTree;
+
+                  let linkVerificationResult = await verifyAquaTreeUtil(
+                    linkAquaTree,
+                    fileObjects,
+                    `${linkIdentChar}\t`,
+                  )
+
+                  if (isErr(linkVerificationResult)) {
+                    linkOk = false
+
+                    logs.push(...linkVerificationResult.data)
+                    logs.push({
+                      log: `verification of ${fileUri}.aqua.json failed `,
+                      logType: LogType.ERROR,
+                      ident: linkIdentChar, //`${identCharacter}\t`
+                    })
+                  } else {
+                    logs.push(...linkVerificationResult.data.logData)
+
+                    logs.push({
+                      log: `successfully verified ${fileUri}.aqua.json `,
+                      logType: LogType.SUCCESS,
+                      ident: linkIdentChar, //`${identCharacter}\t`
+                    })
+                  }
+                } catch (error) {
+                  linkOk = false
+                  logs.push({
+                    log: `Error verifying linked file ${aquaFileUri}: ${error}`,
+                    logType: LogType.ERROR,
+                    ident: `${identCharacter}\t`,
+                  })
+                }
+
+                // end of fix me
+                throwError = false
+                break
+              }
+            }
+          }
+
+          if (throwError) {
+            linkOk = false
+            logs.push({
+              log: `File ${fileUri} not found in file objects`,
+              logType: LogType.ERROR,
+              ident: `${identCharacter}\t`,
+            })
+
+          }
+
         } else {
           logs.push({
             log: `Verifying linked File ${aquaFileUri}.`,
