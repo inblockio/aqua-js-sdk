@@ -53,9 +53,11 @@ __export(index_exports, {
   dict2Leaves: () => dict2Leaves,
   estimateWitnessGas: () => estimateWitnessGas,
   findFormKey: () => findFormKey,
+  findNextRevisionHashByArrayofRevisions: () => findNextRevisionHashByArrayofRevisions,
   formatMwTimestamp: () => formatMwTimestamp,
   getEntropy: () => getEntropy,
   getFileHashSum: () => getFileHashSum,
+  getGenesisHash: () => getGenesisHash,
   getHashSum: () => getHashSum,
   getLatestVH: () => getLatestVH,
   getMerkleRoot: () => getMerkleRoot,
@@ -583,6 +585,18 @@ function OrderRevisionInAquaTree(params) {
   }
   return newAquaTree;
 }
+function getGenesisHash(aquaTree) {
+  let aquaTreeGenesisHash = null;
+  let allAquuaTreeHashes = Object.keys(aquaTree.revisions);
+  for (let hash of allAquuaTreeHashes) {
+    let revisionItem = aquaTree.revisions[hash];
+    if (revisionItem.previous_verification_hash == "" || revisionItem.previous_verification_hash == null || revisionItem.previous_verification_hash == void 0) {
+      aquaTreeGenesisHash = hash;
+      break;
+    }
+  }
+  return aquaTreeGenesisHash;
+}
 function findNextRevisionHash(previousVerificationHash, aquaTree) {
   let hashOfRevision = "";
   let allHashes = Object.keys(aquaTree.revisions);
@@ -594,6 +608,16 @@ function findNextRevisionHash(previousVerificationHash, aquaTree) {
     }
   }
   return hashOfRevision;
+}
+function findNextRevisionHashByArrayofRevisions(previousVerificationHash, revisions) {
+  let revisionItem = null;
+  for (let revision of revisions) {
+    if (revision.previous_verification_hash == previousVerificationHash) {
+      revisionItem = revision;
+      break;
+    }
+  }
+  return revisionItem;
 }
 
 // src/aquavhtree.ts
@@ -1184,7 +1208,6 @@ async function createGenesisRevision(fileObject, isForm, enableContent, enableSc
       logType: "scalar" /* SCALAR */
     });
     let stringifiedData = JSON.stringify(sortedVerificationData);
-    console.log("Sorted Stringified data: ", stringifiedData);
     let hashSumData = getHashSum(stringifiedData);
     verificationHash = "0x" + hashSumData;
   } else {
@@ -3118,7 +3141,6 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
   }
   if (isScalar && !verifyWitnessMerkleProof) {
     let revData = JSON.stringify(revision);
-    console.log("Rev Data: ", revData);
     const actualVH = "0x" + getHashSum(revData);
     isScalarSuccess = actualVH === verificationHash;
     if (!isScalarSuccess) {
@@ -3165,7 +3187,6 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
       logs.push(...res.logs);
       break;
     case "file":
-      console.log(`file rev.`);
       let fileContent;
       if (!!revision.content) {
         fileContent = Buffer.from(revision.content, "utf8");
@@ -3181,14 +3202,11 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
           return [false, logs];
         }
         if (fileObjectItem.fileContent instanceof Uint8Array) {
-          console.log("fileContent is  Uint8Array");
           fileContent = Buffer.from(fileObjectItem.fileContent);
         } else {
           if (typeof fileObjectItem.fileContent === "string") {
-            console.log("fileContent is  string");
             fileContent = Buffer.from(fileObjectItem.fileContent);
           } else {
-            console.log("fileContent is  aqua tree");
             fileContent = Buffer.from(
               JSON.stringify(fileObjectItem.fileContent)
             );
@@ -3229,12 +3247,81 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
           (fileObj2) => fileObj2.fileName === aquaFileUri
         );
         if (!fileObj) {
-          linkOk = false;
-          logs.push({
-            log: `File ${fileUri} not found in file objects`,
-            logType: "error" /* ERROR */,
-            ident: `${identCharacter}	`
-          });
+          let throwError = true;
+          for (let fileObjectItem of fileObjects) {
+            if (fileObjectItem.fileName.endsWith(".aqua.json")) {
+              let aquaTree2 = fileObjectItem.fileContent;
+              let revisionHashes = Object.keys(aquaTree2.revisions);
+              if (revisionHashes.includes(vh)) {
+                let genesisHash = getGenesisHash(aquaTree2);
+                let fileName = aquaTree2.file_index[genesisHash];
+                let fileUriObj = fileObjects.find(
+                  (fileObj2) => fileObj2.fileName === fileName
+                );
+                let fileUri2 = fileUriObj.fileName;
+                const aquaFileUri2 = `${fileUri2}.aqua.json`;
+                logs.push({
+                  log: `Deep Linking Verifying linked File ${aquaFileUri2}.`,
+                  logType: "info" /* INFO */,
+                  ident: `${identCharacter}	`
+                });
+                try {
+                  let fileObj2 = fileObjects.find(
+                    (fileObj3) => fileObj3.fileName === aquaFileUri2
+                  );
+                  if (fileObj2 == void 0 || fileObj2 === null) {
+                    logs.push({
+                      log: `Aqua tree ${aquaFileUri2}  not found`,
+                      logType: "error" /* ERROR */,
+                      ident: `${identCharacter}	`
+                    });
+                    break;
+                  }
+                  const linkAquaTree = fileObj2.fileContent;
+                  let linkVerificationResult = await verifyAquaTreeUtil(
+                    linkAquaTree,
+                    fileObjects,
+                    `${linkIdentChar}	`
+                  );
+                  if (isErr(linkVerificationResult)) {
+                    linkOk = false;
+                    logs.push(...linkVerificationResult.data);
+                    logs.push({
+                      log: `verification of ${fileUri2}.aqua.json failed `,
+                      logType: "error" /* ERROR */,
+                      ident: linkIdentChar
+                      //`${identCharacter}\t`
+                    });
+                  } else {
+                    logs.push(...linkVerificationResult.data.logData);
+                    logs.push({
+                      log: `successfully verified ${fileUri2}.aqua.json `,
+                      logType: "success" /* SUCCESS */,
+                      ident: linkIdentChar
+                      //`${identCharacter}\t`
+                    });
+                  }
+                } catch (error) {
+                  linkOk = false;
+                  logs.push({
+                    log: `Error verifying linked file ${aquaFileUri2}: ${error}`,
+                    logType: "error" /* ERROR */,
+                    ident: `${identCharacter}	`
+                  });
+                }
+                throwError = false;
+                break;
+              }
+            }
+          }
+          if (throwError) {
+            linkOk = false;
+            logs.push({
+              log: `File ${fileUri} not found in file objects`,
+              logType: "error" /* ERROR */,
+              ident: `${identCharacter}	`
+            });
+          }
         } else {
           logs.push({
             log: `Verifying linked File ${aquaFileUri}.`,
@@ -3280,7 +3367,6 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
       break;
   }
   logs.push(...logsResult);
-  console.log(`---> isSuccess ${isSuccess} isScalarSuccess ${isScalarSuccess}`);
   if (isSuccess && isScalarSuccess) {
     if (isScalar) {
       logs.push({
@@ -3433,7 +3519,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-6",
+  version: "3.2.1-10",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {
@@ -3929,9 +4015,11 @@ var AquafierChainable = class {
   dict2Leaves,
   estimateWitnessGas,
   findFormKey,
+  findNextRevisionHashByArrayofRevisions,
   formatMwTimestamp,
   getEntropy,
   getFileHashSum,
+  getGenesisHash,
   getHashSum,
   getLatestVH,
   getMerkleRoot,

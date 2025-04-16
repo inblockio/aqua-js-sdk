@@ -19,26 +19,26 @@ import { Err, Ok, Result } from "./type_guards"
 
 export function reorderRevisionsProperties(revision: Revision): Revision {
   const reordered: Revision = {} as Revision
-  
+
   // Sort keys alphabetically
   const sortedKeys = Object.keys(revision).sort() as (keyof Revision)[]
-  
+
   // Add all properties in alphabetical order
   for (const key of sortedKeys) {
     reordered[key] = revision[key]
   }
-  
+
   return reordered
 }
 
 export function reorderAquaTreeRevisionsProperties(aquaTree: AquaTree): AquaTree {
   const reorderedRevisions: Revisions = {}
-  
+
   for (const [hash, revision] of Object.entries(aquaTree.revisions)) {
     // Reorder each revision's properties alphabetically
     reorderedRevisions[hash] = reorderRevisionsProperties(revision)
   }
-  
+
   return {
     ...aquaTree,
     revisions: reorderedRevisions,
@@ -721,6 +721,66 @@ export function OrderRevisionInAquaTree(params: AquaTree): AquaTree {
   return newAquaTree
 }
 
+
+export function getGenesisHash(aquaTree: AquaTree): string | null {
+  let aquaTreeGenesisHash: string | null = null;
+  let allAquuaTreeHashes = Object.keys(aquaTree!.revisions);
+
+  for (let hash of allAquuaTreeHashes) {
+      let revisionItem = aquaTree!.revisions[hash];
+      if (revisionItem.previous_verification_hash == "" || revisionItem.previous_verification_hash == null || revisionItem.previous_verification_hash == undefined) {
+
+          aquaTreeGenesisHash = hash //revisionItem.previous_verification_hash
+          break;
+
+      }
+  }
+
+  return aquaTreeGenesisHash
+}
+
+// export function OrderRevisionsArray(revisions: Array<Revision>): Array<Revision> {
+//   // let allHashes = Object.keys(revisions)
+//   let orderdHashes: Array<Revision> = []
+//   if (revisions.length == 1) {
+//     return revisions
+//   }
+
+//   //more than one  revision
+//   for (let revision of revisions) {
+//     if (revision.previous_verification_hash == "") {
+//       orderdHashes.push(revision)
+//       break
+//     }
+//   }
+
+//   while (true) {
+//     // find next revision
+//     let nextRevisionHash = findNextRevisionHashByArrayofRevisions(
+//       orderdHashes[orderdHashes.length - 1],
+//       params,
+//     )
+//     if (nextRevisionHash == "") {
+//       break
+//     } else {
+//       orderdHashes.push(nextRevisionHash)
+//     }
+//   }
+
+//   // construct the new aqua tree with orderd revision
+//   let newAquaTree: AquaTree = {
+//     ...params,
+//     revisions: {},
+//   }
+
+//   for (let hash of orderdHashes) {
+//     let revision = params.revisions[hash]
+//     newAquaTree.revisions[hash] = revision
+//   }
+
+//   return newAquaTree
+// }
+
 function findNextRevisionHash(
   previousVerificationHash: string,
   aquaTree: AquaTree,
@@ -736,4 +796,22 @@ function findNextRevisionHash(
     }
   }
   return hashOfRevision
+}
+
+
+export function findNextRevisionHashByArrayofRevisions(
+  previousVerificationHash: string,
+  revisions: Array<Revision>,
+): Revision | null {
+  let revisionItem: Revision | null = null;
+
+  // let allHashes = Object.keys(revisions)
+
+  for (let revision of revisions) {
+    if (revision.previous_verification_hash == previousVerificationHash) {
+      revisionItem = revision
+      break
+    }
+  }
+  return revisionItem
 }
