@@ -163,45 +163,18 @@ function isNone(option) {
 }
 
 // src/utils.ts
+function reorderRevisionsProperties(revision) {
+  const reordered = {};
+  const sortedKeys = Object.keys(revision).sort();
+  for (const key of sortedKeys) {
+    reordered[key] = revision[key];
+  }
+  return reordered;
+}
 function reorderAquaTreeRevisionsProperties(aquaTree) {
-  const keyOrder = [
-    "previous_verification_hash",
-    "local_timestamp",
-    "revision_type",
-    "version",
-    "file_hash",
-    "file_nonce",
-    "content",
-    "witness_merkle_root",
-    "witness_timestamp",
-    "witness_network",
-    "witness_smart_contract_address",
-    "witness_transaction_hash",
-    "witness_sender_account_address",
-    "witness_merkle_proof",
-    "signature",
-    "signature_public_key",
-    "signature_wallet_address",
-    "signature_type",
-    "link_type",
-    "link_verification_hashes",
-    "link_file_hashes",
-    "leaves"
-  ];
   const reorderedRevisions = {};
   for (const [hash, revision] of Object.entries(aquaTree.revisions)) {
-    const reordered = {};
-    for (const key of keyOrder) {
-      if (key in revision) {
-        reordered[key] = revision[key];
-      }
-    }
-    for (const key of Object.keys(revision)) {
-      if (!keyOrder.includes(key)) {
-        reordered[key] = revision[key];
-      }
-    }
-    reorderedRevisions[hash] = reordered;
+    reorderedRevisions[hash] = reorderRevisionsProperties(revision);
   }
   return {
     ...aquaTree,
@@ -256,7 +229,6 @@ function getFileHashSum(fileContent) {
   return getHashSum(fileContent);
 }
 function getHashSum(data) {
-  console.log(`getHashSum Data ${data}`);
   let hash = shajs("sha256").update(data).digest("hex");
   return hash;
 }
@@ -636,7 +608,6 @@ function logAquaTree(node, prefix = "", isLast = true) {
 // src/core/content.ts
 async function createContentRevisionUtil(aquaTreeWrapper, fileObject, enableScalar) {
   let logs = [];
-  console.log("File object: ", fileObject);
   const now = (/* @__PURE__ */ new Date()).toISOString();
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")));
   let revisionType = "file";
@@ -899,9 +870,9 @@ async function linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScal
   let newRevision = {
     previous_verification_hash,
     local_timestamp: timestamp,
-    revision_type: "link"
+    revision_type: "link",
+    version: `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`
   };
-  newRevision["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`;
   const linkVHs = [getLatestVH(linkAquaTreeWrapper.aquaTree)];
   const linkFileHashes = [getHashSum(linkAquaTreeWrapper.fileObject.fileContent)];
   linkFileHashes.forEach((fh) => {
@@ -923,23 +894,24 @@ async function linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScal
     ...newRevision,
     ...linkData
   };
-  const leaves = dict2Leaves(newRevision);
+  let revisionData = reorderRevisionsProperties(newRevision);
+  const leaves = dict2Leaves(revisionData);
   let verificationHash = "";
   if (enableScalar) {
     logs.push({
       log: `Scalar enabled`,
       logType: "scalar" /* SCALAR */
     });
-    let stringifiedData = JSON.stringify(newRevision);
+    let stringifiedData = JSON.stringify(revisionData);
     verificationHash = "0x" + getHashSum(stringifiedData);
   } else {
-    newRevision.leaves = leaves;
+    revisionData.leaves = leaves;
     verificationHash = getMerkleRoot(leaves);
   }
   let updatedAquaTree = {
     revisions: {
       ...aquaTreeWrapper.aquaTree.revisions,
-      [verificationHash]: newRevision
+      [verificationHash]: revisionData
     },
     file_index: {
       ...aquaTreeWrapper.aquaTree.file_index,
@@ -947,12 +919,13 @@ async function linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScal
     }
   };
   let aquaTreeWithTree = createAquaTree(updatedAquaTree);
+  let orderedAquaTreeWithTree = reorderAquaTreeRevisionsProperties(aquaTreeWithTree);
   logs.push({
     log: "Linking successful",
     logType: "link" /* LINK */
   });
   let resutData = {
-    aquaTree: aquaTreeWithTree,
+    aquaTree: orderedAquaTreeWithTree,
     logData: logs,
     aquaTrees: []
   };
@@ -1125,28 +1098,23 @@ async function createGenesisRevision(fileObject, isForm, enableContent, enableSc
       });
       return Err(logs);
   }
-  const leaves = dict2Leaves(verificationData);
+  let sortedVerificationData = reorderRevisionsProperties(verificationData);
+  const leaves = dict2Leaves(sortedVerificationData);
   let verificationHash = "";
   if (enableScalar) {
     logs.push({
       log: `Scalar enabled`,
       logType: "scalar" /* SCALAR */
     });
-    let stringifiedData = JSON.stringify(verificationData);
+    let stringifiedData = JSON.stringify(sortedVerificationData);
     let hashSumData = getHashSum(stringifiedData);
-    logs.push({
-      logType: "debug_data" /* DEBUGDATA */,
-      log: `Genesi scalar  hashSumData ${hashSumData} 
- input ${stringifiedData} `,
-      ident: `	`
-    });
     verificationHash = "0x" + hashSumData;
   } else {
-    verificationData.leaves = leaves;
+    sortedVerificationData.leaves = leaves;
     verificationHash = getMerkleRoot(leaves);
   }
   const aquaTree = createNewAquaTree();
-  aquaTree.revisions[verificationHash] = verificationData;
+  aquaTree.revisions[verificationHash] = sortedVerificationData;
   let aquaTreeUpdatedResult;
   if (revisionType == "file") {
     aquaTreeUpdatedResult = maybeUpdateFileIndex(
@@ -1604,17 +1572,18 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
   }
   const now = (/* @__PURE__ */ new Date()).toISOString();
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")));
-  let verificationData = {
+  let verificationDataRaw = {
     previous_verification_hash: targetRevisionHash,
     //previousVerificationHash,
     local_timestamp: timestamp,
+    version: `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`,
     revision_type: "signature",
     signature,
     signature_public_key: publicKey,
     signature_wallet_address: walletAddress,
-    signature_type,
-    version: `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`
+    signature_type
   };
+  let verificationData = reorderRevisionsProperties(verificationDataRaw);
   const leaves = dict2Leaves(verificationData);
   let verification_hash = "";
   if (enableScalar) {
@@ -2375,19 +2344,20 @@ async function witnessAquaTreeUtil(aquaTreeWrapper, witnessType, witnessNetwork,
   const now = (/* @__PURE__ */ new Date()).toISOString();
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")));
   const revisionType = "witness";
-  let verificationData = {
+  let verificationDataBasic = {
     previous_verification_hash: lastRevisionHash,
     local_timestamp: timestamp,
     revision_type: revisionType
   };
-  verificationData["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`;
+  verificationDataBasic["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`;
   const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials, witnessNetwork);
   if (isErr(revisionResultData)) {
     revisionResultData.data.forEach((e) => logs.push(e));
     return Err(logs);
   }
   let witness = revisionResultData.data;
-  verificationData = { ...verificationData, ...witness };
+  let verificationDataRaw = { ...verificationDataBasic, ...witness };
+  let verificationData = reorderRevisionsProperties(verificationDataRaw);
   const leaves = dict2Leaves(verificationData);
   let verification_hash = "";
   if (enableScalar) {
@@ -2463,7 +2433,8 @@ async function witnessMultipleAquaTreesUtil(aquaTrees, witnessType, witnessNetwo
     const verificationHash = getMerkleRoot(leaves);
     revisions[verificationHash] = verificationData;
     item.aquaTree.revisions = revisions;
-    let aquaTreeUpdated = createAquaTree(item.aquaTree);
+    let aquaTreeUpdatedData = createAquaTree(item.aquaTree);
+    let aquaTreeUpdated = reorderAquaTreeRevisionsProperties(aquaTreeUpdatedData);
     if (aquaTreeUpdated) {
       aquaTreesResult.push(aquaTreeUpdated);
     }
@@ -2697,10 +2668,10 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
 }
 
 // src/core/verify.ts
+import { console as console2 } from "inspector";
 async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject) {
   let logs = [];
   const isScalar = !revision.hasOwnProperty("leaves");
-  console.log(`is sclar ${isScalar}`);
   let result = await verifyRevision(
     aquaTree,
     revision,
@@ -2712,7 +2683,6 @@ async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, 
   if (result[0] == false) {
     return Err(logs);
   }
-  console.log(`Ok hash ${revisionItemHash}`);
   let data = {
     aquaTree,
     aquaTrees: [],
@@ -3059,22 +3029,18 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
   }
   return Ok(verificationResults);
 }
-async function verifyRevision(aquaTree, revision, verificationHash, fileObjects, isScalar, identCharacter = "") {
+async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjects, isScalar, identCharacter = "") {
   let logs = [];
   let doVerifyMerkleProof = false;
   let isSuccess = true;
   let isScalarSuccess = true;
   let verifyWitnessMerkleProof = false;
+  let revision = reorderRevisionsProperties(revisionPar);
   if (revision.revision_type === "witness" && revision.witness_merkle_proof.length > 1) {
     verifyWitnessMerkleProof = true;
   }
   if (isScalar && !verifyWitnessMerkleProof) {
     let revData = JSON.stringify(revision);
-    logs.push({
-      logType: "debug_data" /* DEBUGDATA */,
-      log: `revison data   ${revData} `,
-      ident: `${identCharacter}	`
-    });
     const actualVH = "0x" + getHashSum(revData);
     isScalarSuccess = actualVH === verificationHash;
     if (!isScalarSuccess) {
@@ -3121,6 +3087,7 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
       logs.push(...res.logs);
       break;
     case "file":
+      console2.log(`file rev.`);
       let fileContent;
       if (!!revision.content) {
         fileContent = Buffer.from(revision.content, "utf8");
@@ -3135,7 +3102,20 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
           });
           return [false, logs];
         }
-        fileContent = Buffer.from(fileObjectItem.fileContent);
+        if (fileObjectItem.fileContent instanceof Uint8Array) {
+          console2.log("fileContent is  Uint8Array");
+          fileContent = Buffer.from(fileObjectItem.fileContent);
+        } else {
+          if (typeof fileObjectItem.fileContent === "string") {
+            console2.log("fileContent is  string");
+            fileContent = Buffer.from(fileObjectItem.fileContent);
+          } else {
+            console2.log("fileContent is  aqua tree");
+            fileContent = Buffer.from(
+              JSON.stringify(fileObjectItem.fileContent)
+            );
+          }
+        }
       }
       const fileHash = getHashSum(fileContent);
       isSuccess = fileHash === revision.file_hash;
@@ -3222,6 +3202,7 @@ async function verifyRevision(aquaTree, revision, verificationHash, fileObjects,
       break;
   }
   logs.push(...logsResult);
+  console2.log(`---> isSuccess ${isSuccess} isScalarSuccess ${isScalarSuccess}`);
   if (isSuccess && isScalarSuccess) {
     if (isScalar) {
       logs.push({
@@ -3374,7 +3355,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "1.3.2-1",
+  version: "3.2.1-1",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {
@@ -3715,7 +3696,6 @@ var AquafierChainable = class {
   */
   unwrap(result) {
     if (result.isErr()) {
-      console.log(result.data);
       this.logs.push(...result.data);
       throw Error("an error occured");
     } else {
@@ -3895,6 +3875,7 @@ export {
   printlinkedGraphData,
   recoverWalletAddress,
   reorderAquaTreeRevisionsProperties,
+  reorderRevisionsProperties,
   verifyMerkleIntegrity
 };
 /*! Bundled license information:

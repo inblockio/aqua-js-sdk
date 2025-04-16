@@ -24,6 +24,7 @@ import {
 import { verifySignature } from "./signature"
 import { verifyWitness } from "./witness"
 import { Err, isErr, Ok, Result } from "../type_guards"
+import { console } from "inspector"
 
 /**
  * Verifies a single revision in an Aqua Tree
@@ -554,8 +555,8 @@ async function verifyRevision(
 
   let verifyWitnessMerkleProof = false
 
-  let revision = reorderRevisionsProperties(revisionPar);
-  
+  let revision = reorderRevisionsProperties(revisionPar)
+
   if (
     revision.revision_type === "witness" &&
     revision.witness_merkle_proof.length > 1
@@ -647,6 +648,7 @@ async function verifyRevision(
       logs.push(...res.logs)
       break
     case "file":
+      console.log(`file rev.`)
       let fileContent: Buffer
       if (!!revision.content) {
         fileContent = Buffer.from(revision.content, "utf8")
@@ -661,7 +663,21 @@ async function verifyRevision(
           })
           return [false, logs]
         }
-        fileContent = Buffer.from(fileObjectItem.fileContent as string)
+
+        if (fileObjectItem.fileContent instanceof Uint8Array) {
+          console.log("fileContent is  Uint8Array")
+          fileContent = Buffer.from(fileObjectItem.fileContent)
+        } else {
+          if (typeof fileObjectItem.fileContent === "string") {
+            console.log("fileContent is  string")
+            fileContent = Buffer.from(fileObjectItem.fileContent as string)
+          } else {
+            console.log("fileContent is  aqua tree")
+            fileContent = Buffer.from(
+              JSON.stringify(fileObjectItem.fileContent),
+            )
+          }
+        }
       }
       const fileHash = getHashSum(fileContent)
       isSuccess = fileHash === revision.file_hash
@@ -762,6 +778,7 @@ async function verifyRevision(
 
   logs.push(...logsResult)
 
+  console.log(`---> isSuccess ${isSuccess} isScalarSuccess ${isScalarSuccess}`)
   if (isSuccess && isScalarSuccess) {
     if (isScalar) {
       logs.push({
@@ -906,7 +923,6 @@ function verifyRevisionMerkleTreeStructure(
   input: Revision,
   verificationHash: string,
 ): [boolean, Array<LogData>] {
-
   let logs: Array<LogData> = []
 
   let ok: boolean = true
@@ -960,7 +976,6 @@ function verifyRevisionMerkleTreeStructure(
 
     const hexRoot = getMerkleRoot(witnessMerkleProofLeaves) // tree.getHexRoot()
     vhOk = hexRoot === input.witness_merkle_root
-
   } else {
     // Verify leaves
     for (const [i, claim] of Object.keys(input).sort().entries()) {
@@ -976,7 +991,6 @@ function verifyRevisionMerkleTreeStructure(
 
     const hexRoot = getMerkleRoot(leaves2) // tree.getHexRoot()
     vhOk = hexRoot === verificationHash
-
   }
 
   ok = ok && vhOk

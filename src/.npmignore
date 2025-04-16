@@ -1,3 +1,6 @@
+docs/
+new_docs/
+example/
 .env
 node_modules
 .DS_Store
