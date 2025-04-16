@@ -10,13 +10,13 @@ Ensure to use the same semantic version as the Aqua protocol version you are usi
 
 ## Installation
 ```bash
-npm install aqua-verifier
+npm install aqua-js-sdk
 ```
 
 ## Usage
 
 ```typescript
-import Aquafier, {FileObject} from 'aqua-verifier';
+import Aquafier, {FileObject} from 'aqua-js-sdk';
 
 
 let aquafier = new Aquafier();
