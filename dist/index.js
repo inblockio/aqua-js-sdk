@@ -3187,7 +3187,18 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
                   ident: `${identCharacter}	`
                 });
                 try {
-                  const linkAquaTree = fileObj.fileContent;
+                  let fileObj2 = fileObjects.find(
+                    (fileObj3) => fileObj3.fileName === aquaFileUri2
+                  );
+                  if (fileObj2 == void 0 || fileObj2 === null) {
+                    logs.push({
+                      log: `Aqua tree ${aquaFileUri2}  not found`,
+                      logType: "error" /* ERROR */,
+                      ident: `${identCharacter}	`
+                    });
+                    break;
+                  }
+                  const linkAquaTree = fileObj2.fileContent;
                   let linkVerificationResult = await verifyAquaTreeUtil(
                     linkAquaTree,
                     fileObjects,
@@ -3429,7 +3440,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-9",
+  version: "3.2.1-10",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {

@@ -731,6 +731,20 @@ async function verifyRevision(
                 })
 
                 try {
+
+                  let fileObj = fileObjects.find(
+                    (fileObj) => fileObj.fileName === aquaFileUri,
+                  )
+
+                  if(fileObj==undefined|| fileObj ===null){
+                    logs.push({
+                      log: `Aqua tree ${aquaFileUri}  not found`,
+                      logType: LogType.ERROR,
+                      ident: `${identCharacter}\t`,
+                    })
+                    break
+                  }
+
                   const linkAquaTree = fileObj.fileContent as AquaTree //JSON.parse(fileObj.fileContent)  as AquaTree;
 
                   let linkVerificationResult = await verifyAquaTreeUtil(
