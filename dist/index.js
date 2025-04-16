@@ -1107,6 +1107,7 @@ async function createGenesisRevision(fileObject, isForm, enableContent, enableSc
       logType: "scalar" /* SCALAR */
     });
     let stringifiedData = JSON.stringify(sortedVerificationData);
+    console.log("Sorted Stringified data: ", stringifiedData);
     let hashSumData = getHashSum(stringifiedData);
     verificationHash = "0x" + hashSumData;
   } else {
@@ -2668,7 +2669,6 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
 }
 
 // src/core/verify.ts
-import { console as console2 } from "inspector";
 async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject) {
   let logs = [];
   const isScalar = !revision.hasOwnProperty("leaves");
@@ -3041,6 +3041,7 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
   }
   if (isScalar && !verifyWitnessMerkleProof) {
     let revData = JSON.stringify(revision);
+    console.log("Rev Data: ", revData);
     const actualVH = "0x" + getHashSum(revData);
     isScalarSuccess = actualVH === verificationHash;
     if (!isScalarSuccess) {
@@ -3087,7 +3088,7 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
       logs.push(...res.logs);
       break;
     case "file":
-      console2.log(`file rev.`);
+      console.log(`file rev.`);
       let fileContent;
       if (!!revision.content) {
         fileContent = Buffer.from(revision.content, "utf8");
@@ -3103,14 +3104,14 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
           return [false, logs];
         }
         if (fileObjectItem.fileContent instanceof Uint8Array) {
-          console2.log("fileContent is  Uint8Array");
+          console.log("fileContent is  Uint8Array");
           fileContent = Buffer.from(fileObjectItem.fileContent);
         } else {
           if (typeof fileObjectItem.fileContent === "string") {
-            console2.log("fileContent is  string");
+            console.log("fileContent is  string");
             fileContent = Buffer.from(fileObjectItem.fileContent);
           } else {
-            console2.log("fileContent is  aqua tree");
+            console.log("fileContent is  aqua tree");
             fileContent = Buffer.from(
               JSON.stringify(fileObjectItem.fileContent)
             );
@@ -3202,7 +3203,7 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
       break;
   }
   logs.push(...logsResult);
-  console2.log(`---> isSuccess ${isSuccess} isScalarSuccess ${isScalarSuccess}`);
+  console.log(`---> isSuccess ${isSuccess} isScalarSuccess ${isScalarSuccess}`);
   if (isSuccess && isScalarSuccess) {
     if (isScalar) {
       logs.push({
@@ -3355,7 +3356,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-1",
+  version: "3.2.1-6",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {

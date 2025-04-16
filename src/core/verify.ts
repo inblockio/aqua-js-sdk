@@ -24,7 +24,6 @@ import {
 import { verifySignature } from "./signature"
 import { verifyWitness } from "./witness"
 import { Err, isErr, Ok, Result } from "../type_guards"
-import { console } from "inspector"
 
 /**
  * Verifies a single revision in an Aqua Tree
@@ -568,24 +567,6 @@ async function verifyRevision(
   // remove  verifyWitnessMerkleProof which is hard coded.
   // verify scalar should be minimal
   if (isScalar && !verifyWitnessMerkleProof) {
-    // logs.push({
-    //     logType: LogType.SCALAR,
-    //     log: "Scalar revision detected."
-    // })
-    // todo fix verifyRevisionMerkleTreeStructure
-    // if (revision.witness_merkle_proof && revision.witness_merkle_proof.length > 1) {
-
-    //     let [ok, logs] = verifyRevisionMerkleTreeStructure(revision, verificationHash)
-    //     if (!ok) {
-    //         return [ok, logs]
-    //     }
-    // } else {
-    // }
-
-    // const leaves = dict2Leaves(revision)
-    // const actualVH = getMerkleRoot(leaves);
-
-    // const actualVH = "0x" + getHashSum(JSON.stringify(revision))
     let revData = JSON.stringify(revision)
     //todo remove this log
     // logs.push({
@@ -648,7 +629,6 @@ async function verifyRevision(
       logs.push(...res.logs)
       break
     case "file":
-      console.log(`file rev.`)
       let fileContent: Buffer
       if (!!revision.content) {
         fileContent = Buffer.from(revision.content, "utf8")
@@ -665,14 +645,11 @@ async function verifyRevision(
         }
 
         if (fileObjectItem.fileContent instanceof Uint8Array) {
-          console.log("fileContent is  Uint8Array")
           fileContent = Buffer.from(fileObjectItem.fileContent)
         } else {
           if (typeof fileObjectItem.fileContent === "string") {
-            console.log("fileContent is  string")
             fileContent = Buffer.from(fileObjectItem.fileContent as string)
           } else {
-            console.log("fileContent is  aqua tree")
             fileContent = Buffer.from(
               JSON.stringify(fileObjectItem.fileContent),
             )
@@ -778,7 +755,6 @@ async function verifyRevision(
 
   logs.push(...logsResult)
 
-  console.log(`---> isSuccess ${isSuccess} isScalarSuccess ${isScalarSuccess}`)
   if (isSuccess && isScalarSuccess) {
     if (isScalar) {
       logs.push({
