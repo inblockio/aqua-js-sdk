@@ -267,6 +267,24 @@ function getEntropy() {
     return new Uint8Array(nodeCrypto.randomBytes(16));
   }
 }
+var getFileNameCheckingPaths = (fileObjects, fileName) => {
+  let fileObjectItem = fileObjects.find((e) => {
+    if (e.fileName.includes("/") || fileName.includes("/")) {
+      let eFileName = e.fileName;
+      let parentFileName = fileName;
+      if (e.fileName.includes("/")) {
+        eFileName = e.fileName.split("/").pop();
+      }
+      if (fileName.includes("/")) {
+        parentFileName = fileName.split("/").pop();
+      }
+      return eFileName == parentFileName;
+    } else {
+      return e.fileName == fileName;
+    }
+  });
+  return fileObjectItem;
+};
 function createCredentials() {
   console.log("Credential file  does not exist.Creating wallet");
   const entropy = getEntropy();
@@ -2968,9 +2986,8 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
     let linkedVerificationGraphData = [];
     if (revision.revision_type === "link") {
       let aqtreeFilename = aquaTree.file_index[revision.link_verification_hashes[0]];
-      let linkedAquaTree = fileObject.find(
-        (el) => el.fileName === `${aqtreeFilename}.aqua.json`
-      );
+      let name = `${aqtreeFilename}.aqua.json`;
+      let linkedAquaTree = getFileNameCheckingPaths(fileObject, name);
       if (!linkedAquaTree) {
         logs.push({
           logType: "error" /* ERROR */,
@@ -3113,7 +3130,7 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
         fileContent = Buffer.from(revision.content, "utf8");
       } else {
         let fileName = aquaTree.file_index[verificationHash];
-        let fileObjectItem = fileObjects.find((e) => e.fileName == fileName);
+        let fileObjectItem = getFileNameCheckingPaths(fileObjects, fileName);
         if (fileObjectItem == void 0) {
           logs.push({
             log: `file not found in file objects`,
@@ -3162,11 +3179,13 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
     case "link":
       let linkOk = true;
       for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
-        const fileUri = aquaTree.file_index[vh];
+        const fileUriFromAquaTree = aquaTree.file_index[vh];
+        let fileUri = fileUriFromAquaTree;
+        if (fileUriFromAquaTree.includes("/")) {
+          fileUri = fileUriFromAquaTree.split("/").pop();
+        }
         const aquaFileUri = `${fileUri}.aqua.json`;
-        let fileObj = fileObjects.find(
-          (fileObj2) => fileObj2.fileName === aquaFileUri
-        );
+        let fileObj = getFileNameCheckingPaths(fileObjects, aquaFileUri);
         if (!fileObj) {
           let throwError = true;
           for (let fileObjectItem of fileObjects) {
@@ -3176,9 +3195,10 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
               if (revisionHashes.includes(vh)) {
                 let genesisHash = getGenesisHash(aquaTree2);
                 let fileName = aquaTree2.file_index[genesisHash];
-                let fileUriObj = fileObjects.find(
-                  (fileObj2) => fileObj2.fileName === fileName
-                );
+                let fileUriObj = getFileNameCheckingPaths(fileObjects, fileName);
+                if (fileUriObj == void 0) {
+                  break;
+                }
                 let fileUri2 = fileUriObj.fileName;
                 const aquaFileUri2 = `${fileUri2}.aqua.json`;
                 logs.push({
@@ -3187,9 +3207,7 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
                   ident: `${identCharacter}	`
                 });
                 try {
-                  let fileObj2 = fileObjects.find(
-                    (fileObj3) => fileObj3.fileName === aquaFileUri2
-                  );
+                  let fileObj2 = getFileNameCheckingPaths(fileObjects, aquaFileUri2);
                   if (fileObj2 == void 0 || fileObj2 === null) {
                     logs.push({
                       log: `Aqua tree ${aquaFileUri2}  not found`,
@@ -3440,7 +3458,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-10",
+  version: "3.2.1-8",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {
@@ -3940,6 +3958,7 @@ export {
   formatMwTimestamp,
   getEntropy,
   getFileHashSum,
+  getFileNameCheckingPaths,
   getGenesisHash,
   getHashSum,
   getLatestVH,

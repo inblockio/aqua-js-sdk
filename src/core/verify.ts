@@ -16,6 +16,7 @@ import {
 } from "../types"
 import {
   dict2Leaves,
+  getFileNameCheckingPaths,
   getGenesisHash,
   getHashSum,
   getMerkleRoot,
@@ -426,9 +427,11 @@ export async function verifyAndGetGraphDataUtil(
     if (revision.revision_type === "link") {
       let aqtreeFilename =
         aquaTree.file_index[revision.link_verification_hashes[0]]
-      let linkedAquaTree = fileObject.find(
-        (el) => el.fileName === `${aqtreeFilename}.aqua.json`,
-      )
+      // let linkedAquaTree = fileObject.find(
+      //   (el) => el.fileName === `${aqtreeFilename}.aqua.json`,
+      // )
+      let name = `${aqtreeFilename}.aqua.json`;
+      let linkedAquaTree = getFileNameCheckingPaths(fileObject, name)
       if (!linkedAquaTree) {
         logs.push({
           logType: LogType.ERROR,
@@ -636,7 +639,8 @@ async function verifyRevision(
         fileContent = Buffer.from(revision.content, "utf8")
       } else {
         let fileName = aquaTree.file_index[verificationHash]
-        let fileObjectItem = fileObjects.find((e) => e.fileName == fileName)
+        let fileObjectItem = getFileNameCheckingPaths(fileObjects, fileName)
+
         if (fileObjectItem == undefined) {
           logs.push({
             log: `file not found in file objects`,
@@ -692,12 +696,15 @@ async function verifyRevision(
     case "link":
       let linkOk: boolean = true
       for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
-        const fileUri = aquaTree.file_index[vh]
+        const fileUriFromAquaTree = aquaTree.file_index[vh]
+        let fileUri = fileUriFromAquaTree
+        if (fileUriFromAquaTree.includes("/")) {
+          fileUri = fileUriFromAquaTree.split('/').pop()
+        }
         const aquaFileUri = `${fileUri}.aqua.json`
 
-        let fileObj = fileObjects.find(
-          (fileObj) => fileObj.fileName === aquaFileUri,
-        )
+
+        let fileObj = getFileNameCheckingPaths(fileObjects, aquaFileUri)
 
         if (!fileObj) {
 
@@ -717,9 +724,16 @@ async function verifyRevision(
                 let genesisHash = getGenesisHash(aquaTree);
                 let fileName = aquaTree.file_index[genesisHash]
 
-                let fileUriObj = fileObjects.find(
-                  (fileObj) => fileObj.fileName === fileName,
-                )
+                // let fileUriObj = fileObjects.find(
+                //   (fileObj) => fileObj.fileName === fileName,
+                // )
+
+                let fileUriObj = getFileNameCheckingPaths(fileObjects, fileName)
+
+                if (fileUriObj == undefined) {
+                  break;
+                }
+
                 let fileUri = fileUriObj.fileName;
                 const aquaFileUri = `${fileUri}.aqua.json`
 
@@ -732,11 +746,13 @@ async function verifyRevision(
 
                 try {
 
-                  let fileObj = fileObjects.find(
-                    (fileObj) => fileObj.fileName === aquaFileUri,
-                  )
+                  // let fileObj = fileObjects.find(
+                  //   (fileObj) => fileObj.fileName === aquaFileUri,
+                  // )
+                  let fileObj = getFileNameCheckingPaths(fileObjects, aquaFileUri)
 
-                  if(fileObj==undefined|| fileObj ===null){
+
+                  if (fileObj == undefined || fileObj === null) {
                     logs.push({
                       log: `Aqua tree ${aquaFileUri}  not found`,
                       logType: LogType.ERROR,
