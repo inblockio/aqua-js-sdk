@@ -3260,13 +3260,18 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
       let linkOk = true;
       for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
         const fileUriFromAquaTree = aquaTree.file_index[vh];
-        let fileUri = fileUriFromAquaTree;
-        if (fileUriFromAquaTree.includes("/")) {
-          fileUri = fileUriFromAquaTree.split("/").pop();
+        let fileObj = void 0;
+        let aquaFileUri = "";
+        let fileUri = "";
+        if (fileUriFromAquaTree) {
+          fileUri = fileUriFromAquaTree;
+          if (fileUriFromAquaTree.includes("/")) {
+            fileUri = fileUriFromAquaTree.split("/").pop();
+          }
+          aquaFileUri = `${fileUri}.aqua.json`;
+          fileObj = getFileNameCheckingPaths(fileObjects, aquaFileUri);
         }
-        const aquaFileUri = `${fileUri}.aqua.json`;
-        let fileObj = getFileNameCheckingPaths(fileObjects, aquaFileUri);
-        if (!fileObj) {
+        if (fileObj == void 0) {
           let throwError = true;
           for (let fileObjectItem of fileObjects) {
             if (fileObjectItem.fileName.endsWith(".aqua.json")) {
@@ -3538,7 +3543,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-8",
+  version: "3.2.1-9",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {

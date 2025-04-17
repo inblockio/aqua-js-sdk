@@ -697,16 +697,20 @@ async function verifyRevision(
       let linkOk: boolean = true
       for (const [_idx, vh] of revision.link_verification_hashes.entries()) {
         const fileUriFromAquaTree = aquaTree.file_index[vh]
-        let fileUri = fileUriFromAquaTree
-        if (fileUriFromAquaTree.includes("/")) {
-          fileUri = fileUriFromAquaTree.split('/').pop()
+        let fileObj = undefined;
+        let aquaFileUri = ""
+        let fileUri = ""
+        if (fileUriFromAquaTree) {
+          fileUri = fileUriFromAquaTree
+          if (fileUriFromAquaTree.includes("/")) {
+            fileUri = fileUriFromAquaTree.split('/').pop()
+          }
+          aquaFileUri = `${fileUri}.aqua.json`
+
+
+          fileObj = getFileNameCheckingPaths(fileObjects, aquaFileUri)
         }
-        const aquaFileUri = `${fileUri}.aqua.json`
-
-
-        let fileObj = getFileNameCheckingPaths(fileObjects, aquaFileUri)
-
-        if (!fileObj) {
+        if (fileObj == undefined) {
 
           let throwError = true
 
