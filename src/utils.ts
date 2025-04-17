@@ -2,6 +2,7 @@ import {
   AnObject,
   AquaTree,
   CredentialsData,
+  FileObject,
   GasEstimateResult,
   LogData,
   LogType,
@@ -301,6 +302,29 @@ export function getEntropy(): Uint8Array {
     const nodeCrypto = require("crypto")
     return new Uint8Array(nodeCrypto.randomBytes(16))
   }
+}
+export const getFileNameCheckingPaths = (fileObjects: Array<FileObject>, fileName: string): FileObject | undefined => {
+  let fileObjectItem = fileObjects.find((e) => {
+
+    if (e.fileName.includes("/") || fileName.includes("/")) {
+
+      let eFileName = e.fileName
+      let parentFileName = fileName
+      if (e.fileName.includes("/")) {
+        eFileName = e.fileName.split('/').pop();
+      }
+      if (fileName.includes("/")) {
+        parentFileName = fileName.split('/').pop()
+      }
+
+      return eFileName == parentFileName
+    } else {
+
+      return e.fileName == fileName
+    }
+  })
+  return fileObjectItem
+
 }
 /**
  * Creates default credentials for the SDK
@@ -727,13 +751,13 @@ export function getGenesisHash(aquaTree: AquaTree): string | null {
   let allAquuaTreeHashes = Object.keys(aquaTree!.revisions);
 
   for (let hash of allAquuaTreeHashes) {
-      let revisionItem = aquaTree!.revisions[hash];
-      if (revisionItem.previous_verification_hash == "" || revisionItem.previous_verification_hash == null || revisionItem.previous_verification_hash == undefined) {
+    let revisionItem = aquaTree!.revisions[hash];
+    if (revisionItem.previous_verification_hash == "" || revisionItem.previous_verification_hash == null || revisionItem.previous_verification_hash == undefined) {
 
-          aquaTreeGenesisHash = hash //revisionItem.previous_verification_hash
-          break;
+      aquaTreeGenesisHash = hash //revisionItem.previous_verification_hash
+      break;
 
-      }
+    }
   }
 
   return aquaTreeGenesisHash
