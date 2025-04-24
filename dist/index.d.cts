@@ -312,7 +312,7 @@ interface FormVerificationResponseData {
  */
 interface FileObject {
     fileName: string;
-    fileContent: string | AquaTree | Uint8Array;
+    fileContent: string | AquaTree | Uint8Array | object;
     path: string;
     fileSize?: number;
 }
