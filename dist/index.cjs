@@ -3543,7 +3543,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-9",
+  version: "3.2.1-10",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {

@@ -216,10 +216,15 @@ export interface FormVerificationResponseData {
  * @property fileContent - Content as string or AquaTree
  * @property path - Path to file
  * @property fileSize - Size in bytes
+ * 
+ * Record<string, string> - for forms
+ * string - for text file ie html, txt, 
+ * aquaTree - linked aqua tree
+ * Uint8Array - for all others ie images, video, music etc
  */
 export interface FileObject {
   fileName: string
-  fileContent: string | AquaTree | Uint8Array
+  fileContent: string | AquaTree | Uint8Array | Record<string, string>
   path: string
   fileSize?: number
 }
