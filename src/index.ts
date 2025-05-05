@@ -287,7 +287,7 @@ export default class Aquafier {
     }
 
 
-    
+
 
 }
 
@@ -310,18 +310,18 @@ export default class Aquafier {
  */
 export class AquafierChainable {
     /** Current Aqua Tree state */
-private value: AquaTree;
+    private value: AquaTree;
     /** Result of last verification operation */
-private verificationResult: Result<AquaOperationData, LogData[]>;
+    private verificationResult: Result<AquaOperationData, LogData[]>;
     /** Collected operation logs */
-private logs: LogData[] = [];
+    private logs: LogData[] = [];
 
     /**
  * Creates a new chainable Aqua operation sequence
  * 
  * @param initialValue - Optional initial Aqua Tree
  */
-constructor(initialValue: AquaTree | null) {
+    constructor(initialValue: AquaTree | null) {
         if (initialValue) {
             this.value = initialValue;
         }
@@ -334,7 +334,7 @@ constructor(initialValue: AquaTree | null) {
  * @returns Aqua Tree from result
  * @throws If result is Err
  */
-unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
+    unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
         if (result.isErr()) {
             this.logs.push(...result.data)
             throw Error("an error occured")
@@ -354,7 +354,7 @@ unwrap(result: Result<AquaOperationData, LogData[]>): AquaTree {
  * @param enableScalar - Whether to enable scalar values
  * @returns This instance for chaining
  */
-async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = true): Promise<this> {
+    async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = true): Promise<this> {
         let data = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
 
         if (data.isOk()) {
@@ -363,8 +363,6 @@ async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: b
         } else {
             this.logs.push(...data.data)
         }
-
-
         return this;
     }
 
@@ -376,7 +374,7 @@ async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: b
  * @param enableScalar - Whether to enable scalar values
  * @returns This instance for chaining
  */
-async sign(signType: SignType = "metamask", credentials: CredentialsData = {
+    async sign(signType: SignType = "metamask", credentials: CredentialsData = {
         mnemonic: "",
         nostr_sk: "",
         "did_key": "",
@@ -393,8 +391,6 @@ async sign(signType: SignType = "metamask", credentials: CredentialsData = {
             },
             revision: ""
         }, signType, credentials, enableScalar)
-
-        // this.value = this.unwrap(data);
 
         if (data.isOk()) {
             this.value = this.unwrap(data);
@@ -416,7 +412,7 @@ async sign(signType: SignType = "metamask", credentials: CredentialsData = {
  * @param enableScalar - Whether to enable scalar values
  * @returns This instance for chaining
  */
-async witness(witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
+    async witness(witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork = "sepolia", witnessPlatform: WitnessPlatformType = "metamask", credentials: CredentialsData = {
         mnemonic: "",
         nostr_sk: "",
         "did_key": "",
@@ -447,7 +443,7 @@ async witness(witnessType: WitnessType = "eth", witnessNetwork: WitnessNetwork =
  * @param linkedFileObject - Linked files for verification
  * @returns This instance for chaining
  */
-async verify(linkedFileObject: Array<FileObject> = []): Promise<this> {
+    async verify(linkedFileObject: Array<FileObject> = []): Promise<this> {
         let data = await verifyAquaTreeUtil(this.value, linkedFileObject)
         if (data.isOk()) {
             this.logs.push(...data.data.logData)
@@ -463,7 +459,7 @@ async verify(linkedFileObject: Array<FileObject> = []): Promise<this> {
  * 
  * @returns Current Aqua Tree
  */
-getValue(): AquaTree {
+    getValue(): AquaTree {
         return this.value;
     }
     /**
@@ -471,7 +467,7 @@ getValue(): AquaTree {
  * 
  * @returns Verification result
  */
-getVerificationValue(): Result<AquaOperationData, LogData[]> {
+    getVerificationValue(): Result<AquaOperationData, LogData[]> {
         return this.verificationResult;
     }
     /**
@@ -479,7 +475,7 @@ getVerificationValue(): Result<AquaOperationData, LogData[]> {
  * 
  * @returns Array of log entries
  */
-getLogs(): LogData[] {
+    getLogs(): LogData[] {
         return this.logs;
     }
 }
