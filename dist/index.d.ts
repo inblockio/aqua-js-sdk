@@ -309,10 +309,15 @@ interface FormVerificationResponseData {
  * @property fileContent - Content as string or AquaTree
  * @property path - Path to file
  * @property fileSize - Size in bytes
+ *
+ * Record<string, string> /object - for forms
+ * string - for text file ie html, txt,
+ * aquaTree - linked aqua tree
+ * Uint8Array - for all others ie images, video, music etc
  */
 interface FileObject {
     fileName: string;
-    fileContent: string | AquaTree | Uint8Array | object;
+    fileContent: string | AquaTree | Uint8Array | Record<string, string> | object;
     path: string;
     fileSize?: number;
 }
