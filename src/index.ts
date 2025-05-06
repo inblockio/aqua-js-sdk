@@ -378,8 +378,6 @@ export class AquafierChainable {
         } else {
             this.logs.push(...data.data)
         }
-
-
         return this;
     }
 
@@ -408,8 +406,6 @@ export class AquafierChainable {
             },
             revision: ""
         }, signType, credentials, enableScalar)
-
-        // this.value = this.unwrap(data);
 
         if (data.isOk()) {
             this.value = this.unwrap(data);
