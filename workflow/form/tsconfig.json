@@ -1,0 +1,43 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",
+      "module": "ESNext",
+      "lib": [
+        "ES2022",
+        "DOM"
+      ],
+      "declaration": true,
+      "declarationMap": true,
+      "outDir": "./dist",
+      "rootDir": "./src",
+      "strict": true,
+      "moduleResolution": "bundler",
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "allowSyntheticDefaultImports": true,
+      "importHelpers": true,
+      "alwaysStrict": true,
+      "sourceMap": true,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitReturns": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "noImplicitAny": false,
+      "noImplicitThis": false,
+      "strictNullChecks": false,
+      "resolveJsonModule": true,
+      "types": [
+        "node",
+        "jest"
+      ]
+    },
+    "include": [
+      "src",
+      "node_modules/nostr-tools"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist"
+    ]
+  }

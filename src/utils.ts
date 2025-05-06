@@ -18,6 +18,7 @@ import shajs from "sha.js"
 import { MerkleTree } from "merkletreejs"
 import { Err, Ok, Result } from "./type_guards"
 
+
 export function reorderRevisionsProperties(revision: Revision): Revision {
   const reordered: Revision = {} as Revision
 
@@ -292,6 +293,7 @@ export async function getWallet(
  * - Works in both browser and Node.js
  * - Uses appropriate crypto API for environment
  * - Used for mnemonic generation
+ * 
  */
 export function getEntropy(): Uint8Array {
   if (typeof window !== "undefined" && window.crypto) {
@@ -303,6 +305,7 @@ export function getEntropy(): Uint8Array {
     return new Uint8Array(nodeCrypto.randomBytes(16))
   }
 }
+
 export const getFileNameCheckingPaths = (fileObjects: Array<FileObject>, fileName: string): FileObject | undefined => {
   let fileObjectItem = fileObjects.find((e) => {
 
