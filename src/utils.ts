@@ -1,5 +1,6 @@
 import {
   AnObject,
+  AquaTreeAndFileObject,
   AquaTree,
   CredentialsData,
   FileObject,
@@ -841,4 +842,44 @@ export function findNextRevisionHashByArrayofRevisions(
     }
   }
   return revisionItem
+}
+
+
+export function getAquaTreeFileName(aquaTree: AquaTree): string {
+
+  let mainAquaHash = "";
+  // fetch the genesis 
+  let revisionHashes = Object.keys(aquaTree!.revisions!)
+  for (let revisionHash of revisionHashes) {
+      let revisionData = aquaTree!.revisions![revisionHash];
+      if (revisionData.previous_verification_hash == null || revisionData.previous_verification_hash == "") {
+          mainAquaHash = revisionHash;
+          break;
+      }
+  }
+
+
+  return aquaTree!.file_index[mainAquaHash] ?? "";
+
+}
+
+
+export function getAquaTreeFileObject(fileInfo: AquaTreeAndFileObject): FileObject | undefined {
+
+  let mainAquaFileName = "";
+  let mainAquaHash = "";
+  // fetch the genesis 
+  let revisionHashes = Object.keys(fileInfo.aquaTree!.revisions!)
+  for (let revisionHash of revisionHashes) {
+      let revisionData = fileInfo.aquaTree!.revisions![revisionHash];
+      if (revisionData.previous_verification_hash == null || revisionData.previous_verification_hash == "") {
+          mainAquaHash = revisionHash;
+          break;
+      }
+  }
+  mainAquaFileName = fileInfo.aquaTree!.file_index[mainAquaHash];
+
+  return fileInfo.fileObject.find((e) => e.fileName == mainAquaFileName);
+
+
 }

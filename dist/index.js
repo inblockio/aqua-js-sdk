@@ -558,6 +558,32 @@ function findNextRevisionHashByArrayofRevisions(previousVerificationHash, revisi
   }
   return revisionItem;
 }
+function getAquaTreeFileName(aquaTree) {
+  let mainAquaHash = "";
+  let revisionHashes = Object.keys(aquaTree.revisions);
+  for (let revisionHash of revisionHashes) {
+    let revisionData = aquaTree.revisions[revisionHash];
+    if (revisionData.previous_verification_hash == null || revisionData.previous_verification_hash == "") {
+      mainAquaHash = revisionHash;
+      break;
+    }
+  }
+  return aquaTree.file_index[mainAquaHash] ?? "";
+}
+function getAquaTreeFileObject(fileInfo) {
+  let mainAquaFileName = "";
+  let mainAquaHash = "";
+  let revisionHashes = Object.keys(fileInfo.aquaTree.revisions);
+  for (let revisionHash of revisionHashes) {
+    let revisionData = fileInfo.aquaTree.revisions[revisionHash];
+    if (revisionData.previous_verification_hash == null || revisionData.previous_verification_hash == "") {
+      mainAquaHash = revisionHash;
+      break;
+    }
+  }
+  mainAquaFileName = fileInfo.aquaTree.file_index[mainAquaHash];
+  return fileInfo.fileObject.find((e) => e.fileName == mainAquaFileName);
+}
 
 // src/aquavhtree.ts
 function findNode(tree, hash) {
@@ -3463,7 +3489,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-10",
+  version: "3.2.1-11",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {
@@ -3570,6 +3596,37 @@ function log_success(content) {
 // src/index.ts
 var Aquafier = class {
   constructor() {
+    // get revision at specific index
+    this.isWorkFlow = (aquaTree, systemFileInfo) => {
+      let falseResponse = {
+        isWorkFlow: false,
+        workFlow: ""
+      };
+      let aquaTreeRevisionsOrderd = OrderRevisionInAquaTree(aquaTree);
+      let allHashes = Object.keys(aquaTreeRevisionsOrderd.revisions);
+      if (allHashes.length <= 1) {
+        console.log(`Aqua tree has one revision`);
+        return falseResponse;
+      }
+      let secondRevision = aquaTreeRevisionsOrderd.revisions[allHashes[1]];
+      if (!secondRevision) {
+        console.log(`Aqua tree has second revision not found`);
+        return falseResponse;
+      }
+      if (secondRevision.revision_type == "link") {
+        let allNames = systemFileInfo.map((e) => getAquaTreeFileName(e.aquaTree));
+        let name = aquaTreeRevisionsOrderd.file_index[allHashes[1]];
+        console.log(`allNames ${allNames} --  name ${name}`);
+        if (allNames.includes(name)) {
+          return {
+            isWorkFlow: true,
+            workFlow: name.replace("json", "")
+          };
+        }
+      }
+      console.log(`Aqua tree has second revision is of type ${secondRevision.revision_type}`);
+      return falseResponse;
+    };
     // Revision
     /**
      * @method removeLastRevision
@@ -3577,6 +3634,18 @@ var Aquafier = class {
      * @param aquaTree - The aqua tree to remove the last revision from
      * @returns Result<AquaOperationData, LogData[]>
      */
+    this.at = (aquaTree, index) => {
+      const hashes = Object.keys(aquaTree.revisions);
+      let hashAtIndex = hashes[index];
+      if (hashAtIndex == void 0) {
+        return null;
+      }
+      let revision = aquaTree.revisions[hashAtIndex];
+      if (revision == void 0) {
+        return null;
+      }
+      return revision;
+    };
     this.removeLastRevision = (aquaTree) => {
       return removeLastRevisionUtil(aquaTree);
     };
@@ -3961,6 +4030,8 @@ export {
   findFormKey,
   findNextRevisionHashByArrayofRevisions,
   formatMwTimestamp,
+  getAquaTreeFileName,
+  getAquaTreeFileObject,
   getEntropy,
   getFileHashSum,
   getFileNameCheckingPaths,

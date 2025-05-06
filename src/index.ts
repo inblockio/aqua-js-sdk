@@ -6,10 +6,10 @@ import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
 import { verifyAndGetGraphDataRevisionUtil, verifyAndGetGraphDataUtil, verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
 import { Result } from "./type_guards";
-import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData } from "./types"
+import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData,  AquaTreeAndFileObject } from "./types"
 import { default as packageJson } from "./../package.json";
 import { logAquaTree } from "./aquavhtree";
-import { getHashSum } from "./utils";
+import { getAquaTreeFileName, getHashSum, OrderRevisionInAquaTree } from "./utils";
 
 export * from "./utils";
 export * from "./types";
@@ -49,6 +49,44 @@ export default class Aquafier {
 
     // get revision at specific index
 
+    isWorkFlow = (aquaTree: AquaTree, systemFileInfo: AquaTreeAndFileObject[]): { isWorkFlow: boolean; workFlow: string } => {
+        let falseResponse = {
+            isWorkFlow: false,
+            workFlow: ""
+        }
+
+        //order revision in aqua tree 
+        let aquaTreeRevisionsOrderd = OrderRevisionInAquaTree(aquaTree)
+        let allHashes = Object.keys(aquaTreeRevisionsOrderd.revisions)
+        if (allHashes.length <= 1) {
+            console.log(`Aqua tree has one revision`)
+            return falseResponse
+        }
+        let secondRevision = aquaTreeRevisionsOrderd.revisions[allHashes[1]]
+        if (!secondRevision) {
+            console.log(`Aqua tree has second revision not found`)
+            return falseResponse
+        }
+        if (secondRevision.revision_type == 'link') {
+            let allNames = systemFileInfo.map((e) => getAquaTreeFileName(e!.aquaTree!))
+            //get the  system aqua tree name 
+            let name = aquaTreeRevisionsOrderd.file_index[allHashes[1]]
+            console.log(`allNames ${allNames} --  name ${name}`)
+
+            if (allNames.includes(name)) {
+                return {
+                    isWorkFlow: true,
+                    workFlow: name.replace("json", "")
+                }
+            }
+
+
+        }
+        console.log(`Aqua tree has second revision is of type ${secondRevision.revision_type}`)
+
+
+        return falseResponse
+    }
 
     // Revision
     /**

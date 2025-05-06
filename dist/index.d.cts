@@ -660,6 +660,10 @@ interface WitnessNostrVerifyResult {
         author?: string;
     };
 }
+interface AquaTreeAndFileObject {
+    fileObject: FileObject[];
+    aquaTree: AquaTree | null;
+}
 
 declare function reorderRevisionsProperties(revision: Revision): Revision;
 declare function reorderAquaTreeRevisionsProperties(aquaTree: AquaTree): AquaTree;
@@ -790,6 +794,7 @@ declare function getWallet(mnemonic: string): Promise<[HDNodeWallet, string, str
  * - Works in both browser and Node.js
  * - Uses appropriate crypto API for environment
  * - Used for mnemonic generation
+ *
  */
 declare function getEntropy(): Uint8Array;
 declare const getFileNameCheckingPaths: (fileObjects: Array<FileObject>, fileName: string) => FileObject | undefined;
@@ -848,6 +853,8 @@ declare function printGraphData(node: VerificationGraphData, prefix?: string, _i
 declare function OrderRevisionInAquaTree(params: AquaTree): AquaTree;
 declare function getGenesisHash(aquaTree: AquaTree): string | null;
 declare function findNextRevisionHashByArrayofRevisions(previousVerificationHash: string, revisions: Array<Revision>): Revision | null;
+declare function getAquaTreeFileName(aquaTree: AquaTree): string;
+declare function getAquaTreeFileObject(fileInfo: AquaTreeAndFileObject): FileObject | undefined;
 
 /**
  * Recovers the Ethereum wallet address from a signature
@@ -928,12 +935,17 @@ declare function log_success(content: any): void;
  * @method getFileHash
  */
 declare class Aquafier {
+    isWorkFlow: (aquaTree: AquaTree, systemFileInfo: AquaTreeAndFileObject[]) => {
+        isWorkFlow: boolean;
+        workFlow: string;
+    };
     /**
      * @method removeLastRevision
      * @description This method removes the last revision from the aqua tree
      * @param aquaTree - The aqua tree to remove the last revision from
      * @returns Result<AquaOperationData, LogData[]>
      */
+    at: (aquaTree: AquaTree, index: number) => Revision | null;
     removeLastRevision: (aquaTree: AquaTree) => Result<AquaOperationData, LogData[]>;
     /**
      * @method createContentRevision
@@ -1173,4 +1185,4 @@ declare class AquafierChainable {
     getLogs(): LogData[];
 }
 
-export { type AnObject, type AquaOperationData, type AquaTree, type AquaTreeWrapper, AquafierChainable, type CredentialsData, Err, ErrResult, type FileIndex, type FileObject, type FileVerificationGraphData, type FormData, type FormKeyGraphData, type FormVerificationGraphData, type FormVerificationResponseData, type GasEstimateResult, type IWitnessConfig, type LinkVerificationGraphData, type LogData, LogType, LogTypeEmojis, None, NoneOption, Ok, OkResult, type Option, OrderRevisionInAquaTree, type Result, type Revision, type RevisionGraphInfo, type RevisionTree, type RevisionType, type Revisions, type SignType, type SignatureData, type SignatureItem, type SignaturePayload, type SignatureResult, type SignatureVerificationGraphData, Some, SomeOption, type TransactionResult, type TreeMapping, type VerificationGraphData, type WitnessConfig, type WitnessEnvironment, type WitnessEthResponse, type WitnessMerkleProof, type WitnessNetwork, type WitnessNostrResponse, type WitnessNostrVerifyResult, type WitnessPlatformType, type WitnessResult, type WitnessTSAResponse, type WitnessTransactionData, type WitnessType, type WitnessVerificationGraphData, checkFileHashAlreadyNotarized, checkInternetConnection, cliGreenify, cliRedify, cliYellowfy, createCredentials, createNewAquaTree, Aquafier as default, dict2Leaves, estimateWitnessGas, findFormKey, findNextRevisionHashByArrayofRevisions, formatMwTimestamp, getEntropy, getFileHashSum, getFileNameCheckingPaths, getGenesisHash, getHashSum, getLatestVH, getMerkleRoot, getPreviousVerificationHash, getTimestamp, getWallet, isErr, isNone, isOk, isSome, log_dim, log_red, log_success, log_yellow, maybeUpdateFileIndex, prepareNonce, printGraphData, printLogs, printlinkedGraphData, recoverWalletAddress, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity };
+export { type AnObject, type AquaOperationData, type AquaTree, type AquaTreeAndFileObject, type AquaTreeWrapper, AquafierChainable, type CredentialsData, Err, ErrResult, type FileIndex, type FileObject, type FileVerificationGraphData, type FormData, type FormKeyGraphData, type FormVerificationGraphData, type FormVerificationResponseData, type GasEstimateResult, type IWitnessConfig, type LinkVerificationGraphData, type LogData, LogType, LogTypeEmojis, None, NoneOption, Ok, OkResult, type Option, OrderRevisionInAquaTree, type Result, type Revision, type RevisionGraphInfo, type RevisionTree, type RevisionType, type Revisions, type SignType, type SignatureData, type SignatureItem, type SignaturePayload, type SignatureResult, type SignatureVerificationGraphData, Some, SomeOption, type TransactionResult, type TreeMapping, type VerificationGraphData, type WitnessConfig, type WitnessEnvironment, type WitnessEthResponse, type WitnessMerkleProof, type WitnessNetwork, type WitnessNostrResponse, type WitnessNostrVerifyResult, type WitnessPlatformType, type WitnessResult, type WitnessTSAResponse, type WitnessTransactionData, type WitnessType, type WitnessVerificationGraphData, checkFileHashAlreadyNotarized, checkInternetConnection, cliGreenify, cliRedify, cliYellowfy, createCredentials, createNewAquaTree, Aquafier as default, dict2Leaves, estimateWitnessGas, findFormKey, findNextRevisionHashByArrayofRevisions, formatMwTimestamp, getAquaTreeFileName, getAquaTreeFileObject, getEntropy, getFileHashSum, getFileNameCheckingPaths, getGenesisHash, getHashSum, getLatestVH, getMerkleRoot, getPreviousVerificationHash, getTimestamp, getWallet, isErr, isNone, isOk, isSome, log_dim, log_red, log_success, log_yellow, maybeUpdateFileIndex, prepareNonce, printGraphData, printLogs, printlinkedGraphData, recoverWalletAddress, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity };

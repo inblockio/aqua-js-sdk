@@ -611,3 +611,11 @@ export interface WitnessNostrVerifyResult {
     author?: string
   }
 }
+
+
+export interface AquaTreeAndFileObject {
+
+  fileObject: FileObject[]
+  aquaTree: AquaTree | null,
+  
+}
