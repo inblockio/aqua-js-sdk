@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { getChainIdFromNetwork } from '../utils';
 
 /**
  * Configuration options for MetaMask signer
@@ -141,7 +142,7 @@ export class MetaMaskSigner {
  * - Signs message using MetaMask
  * - Recovers public key from signature
  */
-    private async signInBrowser(verificationHash: string): Promise<[string, string, string]> {
+    private async signInBrowser(verificationHash: string, network: string): Promise<[string, string, string]> {
         if (!window.ethereum || !window.ethereum.isMetaMask) {
             throw new Error("MetaMask not detected");
         }
@@ -149,6 +150,11 @@ export class MetaMaskSigner {
         const message = this.createMessage(verificationHash);
 
         try {
+            // Switch to the specified network first
+            await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: getChainIdFromNetwork(network) }],
+            });
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             // const walletAddress = window.ethereum.selectedAddress;
             // console.log(`walletAddress ${walletAddress} if has caps`)
@@ -315,10 +321,10 @@ export class MetaMaskSigner {
  * - Routes to appropriate signing method
  * - Returns complete signature information
  */
-    public async sign(verificationHash: string): Promise<[string, string, string]> {
+    public async sign(verificationHash: string, network: string): Promise<[string, string, string]> {
         const isNode = typeof window === 'undefined';
         return isNode ?
             this.signInNode(verificationHash) :
-            this.signInBrowser(verificationHash);
+            this.signInBrowser(verificationHash, network);
     }
 }

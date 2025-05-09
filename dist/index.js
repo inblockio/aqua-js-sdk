@@ -584,6 +584,34 @@ function getAquaTreeFileObject(fileInfo) {
   mainAquaFileName = fileInfo.aquaTree.file_index[mainAquaHash];
   return fileInfo.fileObject.find((e) => e.fileName == mainAquaFileName);
 }
+function getChainIdFromNetwork(network) {
+  const networkMap = {
+    "mainnet": "0x1",
+    // Ethereum Mainnet
+    "goerli": "0x5",
+    // Goerli Testnet
+    "sepolia": "0xaa36a7",
+    // Sepolia Testnet
+    "polygon": "0x89",
+    // Polygon Mainnet
+    "mumbai": "0x13881",
+    // Mumbai Testnet
+    "arbitrum": "0xa4b1",
+    // Arbitrum One
+    "optimism": "0xa",
+    // Optimism
+    "avalanche": "0xa86a",
+    // Avalanche C-Chain
+    "bsc": "0x38"
+    // Binance Smart Chain
+    // Add more networks as needed
+  };
+  const chainId = networkMap[network.toLowerCase()];
+  if (!chainId) {
+    throw new Error(`Unsupported network: ${network}`);
+  }
+  return chainId;
+}
 
 // src/aquavhtree.ts
 function findNode(tree, hash) {
@@ -1340,12 +1368,16 @@ var MetaMaskSigner = class {
   * - Signs message using MetaMask
   * - Recovers public key from signature
   */
-  async signInBrowser(verificationHash) {
+  async signInBrowser(verificationHash, network) {
     if (!window.ethereum || !window.ethereum.isMetaMask) {
       throw new Error("MetaMask not detected");
     }
     const message = this.createMessage(verificationHash);
     try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: getChainIdFromNetwork(network) }]
+      });
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const rawWalletAddress = window.ethereum.selectedAddress;
       if (!rawWalletAddress) {
@@ -1485,9 +1517,9 @@ var MetaMaskSigner = class {
   * - Routes to appropriate signing method
   * - Returns complete signature information
   */
-  async sign(verificationHash) {
+  async sign(verificationHash, network) {
     const isNode = typeof window === "undefined";
-    return isNode ? this.signInNode(verificationHash) : this.signInBrowser(verificationHash);
+    return isNode ? this.signInNode(verificationHash) : this.signInBrowser(verificationHash, network);
   }
 };
 
@@ -1586,7 +1618,7 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
   switch (signType) {
     case "metamask":
       let sign = new MetaMaskSigner();
-      [signature, walletAddress, publicKey] = await sign.sign(targetRevisionHash);
+      [signature, walletAddress, publicKey] = await sign.sign(targetRevisionHash, credentials.witness_eth_network);
       signature_type = "ethereum:eip-191";
       break;
     case "cli":
@@ -1913,10 +1945,13 @@ var WitnessEth = class {
         params: [{ chainId: requestedChainId }]
       });
     }
+    let hashToWitness = config.witnessEventVerificationHash.replace(/^0x/, "");
+    const getBytesLength = hashToWitness.length / 2;
+    const zeroPadding = "0".repeat(64);
     const params = [{
       from: walletAddress,
       to: config.smartContractAddress,
-      data: "0x9cef4ea1" + config.witnessEventVerificationHash.replace(/^0x/, "")
+      data: "0x9cef4ea1" + (getBytesLength === 64 ? hashToWitness : `${zeroPadding}${hashToWitness}`)
     }];
     const transactionHash = await window.ethereum.request({
       method: "eth_sendTransaction",
@@ -3489,7 +3524,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-11",
+  version: "3.2.1-16",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {
@@ -4032,6 +4067,7 @@ export {
   formatMwTimestamp,
   getAquaTreeFileName,
   getAquaTreeFileObject,
+  getChainIdFromNetwork,
   getEntropy,
   getFileHashSum,
   getFileNameCheckingPaths,

@@ -70,7 +70,7 @@ export async function signAquaTreeUtil(
     case "metamask":
       let sign = new MetaMaskSigner()
       ;[signature, walletAddress, publicKey] =
-        await sign.sign(targetRevisionHash)
+        await sign.sign(targetRevisionHash, credentials.witness_eth_network)
       signature_type = "ethereum:eip-191"
       break
     case "cli":

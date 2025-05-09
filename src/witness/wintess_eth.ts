@@ -263,10 +263,14 @@ export class WitnessEth {
     }
 
     // Send transaction
+    let hashToWitness = config.witnessEventVerificationHash.replace(/^0x/, '')
+    const getBytesLength = hashToWitness.length / 2
+    const zeroPadding = '0'.repeat(64)
+
     const params = [{
       from: walletAddress,
       to: config.smartContractAddress,
-      data: '0x9cef4ea1' + config.witnessEventVerificationHash.replace(/^0x/, ''),
+      data: '0x9cef4ea1' + (getBytesLength === 64 ? hashToWitness : `${zeroPadding}${hashToWitness}`),
     }];
 
     //@ts-ignore

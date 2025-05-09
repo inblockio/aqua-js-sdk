@@ -883,3 +883,26 @@ export function getAquaTreeFileObject(fileInfo: AquaTreeAndFileObject): FileObje
 
 
 }
+
+
+export function getChainIdFromNetwork(network: string): string {
+    const networkMap: Record<string, string> = {
+        'mainnet': '0x1',      // Ethereum Mainnet
+        'goerli': '0x5',        // Goerli Testnet
+        'sepolia': '0xaa36a7',  // Sepolia Testnet
+        'polygon': '0x89',      // Polygon Mainnet
+        'mumbai': '0x13881',    // Mumbai Testnet
+        'arbitrum': '0xa4b1',   // Arbitrum One
+        'optimism': '0xa',      // Optimism
+        'avalanche': '0xa86a',  // Avalanche C-Chain
+        'bsc': '0x38',          // Binance Smart Chain
+        // Add more networks as needed
+    };
+    
+    const chainId = networkMap[network.toLowerCase()];
+    if (!chainId) {
+        throw new Error(`Unsupported network: ${network}`);
+    }
+    
+    return chainId;
+}
