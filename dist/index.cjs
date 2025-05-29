@@ -2526,7 +2526,6 @@ var WitnessNostr = class {
 // src/core/witness.ts
 async function witnessAquaTreeUtil(aquaTreeWrapper, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar = false) {
   let logs = [];
-  console.log("TExt 1234");
   let lastRevisionHash = "";
   if (aquaTreeWrapper.revision == void 0 || aquaTreeWrapper.revision == null || aquaTreeWrapper.revision.length == 0) {
     const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions);
@@ -2661,7 +2660,6 @@ function getWitnessNetwork(witnessType, witnessNetwork) {
   return witness_network;
 }
 var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2, credentials, witness_network = "sepolia") => {
-  console.log("TExt 1234567");
   let logs = [];
   const merkle_root = verificationHash;
   let smart_contract_address, transactionHash, publisher, witnessTimestamp;
@@ -2680,7 +2678,6 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
       break;
     }
     case "eth": {
-      console.log("TExt 19999");
       smart_contract_address = "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611";
       let network = "sepolia";
       if (witness_network == "holesky") {
@@ -2688,9 +2685,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
       } else if (witness_network == "mainnet") {
         network = "mainnet";
       }
-      console.log(`test 4531 WitnessPlatformType ${WitnessPlatformType2}`);
       if (WitnessPlatformType2 === "cli") {
-        console.log(`test 1`);
         if (credentials.alchemy_key == null || credentials.alchemy_key == void 0 || credentials.alchemy_key == "") {
           logs.push({
             log: `Alchemy key is missing`,
@@ -2698,7 +2693,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
           });
           process.exit(1);
         }
-        let alchemyProvider = `https://eth-mainnet.g.alchemy.com/v2/${credentials.alchemy_key}`;
+        let alchemyProvider = `https://eth-${witness_network}.g.alchemy.com/v2/${credentials.alchemy_key}`;
         if (credentials == null || credentials == void 0) {
           logs.push({
             log: `credentials not found`,
@@ -2742,7 +2737,6 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
           });
           process.exit(1);
         }
-        console.log(`test 2`);
         let transactionResult = null;
         try {
           let [transactionResultData, resultLogData] = await WitnessEth.witnessCli(
@@ -3637,7 +3631,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-25",
+  version: "3.2.1-27",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {

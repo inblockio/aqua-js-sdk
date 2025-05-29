@@ -426,10 +426,9 @@ export const estimateWitnessGas = async (
     // Connect to Ethereum provider
     // const provider = new ethers.JsonRpcProvider(providerUrl);
     // const provider = ethers.getDefaultProvider(ethNetwork)
-
-     const provider = providerUrl
-            ? new ethers.JsonRpcProvider(providerUrl)
-            : ethers.getDefaultProvider(ethNetwork);
+    const provider = providerUrl
+      ? new ethers.JsonRpcProvider(providerUrl)
+      : ethers.getDefaultProvider(ethNetwork);
 
     // Define the transaction
     const tx = {
