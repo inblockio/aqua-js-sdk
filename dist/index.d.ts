@@ -971,7 +971,7 @@ declare class Aquafier {
      * @param fileObject[] - The file objects of the aqua tree that will be useful for verification
      * @returns Result<AquaOperationData, LogData[]>
      */
-    verifyAquaTree: (aquaTree: AquaTree, fileObject: Array<FileObject>) => Promise<Result<AquaOperationData, LogData[]>>;
+    verifyAquaTree: (aquaTree: AquaTree, fileObject: Array<FileObject>, credentials?: CredentialsData) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method verifyAquaTreeRevision
      * @description This method verifies the aqua tree revision
@@ -981,9 +981,9 @@ declare class Aquafier {
      * @param fileObject[] - The file objects of the aqua tree that will be useful for verification
      * @returns Result<AquaOperationData, LogData[]>
      */
-    verifyAquaTreeRevision: (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>) => Promise<Result<AquaOperationData, LogData[]>>;
-    verifyAndGetGraphData: (aquaTree: AquaTree, fileObject: Array<FileObject>) => Promise<Result<VerificationGraphData, LogData[]>>;
-    verifyAndGetGraphDataRevision: (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>) => Promise<Result<VerificationGraphData, LogData[]>>;
+    verifyAquaTreeRevision: (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>, credentials?: CredentialsData) => Promise<Result<AquaOperationData, LogData[]>>;
+    verifyAndGetGraphData: (aquaTree: AquaTree, fileObject: Array<FileObject>, credentials?: CredentialsData) => Promise<Result<VerificationGraphData, LogData[]>>;
+    verifyAndGetGraphDataRevision: (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>, credentials?: CredentialsData) => Promise<Result<VerificationGraphData, LogData[]>>;
     /**
      * @method witnessAquaTree
      * @description This method witnesses the aqua tree

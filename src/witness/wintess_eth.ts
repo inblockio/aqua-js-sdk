@@ -451,9 +451,13 @@ export class WitnessEth {
     WitnessNetwork: WitnessNetwork,
     transactionHash: string,
     expectedMR: string,
-    _expectedTimestamp?: number
+    _expectedTimestamp?: number,
+    providerUrl?: string,
+    alchemyKey?: string
   ): Promise<[boolean, string]> {
-    const provider = ethers.getDefaultProvider(WitnessNetwork);
+    const provider = providerUrl
+        ? new ethers.JsonRpcProvider(providerUrl)
+        : ethers.getDefaultProvider(WitnessNetwork, alchemyKey ? { alchemy: alchemyKey } : null);
 
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {
@@ -461,12 +465,14 @@ export class WitnessEth {
     };
 
     let actual = tx.data.split('0x9cef4ea1')[1];
-    actual = actual.slice(0, 128);
+    // actual = actual.slice(0, 128);
 
-    await this.sleep(200); // prevent overloading free endpoint
+    // await this.sleep(200); // prevent overloading free endpoint
 
-    const actualMrSans0x = actual.startsWith('0x') ? actual.slice(2) : actual;
-    const mrSans0x = expectedMR.startsWith('0x') ? expectedMR.slice(2) : expectedMR;
-    return [actualMrSans0x === mrSans0x, `${actualMrSans0x === mrSans0x ? 'On-Chain Witness hash verified' : 'On-Chain Witness verification failed'}`];
+    // const actualMrSans0x = actual.startsWith('0x') ? actual.slice(2) : actual;
+    // const mrSans0x = expectedMR.startsWith('0x') ? expectedMR.slice(2) : expectedMR;
+    let containsHash = actual.includes(expectedMR.slice(2));
+    // return [actualMrSans0x === mrSans0x, `${actualMrSans0x === mrSans0x ? 'On-Chain Witness hash verified' : 'On-Chain Witness verification failed'}`];
+    return [containsHash, `${containsHash ? 'On-Chain Witness hash verified' : 'On-Chain Witness verification failed'}`];
   }
 }

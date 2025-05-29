@@ -457,6 +457,7 @@ export async function verifyWitness(
     verificationHash: string,
     doVerifyMerkleProof: boolean,
     indentCharacter: string,
+    credentials?: CredentialsData
 ): Promise<[boolean, LogData[]]> {
     let logs: Array<LogData> = [];
 
@@ -473,7 +474,6 @@ export async function verifyWitness(
         return [false, logs];
     }
 
-
     if (verificationHash === "") {
 
         logs.push({
@@ -483,10 +483,6 @@ export async function verifyWitness(
         })
         return [isValid, logs]
     }
-
-
-
-
 
     if (witnessData.witness_network === "nostr") {
         let witnessNostr = new WitnessNostr();
@@ -506,18 +502,26 @@ export async function verifyWitness(
         // Verify the transaction hash via the Ethereum blockchain
         // let  witnessEth =  new WitnessEth();
         let logMessage = "";
+        let alchemyProvider: string | null = null;
+        let alchemyKey: string | null = null;
+        if(credentials){
+            alchemyProvider = `https://eth-${witnessData.witness_network}.g.alchemy.com/v2/${credentials.alchemy_key}`;
+            alchemyKey = credentials.alchemy_key;
+        }
+        
         [isValid, logMessage] = await WitnessEth.verify(
             witnessData.witness_network as WitnessNetwork,
             witnessData.witness_transaction_hash!,
             witnessData.witness_merkle_root!,
             witnessData.witness_timestamp,
+            alchemyProvider,
+            alchemyKey
         )
         logs.push({
             log: logMessage,
             logType: isValid ? LogType.SUCCESS : LogType.ERROR,
             ident: indentCharacter
         })
-
 
     }
 

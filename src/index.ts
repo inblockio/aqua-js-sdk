@@ -106,8 +106,8 @@ export default class Aquafier {
      * @param fileObject[] - The file objects of the aqua tree that will be useful for verification
      * @returns Result<AquaOperationData, LogData[]>
      */
-    verifyAquaTree = async (aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
-        return verifyAquaTreeUtil(aquaTree, fileObject)
+    verifyAquaTree = async (aquaTree: AquaTree, fileObject: Array<FileObject>, credentials?: CredentialsData): Promise<Result<AquaOperationData, LogData[]>> => {
+        return verifyAquaTreeUtil(aquaTree, fileObject, "", credentials)
     }
 
     /**
@@ -119,17 +119,17 @@ export default class Aquafier {
      * @param fileObject[] - The file objects of the aqua tree that will be useful for verification
      * @returns Result<AquaOperationData, LogData[]>
      */
-    verifyAquaTreeRevision = async (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<AquaOperationData, LogData[]>> => {
-        return verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject)
+    verifyAquaTreeRevision = async (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>, credentials?: CredentialsData): Promise<Result<AquaOperationData, LogData[]>> => {
+        return verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject, credentials)
     }
 
-    verifyAndGetGraphData = async (aquaTree: AquaTree, fileObject: Array<FileObject>): Promise<Result<VerificationGraphData, LogData[]>> => {
-        return verifyAndGetGraphDataUtil(aquaTree, fileObject)
+    verifyAndGetGraphData = async (aquaTree: AquaTree, fileObject: Array<FileObject>, credentials?: CredentialsData): Promise<Result<VerificationGraphData, LogData[]>> => {
+        return verifyAndGetGraphDataUtil(aquaTree, fileObject, "", credentials)
     }
 
     // we need aqua tree because of the file index and the previous verification hash
-    verifyAndGetGraphDataRevision = async (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>): Promise<Result<VerificationGraphData, LogData[]>> => {
-        return verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionItemHash, fileObject)
+    verifyAndGetGraphDataRevision = async (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>, credentials?: CredentialsData): Promise<Result<VerificationGraphData, LogData[]>> => {
+        return verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionItemHash, fileObject, credentials)
     }
     /**
      * @method witnessAquaTree

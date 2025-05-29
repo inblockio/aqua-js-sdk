@@ -13,6 +13,7 @@ import {
   FormVerificationGraphData,
   FormKeyGraphData,
   FormVerificationResponseData,
+  CredentialsData,
 } from "../types"
 import {
   dict2Leaves,
@@ -47,6 +48,7 @@ export async function verifyAquaTreeRevisionUtil(
   revision: Revision,
   revisionItemHash: string,
   fileObject: Array<FileObject>,
+  credentials?: CredentialsData,
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let logs: Array<LogData> = []
 
@@ -57,6 +59,8 @@ export async function verifyAquaTreeRevisionUtil(
     revisionItemHash,
     fileObject,
     isScalar,
+    "",
+    credentials
   )
   result[1].forEach((e) => logs.push(e))
   if (result[0] == false) {
@@ -90,6 +94,7 @@ export async function verifyAquaTreeUtil(
   aquaTree: AquaTree,
   fileObject: Array<FileObject>,
   identCharacter: string = "",
+  credentials?: CredentialsData,
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let logs: Array<LogData> = []
 
@@ -158,6 +163,7 @@ export async function verifyAquaTreeUtil(
       fileObject,
       isScalar,
       identCharacter,
+      credentials
     )
 
     if (result[1].length > 0) {
@@ -224,6 +230,7 @@ export async function verifyAndGetGraphDataRevisionUtil(
   revision: Revision,
   revisionItemHash: string,
   fileObject: Array<FileObject>,
+  credentials?: CredentialsData,
 ): Promise<Result<VerificationGraphData, LogData[]>> {
   const logs: LogData[] = []
 
@@ -234,6 +241,8 @@ export async function verifyAndGetGraphDataRevisionUtil(
     revisionItemHash,
     fileObject,
     isScalar,
+    "",
+    credentials
   )
 
   genesisLogData.forEach((e) => logs.push(e))
@@ -281,6 +290,7 @@ export async function verifyAndGetGraphDataUtil(
   aquaTree: AquaTree,
   fileObject: Array<FileObject>,
   identCharacter: string = "",
+  credentials?: CredentialsData,
 ): Promise<Result<VerificationGraphData, LogData[]>> {
   let verificationHashes = Object.keys(aquaTree.revisions)
   const logs: LogData[] = []
@@ -307,6 +317,7 @@ export async function verifyAndGetGraphDataUtil(
     fileObject,
     isScalar,
     identCharacter,
+    credentials
   )
   const genesisRevisionType =
     aquaTree.revisions[verificationHashes[0]].revision_type
@@ -551,6 +562,7 @@ async function verifyRevision(
   fileObjects: Array<FileObject>,
   isScalar: boolean,
   identCharacter: string = "",
+  credentials?: CredentialsData,
 ): Promise<[boolean, Array<LogData>]> {
   let logs: Array<LogData> = []
   let doVerifyMerkleProof = false // todo to be improved rather than hard coded
@@ -688,6 +700,7 @@ async function verifyRevision(
         hash_,
         doVerifyMerkleProof,
         `${identCharacter}\t`,
+        credentials
       )
       logsResult = logsResultData
       isSuccess = isSuccessResult

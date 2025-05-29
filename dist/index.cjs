@@ -2183,19 +2183,16 @@ var WitnessEth = class {
     }
   }
   // Verify Transaction Method
-  static async verify(WitnessNetwork3, transactionHash, expectedMR, _expectedTimestamp) {
-    const provider = import_ethers4.ethers.getDefaultProvider(WitnessNetwork3);
+  static async verify(WitnessNetwork3, transactionHash, expectedMR, _expectedTimestamp, providerUrl, alchemyKey) {
+    const provider = providerUrl ? new import_ethers4.ethers.JsonRpcProvider(providerUrl) : import_ethers4.ethers.getDefaultProvider(WitnessNetwork3, alchemyKey ? { alchemy: alchemyKey } : null);
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {
       return [false, "Transaction not found"];
     }
     ;
     let actual = tx.data.split("0x9cef4ea1")[1];
-    actual = actual.slice(0, 128);
-    await this.sleep(200);
-    const actualMrSans0x = actual.startsWith("0x") ? actual.slice(2) : actual;
-    const mrSans0x = expectedMR.startsWith("0x") ? expectedMR.slice(2) : expectedMR;
-    return [actualMrSans0x === mrSans0x, `${actualMrSans0x === mrSans0x ? "On-Chain Witness hash verified" : "On-Chain Witness verification failed"}`];
+    let containsHash = actual.includes(expectedMR.slice(2));
+    return [containsHash, `${containsHash ? "On-Chain Witness hash verified" : "On-Chain Witness verification failed"}`];
   }
 };
 // Internal Configuration Maps
@@ -2799,7 +2796,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
   };
   return Ok(witness);
 };
-async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof, indentCharacter) {
+async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof, indentCharacter, credentials) {
   let logs = [];
   let isValid = false;
   const hasInternet = await checkInternetConnection();
@@ -2835,11 +2832,19 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
     );
   } else {
     let logMessage = "";
+    let alchemyProvider = null;
+    let alchemyKey = null;
+    if (credentials) {
+      alchemyProvider = `https://eth-${witnessData.witness_network}.g.alchemy.com/v2/${credentials.alchemy_key}`;
+      alchemyKey = credentials.alchemy_key;
+    }
     [isValid, logMessage] = await WitnessEth.verify(
       witnessData.witness_network,
       witnessData.witness_transaction_hash,
       witnessData.witness_merkle_root,
-      witnessData.witness_timestamp
+      witnessData.witness_timestamp,
+      alchemyProvider,
+      alchemyKey
     );
     logs.push({
       log: logMessage,
@@ -2869,7 +2874,7 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
 }
 
 // src/core/verify.ts
-async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject) {
+async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject, credentials) {
   let logs = [];
   const isScalar = !revision.hasOwnProperty("leaves");
   let result = await verifyRevision(
@@ -2877,7 +2882,9 @@ async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, 
     revision,
     revisionItemHash,
     fileObject,
-    isScalar
+    isScalar,
+    "",
+    credentials
   );
   result[1].forEach((e) => logs.push(e));
   if (result[0] == false) {
@@ -2890,7 +2897,7 @@ async function verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, 
   };
   return Ok(data);
 }
-async function verifyAquaTreeUtil(aquaTree, fileObject, identCharacter = "") {
+async function verifyAquaTreeUtil(aquaTree, fileObject, identCharacter = "", credentials) {
   let logs = [];
   let verificationHashes = Object.keys(aquaTree.revisions);
   let isSuccess = true;
@@ -2954,7 +2961,8 @@ async function verifyAquaTreeUtil(aquaTree, fileObject, identCharacter = "") {
       revisionItemHash,
       fileObject,
       isScalar,
-      identCharacter
+      identCharacter,
+      credentials
     );
     if (result[1].length > 0) {
       logs.push(...result[1]);
@@ -2986,7 +2994,7 @@ function findNode2(tree, hash) {
   }
   return null;
 }
-async function verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionItemHash, fileObject) {
+async function verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionItemHash, fileObject, credentials) {
   const logs = [];
   const isScalar = !revision.hasOwnProperty("leaves");
   let [isGenesisOkay, genesisLogData] = await verifyRevision(
@@ -2994,7 +3002,9 @@ async function verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionIte
     revision,
     revisionItemHash,
     fileObject,
-    isScalar
+    isScalar,
+    "",
+    credentials
   );
   genesisLogData.forEach((e) => logs.push(e));
   if (!isGenesisOkay) {
@@ -3019,7 +3029,7 @@ async function verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionIte
   };
   return Ok(verificationResults);
 }
-async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = "") {
+async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = "", credentials) {
   let verificationHashes = Object.keys(aquaTree.revisions);
   const logs = [];
   if (verificationHashes.length === 0) {
@@ -3038,7 +3048,8 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
     verificationHashes[0],
     fileObject,
     isScalar,
-    identCharacter
+    identCharacter,
+    credentials
   );
   const genesisRevisionType = aquaTree.revisions[verificationHashes[0]].revision_type;
   if (genesisRevisionData.revision_type === "form") {
@@ -3228,7 +3239,7 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
   }
   return Ok(verificationResults);
 }
-async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjects, isScalar, identCharacter = "") {
+async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjects, isScalar, identCharacter = "", credentials) {
   let logs = [];
   let doVerifyMerkleProof = false;
   let isSuccess = true;
@@ -3332,7 +3343,8 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
         revision,
         hash_,
         doVerifyMerkleProof,
-        `${identCharacter}	`
+        `${identCharacter}	`,
+        credentials
       );
       logsResult = logsResultData;
       isSuccess = isSuccessResult;
@@ -3631,7 +3643,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-27",
+  version: "3.2.1-19",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {
@@ -3790,8 +3802,8 @@ var Aquafier = class {
      * @param fileObject[] - The file objects of the aqua tree that will be useful for verification
      * @returns Result<AquaOperationData, LogData[]>
      */
-    this.verifyAquaTree = async (aquaTree, fileObject) => {
-      return verifyAquaTreeUtil(aquaTree, fileObject);
+    this.verifyAquaTree = async (aquaTree, fileObject, credentials) => {
+      return verifyAquaTreeUtil(aquaTree, fileObject, "", credentials);
     };
     /**
      * @method verifyAquaTreeRevision
@@ -3802,15 +3814,15 @@ var Aquafier = class {
      * @param fileObject[] - The file objects of the aqua tree that will be useful for verification
      * @returns Result<AquaOperationData, LogData[]>
      */
-    this.verifyAquaTreeRevision = async (aquaTree, revision, revisionItemHash, fileObject) => {
-      return verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject);
+    this.verifyAquaTreeRevision = async (aquaTree, revision, revisionItemHash, fileObject, credentials) => {
+      return verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject, credentials);
     };
-    this.verifyAndGetGraphData = async (aquaTree, fileObject) => {
-      return verifyAndGetGraphDataUtil(aquaTree, fileObject);
+    this.verifyAndGetGraphData = async (aquaTree, fileObject, credentials) => {
+      return verifyAndGetGraphDataUtil(aquaTree, fileObject, "", credentials);
     };
     // we need aqua tree because of the file index and the previous verification hash
-    this.verifyAndGetGraphDataRevision = async (aquaTree, revision, revisionItemHash, fileObject) => {
-      return verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionItemHash, fileObject);
+    this.verifyAndGetGraphDataRevision = async (aquaTree, revision, revisionItemHash, fileObject, credentials) => {
+      return verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionItemHash, fileObject, credentials);
     };
     /**
      * @method witnessAquaTree
