@@ -68,6 +68,7 @@ __export(index_exports, {
   getPreviousVerificationHash: () => getPreviousVerificationHash,
   getTimestamp: () => getTimestamp,
   getWallet: () => getWallet,
+  isAquaTree: () => isAquaTree,
   isErr: () => isErr,
   isNone: () => isNone,
   isOk: () => isOk,
@@ -246,6 +247,9 @@ function isNone(option) {
 }
 
 // src/utils.ts
+function isAquaTree(content) {
+  return content && typeof content === "object" && "revisions" in content && "file_index" in content;
+}
 function reorderRevisionsProperties(revision) {
   const reordered = {};
   const sortedKeys = Object.keys(revision).sort();
@@ -352,18 +356,22 @@ function getEntropy() {
 }
 var getFileNameCheckingPaths = (fileObjects, fileName) => {
   let fileObjectItem = fileObjects.find((e) => {
-    if (e.fileName.includes("/") || fileName.includes("/")) {
-      let eFileName = e.fileName;
-      let parentFileName = fileName;
-      if (e.fileName.includes("/")) {
-        eFileName = e.fileName.split("/").pop();
+    if (e.fileName) {
+      if (e.fileName.includes("/") || fileName.includes("/")) {
+        let eFileName = e.fileName;
+        let parentFileName = fileName;
+        if (e.fileName.includes("/")) {
+          eFileName = e.fileName.split("/").pop();
+        }
+        if (fileName.includes("/")) {
+          parentFileName = fileName.split("/").pop();
+        }
+        return eFileName == parentFileName;
+      } else {
+        return e.fileName == fileName;
       }
-      if (fileName.includes("/")) {
-        parentFileName = fileName.split("/").pop();
-      }
-      return eFileName == parentFileName;
     } else {
-      return e.fileName == fileName;
+      return void 0;
     }
   });
   return fileObjectItem;
@@ -391,10 +399,10 @@ function createCredentials() {
 function formatMwTimestamp(ts) {
   return ts.replace(/-/g, "").replace(/:/g, "").replace("T", "").replace("Z", "");
 }
-var estimateWitnessGas = async (wallet_address, witness_event_verification_hash, ethNetwork, smart_contract_address, _providerUrl) => {
+var estimateWitnessGas = async (wallet_address, witness_event_verification_hash, ethNetwork, smart_contract_address, providerUrl) => {
   let logData = [];
   try {
-    const provider = import_ethers.ethers.getDefaultProvider(ethNetwork);
+    const provider = providerUrl ? new import_ethers.ethers.JsonRpcProvider(providerUrl) : import_ethers.ethers.getDefaultProvider(ethNetwork);
     const tx = {
       from: import_ethers.ethers.getAddress(wallet_address),
       to: import_ethers.ethers.getAddress(smart_contract_address),
@@ -2107,10 +2115,10 @@ var WitnessEth = class {
     `;
   }
   // CLI Witness Method
-  static async witnessCli(walletPrivateKey, witnessEventVerificationHash, smartContractAddress, WitnessNetwork3, providerUrl) {
+  static async witnessCli(walletPrivateKey, witnessEventVerificationHash, smartContractAddress, WitnessNetwork3, providerUrl, alchemyKey) {
     const logData = [];
     try {
-      const provider = providerUrl ? new import_ethers4.ethers.JsonRpcProvider(providerUrl) : import_ethers4.ethers.getDefaultProvider(WitnessNetwork3);
+      const provider = providerUrl ? new import_ethers4.ethers.JsonRpcProvider(providerUrl) : import_ethers4.ethers.getDefaultProvider(WitnessNetwork3, alchemyKey ? { alchemy: alchemyKey } : null);
       const wallet = new import_ethers4.ethers.Wallet(walletPrivateKey, provider);
       const sender = wallet.address;
       console.log(`Using wallet: ${sender}`);
@@ -2518,6 +2526,7 @@ var WitnessNostr = class {
 // src/core/witness.ts
 async function witnessAquaTreeUtil(aquaTreeWrapper, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar = false) {
   let logs = [];
+  console.log("TExt 1234");
   let lastRevisionHash = "";
   if (aquaTreeWrapper.revision == void 0 || aquaTreeWrapper.revision == null || aquaTreeWrapper.revision.length == 0) {
     const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions);
@@ -2652,6 +2661,7 @@ function getWitnessNetwork(witnessType, witnessNetwork) {
   return witness_network;
 }
 var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2, credentials, witness_network = "sepolia") => {
+  console.log("TExt 1234567");
   let logs = [];
   const merkle_root = verificationHash;
   let smart_contract_address, transactionHash, publisher, witnessTimestamp;
@@ -2670,6 +2680,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
       break;
     }
     case "eth": {
+      console.log("TExt 19999");
       smart_contract_address = "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611";
       let network = "sepolia";
       if (witness_network == "holesky") {
@@ -2677,7 +2688,17 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
       } else if (witness_network == "mainnet") {
         network = "mainnet";
       }
+      console.log(`test 4531 WitnessPlatformType ${WitnessPlatformType2}`);
       if (WitnessPlatformType2 === "cli") {
+        console.log(`test 1`);
+        if (credentials.alchemy_key == null || credentials.alchemy_key == void 0 || credentials.alchemy_key == "") {
+          logs.push({
+            log: `Alchemy key is missing`,
+            logType: "debug_data" /* DEBUGDATA */
+          });
+          process.exit(1);
+        }
+        let alchemyProvider = `https://eth-mainnet.g.alchemy.com/v2/${credentials.alchemy_key}`;
         if (credentials == null || credentials == void 0) {
           logs.push({
             log: `credentials not found`,
@@ -2695,7 +2716,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
           merkle_root,
           witness_network,
           smart_contract_address,
-          ""
+          alchemyProvider
         );
         logs.push(...logData);
         logs.push({
@@ -2721,6 +2742,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
           });
           process.exit(1);
         }
+        console.log(`test 2`);
         let transactionResult = null;
         try {
           let [transactionResultData, resultLogData] = await WitnessEth.witnessCli(
@@ -2728,7 +2750,8 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
             verificationHash,
             smart_contract_address,
             network,
-            ""
+            alchemyProvider,
+            credentials.alchemy_key
           );
           transactionResult = transactionResultData;
           logs.push(...resultLogData);
@@ -3263,7 +3286,7 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
   let logsResult = [];
   switch (revision.revision_type) {
     case "form":
-      let res = verifyFormRevision(revision, revision.leaves, identCharacter);
+      let res = verifyFormRevision(revision, revision.leaves, `${identCharacter}		`);
       isSuccess = res.isOk;
       logsResult = logs;
       logs.push(...res.logs);
@@ -3337,14 +3360,19 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
         }
         if (fileObj == void 0) {
           let throwError = true;
-          for (let fileObjectItem of fileObjects) {
+          for (let fileObjectItem of structuredClone(fileObjects)) {
             if (fileObjectItem.fileName.endsWith(".aqua.json")) {
               let aquaTree2 = fileObjectItem.fileContent;
               let revisionHashes = Object.keys(aquaTree2.revisions);
               if (revisionHashes.includes(vh)) {
                 let genesisHash = getGenesisHash(aquaTree2);
                 let fileName = aquaTree2.file_index[genesisHash];
-                let fileUriObj = getFileNameCheckingPaths(fileObjects, fileName);
+                let msg = `revisionHashes ${revisionHashes.join(",")}  hash vh ${vh} genesisHash ${genesisHash} -- fileName ${fileName}, fileObjects ${JSON.stringify(fileObjects.map((e) => e.fileName), null, 4)}`;
+                console.log(msg);
+                if (fileName == void 0) {
+                  break;
+                }
+                let fileUriObj = getFileNameCheckingPaths(structuredClone(fileObjects), fileName);
                 if (fileUriObj == void 0) {
                   break;
                 }
@@ -3477,7 +3505,8 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
     return [true, logs];
   } else {
     logs.push({
-      log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash}`,
+      log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash} - 
+ isSuccess ${isSuccess} - isScalarSuccess ${isScalarSuccess} `,
       logType: "error" /* ERROR */,
       ident: `${identCharacter}	`
     });
@@ -3497,12 +3526,13 @@ function verifyFormRevision(input, leaves, identCharacter = "") {
   let ok = true;
   let formKeysGraphData = [];
   Object.keys(input).sort().forEach((field, i) => {
-    let new_hash = getHashSum(`${field}:${input[field]}`);
+    let hashString = `${field}:${input[field]}`;
+    let new_hash = getHashSum(hashString);
     if (!field.endsWith(".deleted")) {
       if (field.startsWith("forms_")) {
         if (new_hash !== leaves[i]) {
           ok = false;
-          fieldsWithVerification.push(`\u{1F6AB} ${field}: ${input[field]}`);
+          fieldsWithVerification.push(`\u{1F6AB} ${field}: ${input[field]} -- hashString ${hashString} -- new hash ${new_hash} -- index ${i} -- leaves at ${leaves[i]}`);
           formKeysGraphData.push({
             formKey: field,
             content: input[field],
@@ -3607,7 +3637,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-16",
+  version: "3.2.1-25",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {
@@ -3714,37 +3744,6 @@ function log_success(content) {
 // src/index.ts
 var Aquafier = class {
   constructor() {
-    // get revision at specific index
-    this.isWorkFlow = (aquaTree, systemFileInfo) => {
-      let falseResponse = {
-        isWorkFlow: false,
-        workFlow: ""
-      };
-      let aquaTreeRevisionsOrderd = OrderRevisionInAquaTree(aquaTree);
-      let allHashes = Object.keys(aquaTreeRevisionsOrderd.revisions);
-      if (allHashes.length <= 1) {
-        console.log(`Aqua tree has one revision`);
-        return falseResponse;
-      }
-      let secondRevision = aquaTreeRevisionsOrderd.revisions[allHashes[1]];
-      if (!secondRevision) {
-        console.log(`Aqua tree has second revision not found`);
-        return falseResponse;
-      }
-      if (secondRevision.revision_type == "link") {
-        let allNames = systemFileInfo.map((e) => getAquaTreeFileName(e.aquaTree));
-        let name = aquaTreeRevisionsOrderd.file_index[allHashes[1]];
-        console.log(`allNames ${allNames} --  name ${name}`);
-        if (allNames.includes(name)) {
-          return {
-            isWorkFlow: true,
-            workFlow: name.replace("json", "")
-          };
-        }
-      }
-      console.log(`Aqua tree has second revision is of type ${secondRevision.revision_type}`);
-      return falseResponse;
-    };
     // Revision
     /**
      * @method removeLastRevision
@@ -4161,6 +4160,7 @@ var AquafierChainable = class {
   getPreviousVerificationHash,
   getTimestamp,
   getWallet,
+  isAquaTree,
   isErr,
   isNone,
   isOk,

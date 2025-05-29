@@ -354,13 +354,14 @@ export class WitnessEth {
     witnessEventVerificationHash: string,
     smartContractAddress: string,
     WitnessNetwork: WitnessNetwork,
-    providerUrl?: string
+    providerUrl?: string,
+    alchemyKey?: string
   ): Promise<[TransactionResult, Array<LogData>]> {
     const logData: LogData[] = []
     try {
       const provider = providerUrl
         ? new ethers.JsonRpcProvider(providerUrl)
-        : ethers.getDefaultProvider(WitnessNetwork);
+        : ethers.getDefaultProvider(WitnessNetwork, alchemyKey ? { alchemy: alchemyKey } : null);
 
       const wallet = new ethers.Wallet(walletPrivateKey, provider);
       const sender = wallet.address;

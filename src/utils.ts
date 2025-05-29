@@ -20,6 +20,14 @@ import { MerkleTree } from "merkletreejs"
 import { Err, Ok, Result } from "./type_guards"
 
 
+export function isAquaTree(content: any): boolean {
+  // Check if content has the properties of an AquaTree
+  return content &&
+    typeof content === 'object' &&
+    'revisions' in content &&
+    'file_index' in content;
+}
+
 export function reorderRevisionsProperties(revision: Revision): Revision {
   const reordered: Revision = {} as Revision
 
@@ -310,21 +318,25 @@ export function getEntropy(): Uint8Array {
 export const getFileNameCheckingPaths = (fileObjects: Array<FileObject>, fileName: string): FileObject | undefined => {
   let fileObjectItem = fileObjects.find((e) => {
 
-    if (e.fileName.includes("/") || fileName.includes("/")) {
+    if (e.fileName) {
+      if (e.fileName.includes("/") || fileName.includes("/")) {
 
-      let eFileName = e.fileName
-      let parentFileName = fileName
-      if (e.fileName.includes("/")) {
-        eFileName = e.fileName.split('/').pop();
-      }
-      if (fileName.includes("/")) {
-        parentFileName = fileName.split('/').pop()
-      }
+        let eFileName = e.fileName
+        let parentFileName = fileName
+        if (e.fileName.includes("/")) {
+          eFileName = e.fileName.split('/').pop();
+        }
+        if (fileName.includes("/")) {
+          parentFileName = fileName.split('/').pop()
+        }
 
-      return eFileName == parentFileName
+        return eFileName == parentFileName
+      } else {
+
+        return e.fileName == fileName
+      }
     } else {
-
-      return e.fileName == fileName
+      return undefined
     }
   })
   return fileObjectItem
@@ -406,14 +418,18 @@ export const estimateWitnessGas = async (
   witness_event_verification_hash: string,
   ethNetwork: string,
   smart_contract_address: string,
-  _providerUrl: string,
+  providerUrl: string,
 ): Promise<[GasEstimateResult, Array<LogData>]> => {
   let logData: LogData[] = []
 
   try {
     // Connect to Ethereum provider
     // const provider = new ethers.JsonRpcProvider(providerUrl);
-    const provider = ethers.getDefaultProvider(ethNetwork)
+    // const provider = ethers.getDefaultProvider(ethNetwork)
+
+     const provider = providerUrl
+            ? new ethers.JsonRpcProvider(providerUrl)
+            : ethers.getDefaultProvider(ethNetwork);
 
     // Define the transaction
     const tx = {
@@ -851,11 +867,11 @@ export function getAquaTreeFileName(aquaTree: AquaTree): string {
   // fetch the genesis 
   let revisionHashes = Object.keys(aquaTree!.revisions!)
   for (let revisionHash of revisionHashes) {
-      let revisionData = aquaTree!.revisions![revisionHash];
-      if (revisionData.previous_verification_hash == null || revisionData.previous_verification_hash == "") {
-          mainAquaHash = revisionHash;
-          break;
-      }
+    let revisionData = aquaTree!.revisions![revisionHash];
+    if (revisionData.previous_verification_hash == null || revisionData.previous_verification_hash == "") {
+      mainAquaHash = revisionHash;
+      break;
+    }
   }
 
 
@@ -871,11 +887,11 @@ export function getAquaTreeFileObject(fileInfo: AquaTreeAndFileObject): FileObje
   // fetch the genesis 
   let revisionHashes = Object.keys(fileInfo.aquaTree!.revisions!)
   for (let revisionHash of revisionHashes) {
-      let revisionData = fileInfo.aquaTree!.revisions![revisionHash];
-      if (revisionData.previous_verification_hash == null || revisionData.previous_verification_hash == "") {
-          mainAquaHash = revisionHash;
-          break;
-      }
+    let revisionData = fileInfo.aquaTree!.revisions![revisionHash];
+    if (revisionData.previous_verification_hash == null || revisionData.previous_verification_hash == "") {
+      mainAquaHash = revisionHash;
+      break;
+    }
   }
   mainAquaFileName = fileInfo.aquaTree!.file_index[mainAquaHash];
 
@@ -886,23 +902,23 @@ export function getAquaTreeFileObject(fileInfo: AquaTreeAndFileObject): FileObje
 
 
 export function getChainIdFromNetwork(network: string): string {
-    const networkMap: Record<string, string> = {
-        'mainnet': '0x1',      // Ethereum Mainnet
-        'goerli': '0x5',        // Goerli Testnet
-        'sepolia': '0xaa36a7',  // Sepolia Testnet
-        'polygon': '0x89',      // Polygon Mainnet
-        'mumbai': '0x13881',    // Mumbai Testnet
-        'arbitrum': '0xa4b1',   // Arbitrum One
-        'optimism': '0xa',      // Optimism
-        'avalanche': '0xa86a',  // Avalanche C-Chain
-        'bsc': '0x38',          // Binance Smart Chain
-        // Add more networks as needed
-    };
-    
-    const chainId = networkMap[network.toLowerCase()];
-    if (!chainId) {
-        throw new Error(`Unsupported network: ${network}`);
-    }
-    
-    return chainId;
+  const networkMap: Record<string, string> = {
+    'mainnet': '0x1',      // Ethereum Mainnet
+    'goerli': '0x5',        // Goerli Testnet
+    'sepolia': '0xaa36a7',  // Sepolia Testnet
+    'polygon': '0x89',      // Polygon Mainnet
+    'mumbai': '0x13881',    // Mumbai Testnet
+    'arbitrum': '0xa4b1',   // Arbitrum One
+    'optimism': '0xa',      // Optimism
+    'avalanche': '0xa86a',  // Avalanche C-Chain
+    'bsc': '0x38',          // Binance Smart Chain
+    // Add more networks as needed
+  };
+
+  const chainId = networkMap[network.toLowerCase()];
+  if (!chainId) {
+    throw new Error(`Unsupported network: ${network}`);
+  }
+
+  return chainId;
 }

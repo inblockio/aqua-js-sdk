@@ -29,6 +29,7 @@ import { Err, isErr, Ok, Result } from "../type_guards";
 export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
+    console.log("TExt 1234");
     let lastRevisionHash = "";
     if (aquaTreeWrapper.revision == undefined || aquaTreeWrapper.revision == null || aquaTreeWrapper.revision.length == 0) {
         const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions);
@@ -248,6 +249,7 @@ const prepareWitness = async (
     credentials: CredentialsData,
     witness_network: string = 'sepolia',
 ): Promise<Result<WitnessResult, LogData[]>> => {
+    console.log("TExt 1234567")
     let logs: Array<LogData> = [];
 
     const merkle_root: string = verificationHash;
@@ -278,6 +280,7 @@ const prepareWitness = async (
         }
         case "eth": {
 
+            console.log("TExt 19999")
             smart_contract_address = "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611";
 
             let network: WitnessNetwork = "sepolia"
@@ -287,7 +290,23 @@ const prepareWitness = async (
                 network = "mainnet"
             }
 
+            console.log(`test 4531 WitnessPlatformType ${WitnessPlatformType}`)
+
             if (WitnessPlatformType === "cli") {
+
+                console.log(`test 1`)
+                
+                if (credentials.alchemy_key == null || credentials.alchemy_key == undefined || credentials.alchemy_key == "") {
+                    logs.push({
+                        log: `Alchemy key is missing`,
+                        logType: LogType.DEBUGDATA
+                    });
+                    process.exit(1);
+                }
+
+
+                let alchemyProvider = `https://eth-mainnet.g.alchemy.com/v2/${credentials.alchemy_key}`
+
 
                 if (credentials == null || credentials == undefined) {
                     logs.push({
@@ -310,7 +329,7 @@ const prepareWitness = async (
                     merkle_root,
                     witness_network,
                     smart_contract_address,
-                    ""
+                    alchemyProvider
                 );
 
                 logs.push(...logData)
@@ -341,6 +360,8 @@ const prepareWitness = async (
                 }
 
 
+
+                console.log(`test 2`)
                 let transactionResult: TransactionResult | null = null;
                 try {
 
@@ -350,7 +371,9 @@ const prepareWitness = async (
                         verificationHash,
                         smart_contract_address,
                         network,
-                        ""
+                        alchemyProvider,
+                        credentials.alchemy_key
+
                     );
 
                     transactionResult = transactionResultData

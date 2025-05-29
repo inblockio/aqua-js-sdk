@@ -625,7 +625,7 @@ async function verifyRevision(
   let logsResult: Array<LogData> = []
   switch (revision.revision_type) {
     case "form":
-      let res = verifyFormRevision(revision, revision.leaves, identCharacter)
+      let res = verifyFormRevision(revision, revision.leaves,  `${identCharacter}\t\t`)
       isSuccess = res.isOk
       // TODO: Look at this, some weird issue here
       logsResult = logs
@@ -719,7 +719,7 @@ async function verifyRevision(
           // loop through fileObjects if its an aqua tree check if a revision hash == revision.link_verification_hashes
           // find the genesis 
 
-          for (let fileObjectItem of fileObjects) {
+          for (let fileObjectItem of structuredClone(fileObjects)) {
             if (fileObjectItem.fileName.endsWith(".aqua.json")) {
               let aquaTree: AquaTree = fileObjectItem.fileContent as AquaTree
               let revisionHashes = Object.keys(aquaTree.revisions)
@@ -732,7 +732,16 @@ async function verifyRevision(
                 //   (fileObj) => fileObj.fileName === fileName,
                 // )
 
-                let fileUriObj = getFileNameCheckingPaths(fileObjects, fileName)
+                let msg = `revisionHashes ${revisionHashes.join(",")}  hash vh ${vh} genesisHash ${genesisHash} -- fileName ${fileName}, fileObjects ${JSON.stringify(fileObjects.map((e)=>e.fileName), null, 4)}`
+
+                console.log(msg)
+
+                
+                if(fileName==undefined){
+                  break;
+                }
+
+                let fileUriObj = getFileNameCheckingPaths(structuredClone(fileObjects), fileName)
 
                 if (fileUriObj == undefined) {
                   break;
@@ -891,7 +900,7 @@ async function verifyRevision(
     return [true, logs]
   } else {
     logs.push({
-      log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash}`,
+      log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash} - \n isSuccess ${isSuccess} - isScalarSuccess ${isScalarSuccess} `,
       logType: LogType.ERROR,
       ident: `${identCharacter}\t`,
     })
@@ -933,13 +942,15 @@ function verifyFormRevision(
   Object.keys(input)
     .sort()
     .forEach((field, i: number) => {
-      let new_hash = getHashSum(`${field}:${input[field]}`)
+      let hashString =`${field}:${input[field]}`
+      let new_hash = getHashSum(hashString)
 
       if (!field.endsWith(".deleted")) {
         if (field.startsWith("forms_")) {
           if (new_hash !== leaves[i]) {
             ok = false
-            fieldsWithVerification.push(`🚫 ${field}: ${input[field]}`)
+           
+            fieldsWithVerification.push(`🚫 ${field}: ${input[field]} -- hashString ${hashString} -- new hash ${new_hash} -- index ${i} -- leaves at ${leaves[i]}`)
             formKeysGraphData.push({
               formKey: field,
               content: input[field],
