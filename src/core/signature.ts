@@ -19,6 +19,7 @@ import {
   reorderRevisionsProperties,
 } from "../utils"
 import { DIDSigner } from "../signature/sign_did"
+import { P12Signer } from "../signature/sign_p12"
 import { createAquaTree } from "../aquavhtree"
 import { ethers } from "ethers"
 import { Err, Ok, Result } from "../type_guards"
@@ -128,6 +129,14 @@ export async function signAquaTreeUtil(
       walletAddress = key
       publicKey = key
       signature_type = "did_key"
+      break
+    case "p12":
+      // TODO implement credential validation like above
+      const p12signer = new P12Signer()
+      const { signature, pubKey } = await p12signer.sign(targetRevisionHash, credentials["p12_content"], credentials["p12_password"])
+      walletAddress = pubKey
+      publicKey = pubKey
+      signature_type = "p12"
       break
   }
 
@@ -311,6 +320,15 @@ export async function verifySignature(
         })
       }
       break
+    case "p12":
+      const signerP12 = new P12Signer()
+      signatureOk = await signerP12.verify(
+        data.signature,
+        data.signature_public_key!!,
+        verificationHash,
+      )
+      break
+
   }
 
   return [signatureOk, logs]
