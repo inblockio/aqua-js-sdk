@@ -79,6 +79,24 @@ Purpose of each property :
 
 Run `npm test` to ru tests
 
+### Running a single file test
+
+Run aquafier tests
+
+```bash
+npm test -- ./tests/aquafier.test.ts
+```
+
+or
+
+Run p12 tests
+
+```bash
+npm test -- ./tests/p12.test.ts
+```
+
+
+
 
 
 

@@ -30,6 +30,9 @@ export interface CredentialsData {
   alchemy_key: string
   witness_eth_network: string
   witness_method: string
+  // p12 config
+  p12_password?: string
+  p12_content?: string
 }
 
 /**
@@ -191,7 +194,7 @@ export type WitnessPlatformType = "cli" | "metamask"
 /** Network used for witnessing */
 export type WitnessNetwork = "sepolia" | "mainnet" | "holesky"
 /** Type of signing method */
-export type SignType = "cli" | "metamask" | "did"
+export type SignType = "cli" | "metamask" | "did" | "p12"
 
 /** Environment where witnessing occurs */
 export type WitnessEnvironment = "node" | "browser"

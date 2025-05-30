@@ -424,11 +424,37 @@ export const estimateWitnessGas = async (
 
   try {
     // Connect to Ethereum provider
-    // const provider = new ethers.JsonRpcProvider(providerUrl);
-    // const provider = ethers.getDefaultProvider(ethNetwork)
-    const provider = providerUrl
-      ? new ethers.JsonRpcProvider(providerUrl)
-      : ethers.getDefaultProvider(ethNetwork);
+    // Mask API keys in logs for security
+  const maskedUrl = providerUrl ? providerUrl.replace(/(\/v2\/)([a-zA-Z0-9]+)/, '/v2/****') : 'none';
+  console.log("Provider URL: ", maskedUrl)
+
+    // Create provider with fallback options to handle rate limiting
+    let provider;
+    try {
+      if (providerUrl) {
+        provider = new ethers.JsonRpcProvider(providerUrl, ethNetwork);
+        // Test the connection
+        await provider.getNetwork();
+        console.log("Connected to custom provider")
+      } else {
+        // Use a more robust fallback with multiple providers
+        provider = ethers.getDefaultProvider(ethNetwork, {
+          // Increase the timeout to handle potential rate limiting
+          staticNetwork: true,
+          timeout: 30000
+        });
+        console.log("Using default provider fallback")
+      }
+      
+      console.log("Provider network: ", await provider.getNetwork());
+    } catch (error) {
+      console.error("Provider connection error:", error);
+      logData.push({
+        log: `Provider connection error: ${error}`,
+        logType: LogType.ERROR,
+      });
+      throw error;
+    }
 
     // Define the transaction
     const tx = {

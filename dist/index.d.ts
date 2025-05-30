@@ -160,6 +160,8 @@ interface CredentialsData {
     alchemy_key: string;
     witness_eth_network: string;
     witness_method: string;
+    p12_password?: string;
+    p12_content?: string;
 }
 /**
  * @typedef {Object} AquaOperationData
@@ -287,7 +289,7 @@ type WitnessPlatformType = "cli" | "metamask";
 /** Network used for witnessing */
 type WitnessNetwork = "sepolia" | "mainnet" | "holesky";
 /** Type of signing method */
-type SignType = "cli" | "metamask" | "did";
+type SignType = "cli" | "metamask" | "did" | "p12";
 /** Environment where witnessing occurs */
 type WitnessEnvironment = "node" | "browser";
 /**

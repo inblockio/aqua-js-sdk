@@ -95,7 +95,7 @@ export function findHashWithLongestPath(tree: RevisionTree) {
 export function createAquaTreeTree(aquaTree: any) {
   let obj = aquaTree
   // Create a tree given such revision data
-  let revisionTree: RevisionTree = {} as RevisionTree
+  let revisionTree: RevisionTree = { children: [] } as RevisionTree
 
   for (let revisionHash in obj.revisions) {
     const revision = obj.revisions[revisionHash]

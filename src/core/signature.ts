@@ -133,7 +133,8 @@ export async function signAquaTreeUtil(
     case "p12":
       // TODO implement credential validation like above
       const p12signer = new P12Signer()
-      const { signature, pubKey } = await p12signer.sign(targetRevisionHash, credentials["p12_content"], credentials["p12_password"])
+      const { signature: _signature, pubKey } = await p12signer.sign(targetRevisionHash, credentials["p12_content"], credentials["p12_password"])
+      signature = _signature
       walletAddress = pubKey
       publicKey = pubKey
       signature_type = "p12"
@@ -168,7 +169,6 @@ export async function signAquaTreeUtil(
 
   const revisions = aquaTree.revisions
   revisions[verification_hash] = verificationData
-
   let aquaTreeWithTree = createAquaTree(aquaTree)
   if (!aquaTreeWithTree) {
     logs.push({

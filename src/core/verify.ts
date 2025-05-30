@@ -22,7 +22,6 @@ import {
   getHashSum,
   getMerkleRoot,
   getPreviousVerificationHash,
-  OrderRevisionInAquaTree,
   reorderRevisionsProperties,
 } from "../utils"
 import { verifySignature } from "./signature"
@@ -198,6 +197,7 @@ function findNode(
   tree: VerificationGraphData,
   hash: string,
 ): VerificationGraphData | null {
+  console.log("Tree: ", tree)
   if (tree.hash === hash) {
     return tree
   }

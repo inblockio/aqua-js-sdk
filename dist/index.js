@@ -318,7 +318,31 @@ function formatMwTimestamp(ts) {
 var estimateWitnessGas = async (wallet_address, witness_event_verification_hash, ethNetwork, smart_contract_address, providerUrl) => {
   let logData = [];
   try {
-    const provider = providerUrl ? new ethers.JsonRpcProvider(providerUrl) : ethers.getDefaultProvider(ethNetwork);
+    const maskedUrl = providerUrl ? providerUrl.replace(/(\/v2\/)([a-zA-Z0-9]+)/, "/v2/****") : "none";
+    console.log("Provider URL: ", maskedUrl);
+    let provider;
+    try {
+      if (providerUrl) {
+        provider = new ethers.JsonRpcProvider(providerUrl, ethNetwork);
+        await provider.getNetwork();
+        console.log("Connected to custom provider");
+      } else {
+        provider = ethers.getDefaultProvider(ethNetwork, {
+          // Increase the timeout to handle potential rate limiting
+          staticNetwork: true,
+          timeout: 3e4
+        });
+        console.log("Using default provider fallback");
+      }
+      console.log("Provider network: ", await provider.getNetwork());
+    } catch (error) {
+      console.error("Provider connection error:", error);
+      logData.push({
+        log: `Provider connection error: ${error}`,
+        logType: "error" /* ERROR */
+      });
+      throw error;
+    }
     const tx = {
       from: ethers.getAddress(wallet_address),
       to: ethers.getAddress(smart_contract_address),
@@ -665,7 +689,7 @@ function findHashWithLongestPath(tree) {
 }
 function createAquaTreeTree(aquaTree) {
   let obj = aquaTree;
-  let revisionTree = {};
+  let revisionTree = { children: [] };
   for (let revisionHash in obj.revisions) {
     const revision = obj.revisions[revisionHash];
     const parentHash = revision.previous_verification_hash;
@@ -1608,6 +1632,44 @@ var DIDSigner = class {
   }
 };
 
+// src/signature/sign_p12.ts
+import { createSign, createPrivateKey, createPublicKey, verify as cryptoVerify } from "node:crypto";
+import forge from "node-forge";
+var P12Signer = class {
+  // public async verify(signature: string, pubKey: string, data: string): Promise<boolean> {
+  //   return cryptoVerify(null, Buffer.from(data), pubKey, Buffer.from(signature))
+  // }
+  async verify(signature, pubKey, data) {
+    const pubKeyBuffer = Buffer.from(pubKey, "hex");
+    const signatureBuffer = Buffer.from(signature, "hex");
+    return cryptoVerify(
+      "RSA-SHA256",
+      Buffer.from(data),
+      { key: pubKeyBuffer, format: "der", type: "spki" },
+      signatureBuffer
+    );
+  }
+  async sign(verificationHash, privateKey, password) {
+    const p12Asn1 = forge.asn1.fromDer(privateKey);
+    const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, password);
+    const bagType = forge.pki.oids.pkcs8ShroudedKeyBag;
+    const bag = p12.getBags({ bagType })[bagType][0];
+    const keyPem = forge.pki.privateKeyToPem(bag.key);
+    const keyObj = createPrivateKey({ key: keyPem, format: "pem" });
+    const pubKeyObj = createPublicKey({ key: keyPem, format: "pem" });
+    const pubKeyBuffer = Buffer.from(pubKeyObj.export({ type: "spki", format: "der" }));
+    const pubKeyString = pubKeyBuffer.toString("hex");
+    const signer = createSign("RSA-SHA256");
+    signer.update(verificationHash);
+    const signature = signer.sign(keyObj);
+    return {
+      signature: signature.toString("hex"),
+      pubKey: pubKeyString,
+      walletAddress: pubKeyString
+    };
+  }
+};
+
 // src/core/signature.ts
 import { ethers as ethers3 } from "ethers";
 async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableScalar = false, identCharacter = "") {
@@ -1673,6 +1735,14 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
       walletAddress = key;
       publicKey = key;
       signature_type = "did_key";
+      break;
+    case "p12":
+      const p12signer = new P12Signer();
+      const { signature: _signature, pubKey } = await p12signer.sign(targetRevisionHash, credentials["p12_content"], credentials["p12_password"]);
+      signature = _signature;
+      walletAddress = pubKey;
+      publicKey = pubKey;
+      signature_type = "p12";
       break;
   }
   const now = (/* @__PURE__ */ new Date()).toISOString();
@@ -1778,6 +1848,14 @@ async function verifySignature(data, verificationHash, identCharacter = "") {
           logType: "error" /* ERROR */
         });
       }
+      break;
+    case "p12":
+      const signerP12 = new P12Signer();
+      signatureOk = await signerP12.verify(
+        data.signature,
+        data.signature_public_key,
+        verificationHash
+      );
       break;
   }
   return [signatureOk, logs];
@@ -2099,8 +2177,11 @@ var WitnessEth = class {
     }
   }
   // Verify Transaction Method
-  static async verify(WitnessNetwork3, transactionHash, expectedMR, _expectedTimestamp, providerUrl, alchemyKey) {
-    const provider = providerUrl ? new ethers4.JsonRpcProvider(providerUrl) : ethers4.getDefaultProvider(WitnessNetwork3, alchemyKey ? { alchemy: alchemyKey } : null);
+  static async verify(witnessNetwork, transactionHash, expectedMR, _expectedTimestamp, providerUrl, _alchemyKey) {
+    console.log("Provider URL: ", providerUrl);
+    const provider = new ethers4.JsonRpcProvider(providerUrl, witnessNetwork);
+    provider.ready;
+    console.log("Provider---: ", JSON.stringify(provider));
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {
       return [false, "Transaction not found"];
@@ -2607,6 +2688,11 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
           process.exit(1);
         }
         let alchemyProvider = `https://eth-${witness_network}.g.alchemy.com/v2/${credentials.alchemy_key}`;
+        const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, "/v2/****");
+        logs.push({
+          log: `Using Alchemy provider: ${maskedAlchemyUrl}`,
+          logType: "debug_data" /* DEBUGDATA */
+        });
         if (credentials == null || credentials == void 0) {
           logs.push({
             log: `credentials not found`,
@@ -2652,6 +2738,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
         }
         let transactionResult = null;
         try {
+          console.log("Here: --");
           let [transactionResultData, resultLogData] = await WitnessEth.witnessCli(
             _wallet.privateKey,
             verificationHash,
@@ -2747,13 +2834,20 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
       witnessData.witness_timestamp
     );
   } else {
+    console.log("Credentials----: ", credentials);
     let logMessage = "";
     let alchemyProvider = null;
     let alchemyKey = null;
     if (credentials) {
       alchemyProvider = `https://eth-${witnessData.witness_network}.g.alchemy.com/v2/${credentials.alchemy_key}`;
       alchemyKey = credentials.alchemy_key;
+      const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, "/v2/****");
+      logs.push({
+        log: `Using Alchemy provider for verification: ${maskedAlchemyUrl}`,
+        logType: "debug_data" /* DEBUGDATA */
+      });
     }
+    console.log("Alchemy Provider: ", alchemyProvider);
     [isValid, logMessage] = await WitnessEth.verify(
       witnessData.witness_network,
       witnessData.witness_transaction_hash,
@@ -2898,6 +2992,7 @@ async function verifyAquaTreeUtil(aquaTree, fileObject, identCharacter = "", cre
   return Ok(data);
 }
 function findNode2(tree, hash) {
+  console.log("Tree: ", tree);
   if (tree.hash === hash) {
     return tree;
   }
@@ -3605,6 +3700,7 @@ var package_default = {
     "key-did-provider-ed25519": "^4.0.2",
     "key-did-resolver": "^4.0.0",
     merkletreejs: "^0.4.0",
+    "node-forge": "^1.3.1",
     "nostr-tools": "^2.10.4",
     open: "^10.1.0",
     "openid-client": "^5.7.0",

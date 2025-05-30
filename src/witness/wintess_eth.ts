@@ -448,17 +448,20 @@ export class WitnessEth {
 
   // Verify Transaction Method
   static async verify(
-    WitnessNetwork: WitnessNetwork,
+    witnessNetwork: WitnessNetwork,
     transactionHash: string,
     expectedMR: string,
     _expectedTimestamp?: number,
     providerUrl?: string,
-    alchemyKey?: string
+    _alchemyKey?: string
   ): Promise<[boolean, string]> {
-    const provider = providerUrl
-        ? new ethers.JsonRpcProvider(providerUrl)
-        : ethers.getDefaultProvider(WitnessNetwork, alchemyKey ? { alchemy: alchemyKey } : null);
-
+    console.log("Provider URL: ", providerUrl)
+    // const provider = alchemyKey
+    //     ? new ethers.JsonRpcProvider(providerUrl)
+    //     : ethers.getDefaultProvider(witnessNetwork, alchemyKey ? { alchemy: alchemyKey } : null);
+    const provider = new ethers.JsonRpcProvider(providerUrl, witnessNetwork)
+    provider.ready;
+    console.log("Provider---: ", JSON.stringify(provider))
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {
       return [false, 'Transaction not found']
