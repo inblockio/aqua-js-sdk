@@ -852,7 +852,7 @@ declare const getTimestamp: () => string;
 declare function checkInternetConnection(): Promise<boolean>;
 declare function printLogs(logs: LogData[], enableVerbose?: boolean): void;
 declare function printlinkedGraphData(node: VerificationGraphData, prefix?: string, _isLast?: boolean): void;
-declare function printGraphData(node: VerificationGraphData, prefix?: string, _isLast?: boolean): void;
+declare function printGraphData(node: VerificationGraphData, prefix?: string, isLast?: boolean, isLinkChild?: boolean): void;
 declare function OrderRevisionInAquaTree(params: AquaTree): AquaTree;
 declare function getGenesisHash(aquaTree: AquaTree): string | null;
 declare function findNextRevisionHashByArrayofRevisions(previousVerificationHash: string, revisions: Array<Revision>): Revision | null;

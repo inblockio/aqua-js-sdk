@@ -455,13 +455,27 @@ export class WitnessEth {
     providerUrl?: string,
     _alchemyKey?: string
   ): Promise<[boolean, string]> {
-    console.log("Provider URL: ", providerUrl)
+
     // const provider = alchemyKey
     //     ? new ethers.JsonRpcProvider(providerUrl)
     //     : ethers.getDefaultProvider(witnessNetwork, alchemyKey ? { alchemy: alchemyKey } : null);
-    const provider = new ethers.JsonRpcProvider(providerUrl, witnessNetwork)
+
+    // Create a FetchRequest instance
+    const fetchRequest = new ethers.FetchRequest(providerUrl);
+
+    // Set the custom timeout (e.g., 5000 milliseconds = 5 seconds)
+    fetchRequest.timeout = 6000;
+
+    // const provider = new ethers.JsonRpcProvider(providerUrl, {
+    //   name: witnessNetwork,
+    //   chainId: Number(this.ethChainIdMap[witnessNetwork]),
+
+    // })
+    const provider = new ethers.JsonRpcProvider(fetchRequest, {
+      name: witnessNetwork,
+      chainId: Number(this.ethChainIdMap[witnessNetwork]),
+    })
     provider.ready;
-    console.log("Provider---: ", JSON.stringify(provider))
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {
       return [false, 'Transaction not found']

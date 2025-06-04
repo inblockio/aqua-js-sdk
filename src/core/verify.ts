@@ -22,6 +22,7 @@ import {
   getHashSum,
   getMerkleRoot,
   getPreviousVerificationHash,
+  OrderRevisionInAquaTree,
   reorderRevisionsProperties,
 } from "../utils"
 import { verifySignature } from "./signature"
@@ -197,7 +198,6 @@ function findNode(
   tree: VerificationGraphData,
   hash: string,
 ): VerificationGraphData | null {
-  console.log("Tree: ", tree)
   if (tree.hash === hash) {
     return tree
   }
@@ -287,11 +287,12 @@ export async function verifyAndGetGraphDataRevisionUtil(
  * - Includes all verification metadata and relationships
  */
 export async function verifyAndGetGraphDataUtil(
-  aquaTree: AquaTree,
+  _aquaTree: AquaTree,
   fileObject: Array<FileObject>,
   identCharacter: string = "",
   credentials?: CredentialsData,
 ): Promise<Result<VerificationGraphData, LogData[]>> {
+  const aquaTree: AquaTree = OrderRevisionInAquaTree(_aquaTree)
   let verificationHashes = Object.keys(aquaTree.revisions)
   const logs: LogData[] = []
 
@@ -418,6 +419,7 @@ export async function verifyAndGetGraphDataUtil(
       fileObject,
       isScalar,
       identCharacter,
+      credentials
     )
 
     let verificationResultsNode = findNode(
@@ -442,19 +444,20 @@ export async function verifyAndGetGraphDataUtil(
       //   (el) => el.fileName === `${aqtreeFilename}.aqua.json`,
       // )
       let name = `${aqtreeFilename}.aqua.json`;
-      let linkedAquaTree = getFileNameCheckingPaths(fileObject, name)
-      if (!linkedAquaTree) {
+      let linkedFileObject = getFileNameCheckingPaths(fileObject, name)
+      if (!linkedFileObject) {
         logs.push({
           logType: LogType.ERROR,
           log: "Linked aqua tree not found",
         })
         break
       }
-
+      const linkedAquaTree = OrderRevisionInAquaTree(linkedFileObject.fileContent as AquaTree)
       let result = await verifyAndGetGraphDataUtil(
-        linkedAquaTree.fileContent as AquaTree,
+        linkedAquaTree,
         fileObject,
         `${identCharacter}\t`,
+        credentials
       )
 
       if (result.isOk()) {
@@ -747,8 +750,7 @@ async function verifyRevision(
 
                 let msg = `revisionHashes ${revisionHashes.join(",")}  hash vh ${vh} genesisHash ${genesisHash} -- fileName ${fileName}, fileObjects ${JSON.stringify(fileObjects.map((e)=>e.fileName), null, 4)}`
 
-                console.log(msg)
-
+                console.log("Msg: ", msg)
                 
                 if(fileName==undefined){
                   break;
@@ -793,6 +795,7 @@ async function verifyRevision(
                     linkAquaTree,
                     fileObjects,
                     `${linkIdentChar}\t`,
+                    credentials,
                   )
 
                   if (isErr(linkVerificationResult)) {
@@ -853,6 +856,7 @@ async function verifyRevision(
               linkAquaTree,
               fileObjects,
               `${linkIdentChar}\t`,
+              credentials
             )
 
             if (isErr(linkVerificationResult)) {

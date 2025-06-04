@@ -360,8 +360,6 @@ const prepareWitness = async (
 
                 let transactionResult: TransactionResult | null = null;
                 try {
-
-                        console.log("Here: --")
                     let [transactionResultData, resultLogData] = await WitnessEth.witnessCli(
                         _wallet.privateKey,
                         verificationHash,
@@ -465,7 +463,6 @@ export async function verifyWitness(
     credentials?: CredentialsData
 ): Promise<[boolean, LogData[]]> {
     let logs: Array<LogData> = [];
-
     let isValid: boolean = false;
 
     // Check for internet connection first
@@ -506,7 +503,7 @@ export async function verifyWitness(
     } else {
         // Verify the transaction hash via the Ethereum blockchain
         // let  witnessEth =  new WitnessEth();
-        console.log("Credentials----: ", credentials)
+        
         let logMessage = "";
         let alchemyProvider: string | null = null;
         let alchemyKey: string | null = null;
@@ -517,12 +514,11 @@ export async function verifyWitness(
             // Log masked version of the Alchemy URL for security
             const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, '/v2/****');
             logs.push({
+                ident: indentCharacter,
                 log: `Using Alchemy provider for verification: ${maskedAlchemyUrl}`,
                 logType: LogType.DEBUGDATA,
             });
         }
-
-        console.log("Alchemy Provider: ", alchemyProvider)
         
         ;[isValid, logMessage] = await WitnessEth.verify(
             witnessData.witness_network as WitnessNetwork,

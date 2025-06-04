@@ -354,7 +354,7 @@ export const getFileNameCheckingPaths = (fileObjects: Array<FileObject>, fileNam
  * - Sets default witness method
  */
 export function createCredentials() {
-  console.log("Credential file  does not exist.Creating wallet")
+  console.log("Credential file  does not exist. Creating wallet")
 
   // Generate random entropy (128 bits for a 12-word mnemonic)
   // const entropy = crypto.randomBytes(16);
@@ -425,8 +425,7 @@ export const estimateWitnessGas = async (
   try {
     // Connect to Ethereum provider
     // Mask API keys in logs for security
-  const maskedUrl = providerUrl ? providerUrl.replace(/(\/v2\/)([a-zA-Z0-9]+)/, '/v2/****') : 'none';
-  console.log("Provider URL: ", maskedUrl)
+  // const maskedUrl = providerUrl ? providerUrl.replace(/(\/v2\/)([a-zA-Z0-9]+)/, '/v2/****') : 'none';
 
     // Create provider with fallback options to handle rate limiting
     let provider;
@@ -435,7 +434,7 @@ export const estimateWitnessGas = async (
         provider = new ethers.JsonRpcProvider(providerUrl, ethNetwork);
         // Test the connection
         await provider.getNetwork();
-        console.log("Connected to custom provider")
+        // console.log("Connected to custom provider")
       } else {
         // Use a more robust fallback with multiple providers
         provider = ethers.getDefaultProvider(ethNetwork, {
@@ -443,12 +442,12 @@ export const estimateWitnessGas = async (
           staticNetwork: true,
           timeout: 30000
         });
-        console.log("Using default provider fallback")
+        // console.log("Using default provider fallback")
       }
       
-      console.log("Provider network: ", await provider.getNetwork());
+      // console.log("Provider network: ", await provider.getNetwork());
     } catch (error) {
-      console.error("Provider connection error:", error);
+      // console.error("Provider connection error:", error);
       logData.push({
         log: `Provider connection error: ${error}`,
         logType: LogType.ERROR,
@@ -714,37 +713,109 @@ export function printlinkedGraphData(
   })
 }
 
+// export function printGraphData(
+//   node: VerificationGraphData,
+//   prefix: string = "",
+//   _isLast: boolean = true,
+// ): void {
+//   // Log the current node's hash
+//   let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
+//   let isSuccessorFailureEmoji = node.isValidationSucessful
+//     ? LogTypeEmojis["success"]
+//     : LogTypeEmojis["error"]
+//   // console.log(`${prefix}${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+//   console.log(
+//     `└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`,
+//   )
+
+//   if (node.revisionType === "link") {
+//     console.log(`${prefix}\tTree ${node.hash.slice(-4)}`)
+//     for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
+//       const el = node.linkVerificationGraphData[i]
+//       printlinkedGraphData(el, `${prefix}\t`, false)
+//     }
+//   }
+
+//   // Update the prefix for children
+//   const newPrefix = prefix //+ (isLast ? "\t" : "\t");
+
+//   // Recursively log each child
+//   node.verificationGraphData.forEach((child, _index) => {
+//     // const isChildLast = index === node.verificationGraphData.length - 1;
+//     printGraphData(child, newPrefix, false)
+//   })
+// }
+
+// This works but cascaed alot
+// export function printGraphData(
+//   node: VerificationGraphData,
+//   prefix: string = "",
+//   isLast: boolean = true,
+//   isRoot: boolean = true
+// ): void {
+//   // Prepare emojis for display
+//   const revisionTypeEmoji = LogTypeEmojis[node.revisionType];
+//   const statusEmoji = node.isValidationSucessful 
+//     ? LogTypeEmojis["success"] 
+//     : LogTypeEmojis["error"];
+
+//   // Print the current node
+//   const connector = isRoot ? "" : (isLast ? "└── " : "├── ");
+//   console.log(`${prefix}${connector}${statusEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+
+//   // Prepare new prefix for children
+//   const newPrefix = prefix + (isLast ? "    " : "│   ");
+
+//   // Print link verification data if this is a link node
+//   if (node.revisionType === "link" && node.linkVerificationGraphData.length > 0) {
+//     console.log(`${newPrefix}│`);
+//     console.log(`${newPrefix}└── Tree ${node.hash.slice(-4)}`);
+    
+//     const linkPrefix = newPrefix + "    ";
+//     node.linkVerificationGraphData.forEach((linkNode, index) => {
+//       const isLinkLast = index === node.linkVerificationGraphData.length - 1;
+//       printGraphData(linkNode, linkPrefix, isLinkLast, false);
+//     });
+//   }
+
+//   // Print regular verification data
+//   node.verificationGraphData.forEach((child, index) => {
+//     const isChildLast = index === node.verificationGraphData.length - 1;
+//     printGraphData(child, newPrefix, isChildLast, false);
+//   });
+// }
+
 export function printGraphData(
   node: VerificationGraphData,
   prefix: string = "",
-  _isLast: boolean = true,
+  isLast: boolean = true,
+  isLinkChild: boolean = false
 ): void {
-  // Log the current node's hash
-  let revisionTypeEmoji = LogTypeEmojis[node.revisionType]
-  let isSuccessorFailureEmoji = node.isValidationSucessful
-    ? LogTypeEmojis["success"]
-    : LogTypeEmojis["error"]
-  // console.log(`${prefix}${isLast ? "└ " : "├ "}${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
-  console.log(
-    `└${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`,
-  )
+  // Prepare emojis for display
+  const revisionTypeEmoji = LogTypeEmojis[node.revisionType];
+  const statusEmoji = node.isValidationSucessful 
+    ? LogTypeEmojis["success"] 
+    : LogTypeEmojis["error"];
 
-  if (node.revisionType === "link") {
-    console.log(`${prefix}\tTree ${node.hash.slice(-4)}`)
-    for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
-      const el = node.linkVerificationGraphData[i]
-      printlinkedGraphData(el, `${prefix}\t`, false)
-    }
+  // Print the current node
+  const connector = isLinkChild ? (isLast ? "└── " : "├── ") : "";
+  console.log(`${prefix}${connector}${statusEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+
+  // Print link verification data if this is a link node
+  if (node.revisionType === "link" && node.linkVerificationGraphData.length > 0) {
+    const linkPrefix = prefix + (isLinkChild ? "    " : "");
+    console.log(`${linkPrefix}    Tree ${node.hash.slice(-4)}`);
+    
+    node.linkVerificationGraphData.forEach((linkNode, index) => {
+      const isLinkLast = index === node.linkVerificationGraphData.length - 1;
+      printGraphData(linkNode, linkPrefix + "    ", isLinkLast, true);
+    });
   }
 
-  // Update the prefix for children
-  const newPrefix = prefix //+ (isLast ? "\t" : "\t");
-
-  // Recursively log each child
-  node.verificationGraphData.forEach((child, _index) => {
-    // const isChildLast = index === node.verificationGraphData.length - 1;
-    printGraphData(child, newPrefix, false)
-  })
+  // Print regular verification data (direct children remain flat)
+  node.verificationGraphData.forEach((child) => {
+    printGraphData(child, prefix, false, false);
+  });
 }
 
 export function OrderRevisionInAquaTree(params: AquaTree): AquaTree {

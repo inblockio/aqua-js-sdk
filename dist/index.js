@@ -293,7 +293,7 @@ var getFileNameCheckingPaths = (fileObjects, fileName) => {
   return fileObjectItem;
 };
 function createCredentials() {
-  console.log("Credential file  does not exist.Creating wallet");
+  console.log("Credential file  does not exist. Creating wallet");
   const entropy = getEntropy();
   const mnemonic = Mnemonic.fromEntropy(entropy);
   let credentialsObject = {
@@ -318,25 +318,19 @@ function formatMwTimestamp(ts) {
 var estimateWitnessGas = async (wallet_address, witness_event_verification_hash, ethNetwork, smart_contract_address, providerUrl) => {
   let logData = [];
   try {
-    const maskedUrl = providerUrl ? providerUrl.replace(/(\/v2\/)([a-zA-Z0-9]+)/, "/v2/****") : "none";
-    console.log("Provider URL: ", maskedUrl);
     let provider;
     try {
       if (providerUrl) {
         provider = new ethers.JsonRpcProvider(providerUrl, ethNetwork);
         await provider.getNetwork();
-        console.log("Connected to custom provider");
       } else {
         provider = ethers.getDefaultProvider(ethNetwork, {
           // Increase the timeout to handle potential rate limiting
           staticNetwork: true,
           timeout: 3e4
         });
-        console.log("Using default provider fallback");
       }
-      console.log("Provider network: ", await provider.getNetwork());
     } catch (error) {
-      console.error("Provider connection error:", error);
       logData.push({
         log: `Provider connection error: ${error}`,
         logType: "error" /* ERROR */
@@ -503,22 +497,21 @@ function printlinkedGraphData(node, prefix = "", _isLast = true) {
     printlinkedGraphData(child, newPrefix, !isChildLast);
   });
 }
-function printGraphData(node, prefix = "", _isLast = true) {
-  let revisionTypeEmoji = LogTypeEmojis[node.revisionType];
-  let isSuccessorFailureEmoji = node.isValidationSucessful ? LogTypeEmojis["success"] : LogTypeEmojis["error"];
-  console.log(
-    `\u2514${isSuccessorFailureEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`
-  );
-  if (node.revisionType === "link") {
-    console.log(`${prefix}	Tree ${node.hash.slice(-4)}`);
-    for (let i = 0; i < node.linkVerificationGraphData.length; i++) {
-      const el = node.linkVerificationGraphData[i];
-      printlinkedGraphData(el, `${prefix}	`, false);
-    }
+function printGraphData(node, prefix = "", isLast = true, isLinkChild = false) {
+  const revisionTypeEmoji = LogTypeEmojis[node.revisionType];
+  const statusEmoji = node.isValidationSucessful ? LogTypeEmojis["success"] : LogTypeEmojis["error"];
+  const connector = isLinkChild ? isLast ? "\u2514\u2500\u2500 " : "\u251C\u2500\u2500 " : "";
+  console.log(`${prefix}${connector}${statusEmoji.trim()} ${revisionTypeEmoji.trim()} ${node.hash}`);
+  if (node.revisionType === "link" && node.linkVerificationGraphData.length > 0) {
+    const linkPrefix = prefix + (isLinkChild ? "    " : "");
+    console.log(`${linkPrefix}    Tree ${node.hash.slice(-4)}`);
+    node.linkVerificationGraphData.forEach((linkNode, index) => {
+      const isLinkLast = index === node.linkVerificationGraphData.length - 1;
+      printGraphData(linkNode, linkPrefix + "    ", isLinkLast, true);
+    });
   }
-  const newPrefix = prefix;
-  node.verificationGraphData.forEach((child, _index) => {
-    printGraphData(child, newPrefix, false);
+  node.verificationGraphData.forEach((child) => {
+    printGraphData(child, prefix, false, false);
   });
 }
 function OrderRevisionInAquaTree(params) {
@@ -2178,10 +2171,13 @@ var WitnessEth = class {
   }
   // Verify Transaction Method
   static async verify(witnessNetwork, transactionHash, expectedMR, _expectedTimestamp, providerUrl, _alchemyKey) {
-    console.log("Provider URL: ", providerUrl);
-    const provider = new ethers4.JsonRpcProvider(providerUrl, witnessNetwork);
+    const fetchRequest = new ethers4.FetchRequest(providerUrl);
+    fetchRequest.timeout = 6e3;
+    const provider = new ethers4.JsonRpcProvider(fetchRequest, {
+      name: witnessNetwork,
+      chainId: Number(this.ethChainIdMap[witnessNetwork])
+    });
     provider.ready;
-    console.log("Provider---: ", JSON.stringify(provider));
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {
       return [false, "Transaction not found"];
@@ -2738,7 +2734,6 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
         }
         let transactionResult = null;
         try {
-          console.log("Here: --");
           let [transactionResultData, resultLogData] = await WitnessEth.witnessCli(
             _wallet.privateKey,
             verificationHash,
@@ -2834,7 +2829,6 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
       witnessData.witness_timestamp
     );
   } else {
-    console.log("Credentials----: ", credentials);
     let logMessage = "";
     let alchemyProvider = null;
     let alchemyKey = null;
@@ -2843,11 +2837,12 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
       alchemyKey = credentials.alchemy_key;
       const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, "/v2/****");
       logs.push({
+        ident: indentCharacter,
         log: `Using Alchemy provider for verification: ${maskedAlchemyUrl}`,
         logType: "debug_data" /* DEBUGDATA */
       });
     }
-    console.log("Alchemy Provider: ", alchemyProvider);
+    ;
     [isValid, logMessage] = await WitnessEth.verify(
       witnessData.witness_network,
       witnessData.witness_transaction_hash,
@@ -2992,7 +2987,6 @@ async function verifyAquaTreeUtil(aquaTree, fileObject, identCharacter = "", cre
   return Ok(data);
 }
 function findNode2(tree, hash) {
-  console.log("Tree: ", tree);
   if (tree.hash === hash) {
     return tree;
   }
@@ -3040,7 +3034,8 @@ async function verifyAndGetGraphDataRevisionUtil(aquaTree, revision, revisionIte
   };
   return Ok(verificationResults);
 }
-async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = "", credentials) {
+async function verifyAndGetGraphDataUtil(_aquaTree, fileObject, identCharacter = "", credentials) {
+  const aquaTree = OrderRevisionInAquaTree(_aquaTree);
   let verificationHashes = Object.keys(aquaTree.revisions);
   const logs = [];
   if (verificationHashes.length === 0) {
@@ -3152,7 +3147,8 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
       revisionItemHash,
       fileObject,
       isScalar2,
-      identCharacter
+      identCharacter,
+      credentials
     );
     let verificationResultsNode = findNode2(
       verificationResults,
@@ -3170,18 +3166,20 @@ async function verifyAndGetGraphDataUtil(aquaTree, fileObject, identCharacter = 
     if (revision.revision_type === "link") {
       let aqtreeFilename = aquaTree.file_index[revision.link_verification_hashes[0]];
       let name = `${aqtreeFilename}.aqua.json`;
-      let linkedAquaTree = getFileNameCheckingPaths(fileObject, name);
-      if (!linkedAquaTree) {
+      let linkedFileObject = getFileNameCheckingPaths(fileObject, name);
+      if (!linkedFileObject) {
         logs.push({
           logType: "error" /* ERROR */,
           log: "Linked aqua tree not found"
         });
         break;
       }
+      const linkedAquaTree = OrderRevisionInAquaTree(linkedFileObject.fileContent);
       let result2 = await verifyAndGetGraphDataUtil(
-        linkedAquaTree.fileContent,
+        linkedAquaTree,
         fileObject,
-        `${identCharacter}	`
+        `${identCharacter}	`,
+        credentials
       );
       if (result2.isOk()) {
         linkedVerificationGraphData = [result2.data];
@@ -3385,7 +3383,7 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
                 let genesisHash = getGenesisHash(aquaTree2);
                 let fileName = aquaTree2.file_index[genesisHash];
                 let msg = `revisionHashes ${revisionHashes.join(",")}  hash vh ${vh} genesisHash ${genesisHash} -- fileName ${fileName}, fileObjects ${JSON.stringify(fileObjects.map((e) => e.fileName), null, 4)}`;
-                console.log(msg);
+                console.log("Msg: ", msg);
                 if (fileName == void 0) {
                   break;
                 }
@@ -3414,7 +3412,8 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
                   let linkVerificationResult = await verifyAquaTreeUtil(
                     linkAquaTree,
                     fileObjects,
-                    `${linkIdentChar}	`
+                    `${linkIdentChar}	`,
+                    credentials
                   );
                   if (isErr(linkVerificationResult)) {
                     linkOk = false;
@@ -3466,7 +3465,8 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
             let linkVerificationResult = await verifyAquaTreeUtil(
               linkAquaTree,
               fileObjects,
-              `${linkIdentChar}	`
+              `${linkIdentChar}	`,
+              credentials
             );
             if (isErr(linkVerificationResult)) {
               linkOk = false;
@@ -3654,7 +3654,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-19",
+  version: "3.2.1-34",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {

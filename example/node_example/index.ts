@@ -92,8 +92,6 @@ async function chainExampleWithMultipleParameters() {
 
     let result = aqt.getValue();
 
-    console.log(JSON.stringify(result, null, 4));
-
 };
 
 // chainExampleWithMultipleParameters()
