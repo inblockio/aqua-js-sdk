@@ -355,13 +355,22 @@ export class WitnessEth {
     smartContractAddress: string,
     WitnessNetwork: WitnessNetwork,
     providerUrl?: string,
-    alchemyKey?: string
+    _alchemyKey?: string
   ): Promise<[TransactionResult, Array<LogData>]> {
     const logData: LogData[] = []
     try {
-      const provider = providerUrl
-        ? new ethers.JsonRpcProvider(providerUrl)
-        : ethers.getDefaultProvider(WitnessNetwork, alchemyKey ? { alchemy: alchemyKey } : null);
+      // const provider = providerUrl
+      //   ? new ethers.JsonRpcProvider(providerUrl)
+      //   : ethers.getDefaultProvider(WitnessNetwork, alchemyKey ? { alchemy: alchemyKey } : null);
+
+      const fetchRequest = new ethers.FetchRequest(providerUrl);
+
+    // Set the custom timeout (e.g., 5000 milliseconds = 5 seconds)
+    fetchRequest.timeout = 6000;
+    const provider = new ethers.JsonRpcProvider(fetchRequest, {
+      name: WitnessNetwork,
+      chainId: Number(this.ethChainIdMap[WitnessNetwork]),
+    })
 
       const wallet = new ethers.Wallet(walletPrivateKey, provider);
       const sender = wallet.address;
@@ -460,24 +469,24 @@ export class WitnessEth {
     //     ? new ethers.JsonRpcProvider(providerUrl)
     //     : ethers.getDefaultProvider(witnessNetwork, alchemyKey ? { alchemy: alchemyKey } : null);
 
-    const provider = new ethers.JsonRpcProvider(providerUrl, {
+    // const provider = new ethers.JsonRpcProvider(providerUrl, {
+    //   name: witnessNetwork,
+    //   chainId: Number(this.ethChainIdMap[witnessNetwork]),
+
+    // })
+
+
+    // Advanced timeout settings, not tested
+    // Create a FetchRequest instance
+    const fetchRequest = new ethers.FetchRequest(providerUrl);
+
+    // Set the custom timeout (e.g., 5000 milliseconds = 5 seconds)
+    fetchRequest.timeout = 6000;
+    const provider = new ethers.JsonRpcProvider(fetchRequest, {
       name: witnessNetwork,
       chainId: Number(this.ethChainIdMap[witnessNetwork]),
-
     })
 
-    /* 
-      // Advanced timeout settings, not tested
-      // Create a FetchRequest instance
-      const fetchRequest = new ethers.FetchRequest(providerUrl);
-
-      // Set the custom timeout (e.g., 5000 milliseconds = 5 seconds)
-      fetchRequest.timeout = 6000;
-      const provider = new ethers.JsonRpcProvider(fetchRequest, {
-        name: witnessNetwork,
-        chainId: Number(this.ethChainIdMap[witnessNetwork]),
-      })
-    */
     provider.ready;
     const tx = await provider.getTransaction(transactionHash);
     if (!tx) {

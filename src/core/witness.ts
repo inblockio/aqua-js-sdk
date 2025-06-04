@@ -512,12 +512,12 @@ export async function verifyWitness(
             alchemyKey = credentials.alchemy_key;
             
             // Log masked version of the Alchemy URL for security
-            const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, '/v2/****');
-            logs.push({
-                ident: indentCharacter,
-                log: `Using Alchemy provider for verification: ${maskedAlchemyUrl}`,
-                logType: LogType.DEBUGDATA,
-            });
+            // const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, '/v2/****');
+            // logs.push({
+            //     ident: indentCharacter,
+            //     log: `Using Alchemy provider for verification: ${maskedAlchemyUrl}`,
+            //     logType: LogType.DEBUGDATA,
+            // });
         }
         
         ;[isValid, logMessage] = await WitnessEth.verify(

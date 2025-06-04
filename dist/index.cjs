@@ -2186,10 +2186,15 @@ var WitnessEth = class {
     `;
   }
   // CLI Witness Method
-  static async witnessCli(walletPrivateKey, witnessEventVerificationHash, smartContractAddress, WitnessNetwork3, providerUrl, alchemyKey) {
+  static async witnessCli(walletPrivateKey, witnessEventVerificationHash, smartContractAddress, WitnessNetwork3, providerUrl, _alchemyKey) {
     const logData = [];
     try {
-      const provider = providerUrl ? new import_ethers4.ethers.JsonRpcProvider(providerUrl) : import_ethers4.ethers.getDefaultProvider(WitnessNetwork3, alchemyKey ? { alchemy: alchemyKey } : null);
+      const fetchRequest = new import_ethers4.ethers.FetchRequest(providerUrl);
+      fetchRequest.timeout = 6e3;
+      const provider = new import_ethers4.ethers.JsonRpcProvider(fetchRequest, {
+        name: WitnessNetwork3,
+        chainId: Number(this.ethChainIdMap[WitnessNetwork3])
+      });
       const wallet = new import_ethers4.ethers.Wallet(walletPrivateKey, provider);
       const sender = wallet.address;
       console.log(`Using wallet: ${sender}`);
@@ -2919,12 +2924,6 @@ async function verifyWitness(witnessData, verificationHash, doVerifyMerkleProof,
     if (credentials) {
       alchemyProvider = `https://eth-${witnessData.witness_network}.g.alchemy.com/v2/${credentials.alchemy_key}`;
       alchemyKey = credentials.alchemy_key;
-      const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, "/v2/****");
-      logs.push({
-        ident: indentCharacter,
-        log: `Using Alchemy provider for verification: ${maskedAlchemyUrl}`,
-        logType: "debug_data" /* DEBUGDATA */
-      });
     }
     ;
     [isValid, logMessage] = await WitnessEth.verify(
@@ -3738,7 +3737,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-34",
+  version: "3.2.1-22",
   description: "A TypeScript library for managing revision trees",
   type: "module",
   repository: {

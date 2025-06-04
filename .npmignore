@@ -22,3 +22,5 @@ tsconfig.json
 tsconfig.node.json
 tsconfig.json
 tsconfig.node.json
+*.tgz
+.tsconfig_new.json
