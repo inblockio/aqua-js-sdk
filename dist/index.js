@@ -3301,7 +3301,6 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
     case "form":
       let res = verifyFormRevision(revision, revision.leaves, `${identCharacter}		`);
       isSuccess = res.isOk;
-      logsResult = logs;
       logs.push(...res.logs);
       break;
     case "file":
@@ -3654,7 +3653,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 var package_default = {
   name: "aqua-js-sdk",
   version: "3.2.1-22",
-  description: "A TypeScript library for managing revision trees",
+  description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
     type: "git",

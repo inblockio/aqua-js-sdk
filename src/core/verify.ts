@@ -638,12 +638,13 @@ async function verifyRevision(
 
   let linkIdentChar = `${identCharacter}\t`
   let logsResult: Array<LogData> = []
+
   switch (revision.revision_type) {
     case "form":
       let res = verifyFormRevision(revision, revision.leaves,  `${identCharacter}\t\t`)
       isSuccess = res.isOk
       // TODO: Look at this, some weird issue here
-      logsResult = logs
+      // logsResult = logs
       // verification is already done in verifyRevisionMerkleTreeStructure
       // isSuccess = true;
       logs.push(...res.logs)
