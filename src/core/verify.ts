@@ -791,9 +791,9 @@ async function verifyRevision(
                   }
 
                   const linkAquaTree = fileObj.fileContent as AquaTree //JSON.parse(fileObj.fileContent)  as AquaTree;
-
+                  const _linkAquaTreeReordered = OrderRevisionInAquaTree(linkAquaTree)
                   let linkVerificationResult = await verifyAquaTreeUtil(
-                    linkAquaTree,
+                    _linkAquaTreeReordered,
                     fileObjects,
                     `${linkIdentChar}\t`,
                     credentials,
