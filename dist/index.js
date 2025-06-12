@@ -3407,8 +3407,9 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
                     break;
                   }
                   const linkAquaTree = fileObj2.fileContent;
+                  const _linkAquaTreeReordered = OrderRevisionInAquaTree(linkAquaTree);
                   let linkVerificationResult = await verifyAquaTreeUtil(
-                    linkAquaTree,
+                    _linkAquaTreeReordered,
                     fileObjects,
                     `${linkIdentChar}	`,
                     credentials
