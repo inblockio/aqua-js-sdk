@@ -50,7 +50,9 @@ if (typeof global !== 'undefined') {
   
   // Polyfill for crypto
   if (!global.crypto) {
-    (global as any).crypto = require('crypto-browserify');
+    // Don't use crypto-browserify directly as it's not compatible with Hermes
+    // Instead, we'll use our platform-specific crypto implementation
+    (global as any).crypto = {};
   }
   
   // Polyfill for ws module

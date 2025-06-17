@@ -135,14 +135,66 @@ async function getCrypto() {
     }
   } else if (isReactNative) {
     try {
-      const cryptoBrowserify = require("crypto-browserify");
+      const forge = require("node-forge");
       return {
-        verify: cryptoBrowserify.verify,
-        createSign: cryptoBrowserify.createSign,
-        createVerify: cryptoBrowserify.createVerify
+        verify: (_algorithm, data, publicKey, signature) => {
+          try {
+            const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
+            const md = forge.md.sha256.create();
+            md.update(data.toString("binary"));
+            return publicKeyObj.verify(md.digest().bytes(), signature.toString("binary"));
+          } catch (e) {
+            console.error("Verification error:", e);
+            return false;
+          }
+        },
+        createSign: (_algorithm) => {
+          let data = Buffer.from("");
+          return {
+            update: (chunk) => {
+              const chunkBuffer = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
+              data = Buffer.concat([data, chunkBuffer]);
+              return this;
+            },
+            sign: (key) => {
+              try {
+                const privateKey = forge.pki.privateKeyFromPem(key);
+                const md = forge.md.sha256.create();
+                md.update(data.toString("binary"));
+                const signature = privateKey.sign(md);
+                return Buffer.from(signature, "binary");
+              } catch (e) {
+                console.error("Signing error:", e);
+                throw new Error("Failed to sign data");
+              }
+            }
+          };
+        },
+        createVerify: (_algorithm) => {
+          let data = Buffer.from("");
+          return {
+            update: (chunk) => {
+              const chunkBuffer = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
+              data = Buffer.concat([data, chunkBuffer]);
+              return this;
+            },
+            verify: (key, signature) => {
+              try {
+                const publicKey = forge.pki.publicKeyFromPem(key);
+                const md = forge.md.sha256.create();
+                md.update(data.toString("binary"));
+                const sig = typeof signature === "string" ? Buffer.from(signature, "base64") : signature;
+                return publicKey.verify(md.digest().bytes(), sig.toString("binary"));
+              } catch (e) {
+                console.error("Verification error:", e);
+                return false;
+              }
+            }
+          };
+        }
       };
     } catch (error) {
-      console.error("Failed to import React Native compatible crypto module:", error);
+      console.error("Failed to create React Native compatible crypto implementation:", error);
       throw new Error("Crypto functionality not available in this React Native environment");
     }
   } else {
@@ -4506,7 +4558,7 @@ if (typeof global !== "undefined") {
     global.Buffer = Buffer2;
   }
   if (!global.crypto) {
-    global.crypto = require("crypto-browserify");
+    global.crypto = {};
   }
   global.WebSocket = global.WebSocket || {};
 }

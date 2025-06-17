@@ -55,10 +55,10 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-7LULXG2W.js";
+} from "./chunk-RQEA64VQ.js";
 import {
   __require
-} from "./chunk-S5XSPHNJ.js";
+} from "./chunk-VLIZD7LI.js";
 
 // src/react-native.ts
 var isReactNative = typeof navigator !== "undefined" && navigator.product === "ReactNative";
@@ -91,7 +91,7 @@ if (typeof global !== "undefined") {
     global.Buffer = Buffer;
   }
   if (!global.crypto) {
-    global.crypto = __require("crypto-browserify");
+    global.crypto = {};
   }
   global.WebSocket = global.WebSocket || {};
 }
