@@ -1,20 +1,17 @@
+import { getCrypto, getForge } from '../platform/crypto';
+
 export class P12Signer {
-  private async getNodeCrypto() {
-    if (typeof window !== "undefined") {
-      throw new Error("P12Signer is not supported in browser environment")
-    }
-    return require("node:crypto")
+  // Use our platform compatibility layer instead of direct Node.js imports
+  private async getCrypto() {
+    return await getCrypto();
   }
 
   private async getForge() {
-    if (typeof window !== "undefined") {
-      throw new Error("P12Signer is not supported in browser environment")
-    }
-    return require("node-forge")
+    return await getForge();
   }
 
   public async verify(signature: string, pubKey: string, data: string): Promise<boolean> {
-    const { verify: cryptoVerify } = await this.getNodeCrypto()
+    const { createVerify } = await this.getCrypto()
     
     // Convert hex-encoded public key back to a buffer
     const pubKeyBuffer = Buffer.from(pubKey, 'hex')
@@ -22,17 +19,21 @@ export class P12Signer {
     // Convert hex-encoded signature to buffer
     const signatureBuffer = Buffer.from(signature, 'hex')
     
-    // Use the public key format option that matches how it was exported
-    return cryptoVerify(
-      'RSA-SHA256', 
-      Buffer.from(data), 
-      { key: pubKeyBuffer, format: 'der', type: 'spki' }, 
-      signatureBuffer
-    )
+    try {
+      // Create verifier and update with data
+      const verifier = createVerify('RSA-SHA256')
+      verifier.update(data)
+      
+      // Verify the signature
+      return verifier.verify(pubKeyBuffer, signatureBuffer)
+    } catch (error) {
+      console.error('Error verifying signature:', error)
+      return false
+    }
   }
   
   public async sign(verificationHash: string, privateKey: string, password: string | null): Promise<{signature: string, pubKey: string, walletAddress: string}> {
-    const { createSign, createPrivateKey, createPublicKey } = await this.getNodeCrypto()
+    const { createSign } = await this.getCrypto()
     const forge = await this.getForge()
     
     const p12Asn1  = forge.asn1.fromDer(privateKey)
@@ -43,19 +44,35 @@ export class P12Signer {
     const bag = p12.getBags({ bagType })[bagType][0]
     const keyPem = forge.pki.privateKeyToPem(bag.key)
 
-    const keyObj = createPrivateKey({ key: keyPem, format: 'pem' })
-    const pubKeyObj = createPublicKey({ key: keyPem, format: 'pem' })
+    // Use forge for key operations instead of Node.js crypto
+    const privateKeyObj = forge.pki.privateKeyFromPem(keyPem)
+    const publicKey = forge.pki.rsa.setPublicKey(privateKeyObj.n, privateKeyObj.e)
     
-    // Convert public key to a buffer and then to a string
-    const pubKeyBuffer = Buffer.from(pubKeyObj.export({ type: 'spki', format: 'der' }))
-    const pubKeyString = pubKeyBuffer.toString('hex')
+    // Convert public key to DER format and then to hex string
+    const publicKeyAsn1 = forge.pki.publicKeyToAsn1(publicKey)
+    const publicKeyDer = forge.asn1.toDer(publicKeyAsn1).getBytes()
+    const pubKeyString = Buffer.from(publicKeyDer, 'binary').toString('hex')
     
+    // Use the crypto-compatible signer
     const signer = createSign('RSA-SHA256')
     signer.update(verificationHash)
-    const signature = signer.sign(keyObj)
+    
+    // We have two options for signing:
+    // Option 1: Use the crypto signer (preferred for React Native compatibility)
+    let signature;
+    try {
+      // Try to use the crypto signer first
+      signature = signer.sign(privateKeyObj)
+    } catch (error) {
+      // Fallback to forge for signing if crypto signer fails
+      console.warn('Crypto signer failed, falling back to forge:', error)
+      const md = forge.md.sha256.create()
+      md.update(verificationHash)
+      signature = privateKeyObj.sign(md)
+    }
     
     return { 
-      signature: signature.toString('hex'), 
+      signature: Buffer.from(signature, 'binary').toString('hex'), 
       pubKey: pubKeyString, 
       walletAddress: pubKeyString 
     }

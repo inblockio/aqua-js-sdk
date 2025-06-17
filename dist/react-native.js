@@ -1,5 +1,4 @@
 import {
-  Aquafier,
   AquafierChainable,
   Err,
   ErrResult,
@@ -56,7 +55,16 @@ import {
   reorderRevisionsProperties,
   verifyMerkleIntegrity
 } from "./chunk-XQPOAUYF.js";
-import "./chunk-S5XSPHNJ.js";
+import {
+  isReactNative
+} from "./chunk-S5XSPHNJ.js";
+
+// src/react-native.ts
+if (!isReactNative) {
+  console.warn(
+    "You are importing from react-native.ts but not running in a React Native environment. This may cause unexpected behavior."
+  );
+}
 export {
   AquafierChainable,
   Err,
@@ -77,7 +85,6 @@ export {
   cliYellowfy,
   createCredentials,
   createNewAquaTree,
-  Aquafier as default,
   dict2Leaves,
   estimateWitnessGas,
   findFormKey,

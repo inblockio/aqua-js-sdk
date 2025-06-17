@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 import { LogData, LogType, TransactionResult, WitnessConfig, WitnessEnvironment, WitnessNetwork, WitnessTransactionData } from '../types';
-import http from "http";
+import { createHttpServer } from '../platform';
 
 /**
  * Handles Ethereum-based witnessing operations for Aqua Protocol
@@ -142,9 +142,11 @@ export class WitnessEth {
     const serverUrl = `http://${host}:${port}`;
     const html = this.generateWitnessHtml(config);
 
-
     const requestListener = await this.commonPrepareListener(html)
-    const server = http.createServer(requestListener)
+    const server = await createHttpServer(requestListener)
+    if (!server) {
+      throw new Error('Failed to create HTTP server. This feature may not be supported in your environment.')
+    }
     server.listen(port, host, () => {
       console.log(`✨ Server is running on ${serverUrl}`)
     })

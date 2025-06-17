@@ -201,12 +201,16 @@ export class MetaMaskSigner {
  */
     private async signInNode(verificationHash: string): Promise<[string, string, string]> {
         // Dynamic imports for Node environment
-        const { createServer } = await import('http');
+        const { createHttpServer } = await import('../platform');
         const message = this.createMessage(verificationHash);
         const html = this.createHtml(message);
-
-        const requestListener = this.createRequestListener(html);
-        this.server = createServer(requestListener);
+        const server = await createHttpServer(this.createRequestListener(html));
+        
+        if (!server) {
+          throw new Error('Failed to create HTTP server. This feature may not be supported in React Native.');
+        }
+        
+        this.server = server;
 
         return new Promise((resolve, reject) => {
             try {

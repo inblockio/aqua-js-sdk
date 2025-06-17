@@ -13,6 +13,27 @@ Ensure to use the same semantic version as the Aqua protocol version you are usi
 npm install aqua-js-sdk
 ```
 
+## React Native Compatibility
+
+As of version 3.2.1-24, aqua-js-sdk provides React Native compatibility. To use the SDK in a React Native environment:
+
+```javascript
+// Import the React Native compatible version
+import Aquafier from 'aqua-js-sdk/react-native';
+```
+
+The React Native version provides platform-specific implementations for:
+- HTTP server functionality (mocked in React Native)
+- Crypto operations
+- File system operations
+- Internet connectivity checks
+
+### Limitations in React Native
+
+- HTTP server functionality is not available in React Native. Methods that require a local HTTP server (like `WitnessEth.nodeWitnessMetamask`) will show a warning and may not work as expected.
+- File system operations require the `react-native-fs` package for full functionality.
+- For crypto operations, the library uses `crypto-browserify` in React Native environments.
+
 ## Usage
 
 ```typescript
