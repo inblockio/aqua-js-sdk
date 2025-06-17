@@ -1710,16 +1710,24 @@ var DIDSigner = class {
 };
 
 // src/signature/sign_p12.ts
-var import_node_crypto = require("crypto");
-var import_node_forge = __toESM(require("node-forge"), 1);
 var P12Signer = class {
-  // public async verify(signature: string, pubKey: string, data: string): Promise<boolean> {
-  //   return cryptoVerify(null, Buffer.from(data), pubKey, Buffer.from(signature))
-  // }
+  async getNodeCrypto() {
+    if (typeof window !== "undefined") {
+      throw new Error("P12Signer is not supported in browser environment");
+    }
+    return require("crypto");
+  }
+  async getForge() {
+    if (typeof window !== "undefined") {
+      throw new Error("P12Signer is not supported in browser environment");
+    }
+    return require("node-forge");
+  }
   async verify(signature, pubKey, data) {
+    const { verify: cryptoVerify } = await this.getNodeCrypto();
     const pubKeyBuffer = Buffer.from(pubKey, "hex");
     const signatureBuffer = Buffer.from(signature, "hex");
-    return (0, import_node_crypto.verify)(
+    return cryptoVerify(
       "RSA-SHA256",
       Buffer.from(data),
       { key: pubKeyBuffer, format: "der", type: "spki" },
@@ -1727,16 +1735,18 @@ var P12Signer = class {
     );
   }
   async sign(verificationHash, privateKey, password) {
-    const p12Asn1 = import_node_forge.default.asn1.fromDer(privateKey);
-    const p12 = import_node_forge.default.pkcs12.pkcs12FromAsn1(p12Asn1, password);
-    const bagType = import_node_forge.default.pki.oids.pkcs8ShroudedKeyBag;
+    const { createSign, createPrivateKey, createPublicKey } = await this.getNodeCrypto();
+    const forge = await this.getForge();
+    const p12Asn1 = forge.asn1.fromDer(privateKey);
+    const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, password);
+    const bagType = forge.pki.oids.pkcs8ShroudedKeyBag;
     const bag = p12.getBags({ bagType })[bagType][0];
-    const keyPem = import_node_forge.default.pki.privateKeyToPem(bag.key);
-    const keyObj = (0, import_node_crypto.createPrivateKey)({ key: keyPem, format: "pem" });
-    const pubKeyObj = (0, import_node_crypto.createPublicKey)({ key: keyPem, format: "pem" });
+    const keyPem = forge.pki.privateKeyToPem(bag.key);
+    const keyObj = createPrivateKey({ key: keyPem, format: "pem" });
+    const pubKeyObj = createPublicKey({ key: keyPem, format: "pem" });
     const pubKeyBuffer = Buffer.from(pubKeyObj.export({ type: "spki", format: "der" }));
     const pubKeyString = pubKeyBuffer.toString("hex");
-    const signer = (0, import_node_crypto.createSign)("RSA-SHA256");
+    const signer = createSign("RSA-SHA256");
     signer.update(verificationHash);
     const signature = signer.sign(keyObj);
     return {
@@ -3737,7 +3747,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-22",
+  version: "3.2.1-24",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {

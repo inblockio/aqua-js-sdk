@@ -1626,13 +1626,21 @@ var DIDSigner = class {
 };
 
 // src/signature/sign_p12.ts
-import { createSign, createPrivateKey, createPublicKey, verify as cryptoVerify } from "node:crypto";
-import forge from "node-forge";
 var P12Signer = class {
-  // public async verify(signature: string, pubKey: string, data: string): Promise<boolean> {
-  //   return cryptoVerify(null, Buffer.from(data), pubKey, Buffer.from(signature))
-  // }
+  async getNodeCrypto() {
+    if (typeof window !== "undefined") {
+      throw new Error("P12Signer is not supported in browser environment");
+    }
+    return __require("node:crypto");
+  }
+  async getForge() {
+    if (typeof window !== "undefined") {
+      throw new Error("P12Signer is not supported in browser environment");
+    }
+    return __require("node-forge");
+  }
   async verify(signature, pubKey, data) {
+    const { verify: cryptoVerify } = await this.getNodeCrypto();
     const pubKeyBuffer = Buffer.from(pubKey, "hex");
     const signatureBuffer = Buffer.from(signature, "hex");
     return cryptoVerify(
@@ -1643,6 +1651,8 @@ var P12Signer = class {
     );
   }
   async sign(verificationHash, privateKey, password) {
+    const { createSign, createPrivateKey, createPublicKey } = await this.getNodeCrypto();
+    const forge = await this.getForge();
     const p12Asn1 = forge.asn1.fromDer(privateKey);
     const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, password);
     const bagType = forge.pki.oids.pkcs8ShroudedKeyBag;
@@ -3653,7 +3663,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-22",
+  version: "3.2.1-24",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {

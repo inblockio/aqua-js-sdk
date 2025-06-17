@@ -1,12 +1,21 @@
-import { createSign, createPrivateKey, createPublicKey, verify as cryptoVerify } from 'node:crypto'
-import forge from 'node-forge'
-
 export class P12Signer {
-  // public async verify(signature: string, pubKey: string, data: string): Promise<boolean> {
-  //   return cryptoVerify(null, Buffer.from(data), pubKey, Buffer.from(signature))
-  // }
+  private async getNodeCrypto() {
+    if (typeof window !== "undefined") {
+      throw new Error("P12Signer is not supported in browser environment")
+    }
+    return require("node:crypto")
+  }
+
+  private async getForge() {
+    if (typeof window !== "undefined") {
+      throw new Error("P12Signer is not supported in browser environment")
+    }
+    return require("node-forge")
+  }
 
   public async verify(signature: string, pubKey: string, data: string): Promise<boolean> {
+    const { verify: cryptoVerify } = await this.getNodeCrypto()
+    
     // Convert hex-encoded public key back to a buffer
     const pubKeyBuffer = Buffer.from(pubKey, 'hex')
     
@@ -23,6 +32,9 @@ export class P12Signer {
   }
   
   public async sign(verificationHash: string, privateKey: string, password: string | null): Promise<{signature: string, pubKey: string, walletAddress: string}> {
+    const { createSign, createPrivateKey, createPublicKey } = await this.getNodeCrypto()
+    const forge = await this.getForge()
+    
     const p12Asn1  = forge.asn1.fromDer(privateKey)
     const p12      = forge.pkcs12.pkcs12FromAsn1(p12Asn1, password)
 
