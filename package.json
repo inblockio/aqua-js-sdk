@@ -1,6 +1,6 @@
 {
   "name": "aqua-js-sdk",
-  "version": "3.2.1-26",
+  "version": "3.2.1-27",
   "description": "A TypeScript SDK Library for Aqua Protocol for data accounting",
   "type": "module",
   "repository": {
@@ -36,6 +36,14 @@
         "require": "./dist/index.cjs",
         "default": "./dist/index.js"
       }
+    },
+    "./react-native": {
+      "types": {
+        "require": "./dist/react-native.d.cts",
+        "default": "./dist/react-native.d.ts"
+      },
+      "require": "./dist/react-native.cjs",
+      "default": "./dist/react-native.js"
     }
   },
   "peerDependencies": {

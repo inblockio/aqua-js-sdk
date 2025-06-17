@@ -3966,7 +3966,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-25",
+  version: "3.2.1-27",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
@@ -4002,6 +4002,14 @@ var package_default = {
         require: "./dist/index.cjs",
         default: "./dist/index.js"
       }
+    },
+    "./react-native": {
+      types: {
+        require: "./dist/react-native.d.cts",
+        default: "./dist/react-native.d.ts"
+      },
+      require: "./dist/react-native.cjs",
+      default: "./dist/react-native.js"
     }
   },
   peerDependencies: {
