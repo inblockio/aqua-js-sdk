@@ -1,4 +1,5 @@
 import {
+  Aquafier,
   AquafierChainable,
   Err,
   ErrResult,
@@ -54,17 +55,47 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-XQPOAUYF.js";
+} from "./chunk-4NNPUDU7.js";
 import {
-  isReactNative
+  __require
 } from "./chunk-S5XSPHNJ.js";
 
 // src/react-native.ts
+var isReactNative = typeof navigator !== "undefined" && navigator.product === "ReactNative";
 if (!isReactNative) {
   console.warn(
-    "You are importing from react-native.ts but not running in a React Native environment. This may cause unexpected behavior."
+    'You are importing from "aqua-js-sdk/react-native" but this does not appear to be a React Native environment. This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
   );
 }
+if (typeof global !== "undefined") {
+  if (!global.stream) {
+    global.stream = {};
+  }
+  if (!global.process) {
+    global.process = {
+      env: { NODE_ENV: "production" },
+      version: "",
+      versions: { node: "16.0.0" },
+      nextTick: (callback, ...args) => setTimeout(() => callback(...args), 0),
+      // Add minimal stdout/stderr implementations
+      stdout: { write: console.log },
+      stderr: { write: console.error },
+      // Add empty argv array
+      argv: [],
+      // Add platform info
+      platform: "react-native"
+    };
+  }
+  if (typeof global.Buffer === "undefined") {
+    const { Buffer } = __require("buffer/");
+    global.Buffer = Buffer;
+  }
+  if (!global.crypto) {
+    global.crypto = __require("crypto-browserify");
+  }
+  global.WebSocket = global.WebSocket || {};
+}
+var react_native_default = Aquafier;
 export {
   AquafierChainable,
   Err,
@@ -85,6 +116,7 @@ export {
   cliYellowfy,
   createCredentials,
   createNewAquaTree,
+  react_native_default as default,
   dict2Leaves,
   estimateWitnessGas,
   findFormKey,
