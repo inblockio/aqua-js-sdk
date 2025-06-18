@@ -1,8 +1,8 @@
 /**
- * React-specific entry point for aqua-js-sdk
+ * Web-specific entry point for aqua-js-sdk
  * 
- * This file provides a React-compatible version of the aqua-js-sdk library.
- * It's specifically designed for React web applications (not React Native).
+ * This file provides a web-compatible version of the aqua-js-sdk library.
+ * It's specifically designed for web applications (React, Vue, Angular, etc.).
  */
 
 // Import Node.js module shims
@@ -13,7 +13,7 @@ const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefine
 
 if (!isBrowser) {
   console.warn(
-    'You are importing from "aqua-js-sdk/react" but this does not appear to be a browser environment. ' +
+    'You are importing from "aqua-js-sdk/web" but this does not appear to be a browser environment. ' +
     'This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
   );
 }

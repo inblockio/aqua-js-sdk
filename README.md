@@ -36,6 +36,13 @@ The React Native version provides platform-specific implementations for:
 
 ## Usage
 
+// For web applications (React, Vue, Angular, etc.)
+```typescript
+import Aquafier from 'aqua-js-sdk/web';
+```
+
+// For Node.js applications
+
 ```typescript
 import Aquafier, {FileObject} from 'aqua-js-sdk';
 

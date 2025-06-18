@@ -4098,7 +4098,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-28",
+  version: "3.2.1-29",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
@@ -4108,7 +4108,7 @@ var package_default = {
   main: "dist/index.js",
   types: "dist/index.d.ts",
   scripts: {
-    build: "tsup src/index.ts src/react-native.ts src/react.ts --dts --format esm,cjs --out-dir dist --tsconfig tsconfig.json",
+    build: "tsup src/index.ts src/react-native.ts src/web.ts --dts --format esm,cjs --out-dir dist --tsconfig tsconfig.json",
     prepare: "npm run build",
     dev: "tsc",
     test: "NODE_OPTIONS='--experimental-vm-modules' npx jest",
@@ -4123,12 +4123,12 @@ var package_default = {
         default: "./dist/index.d.ts"
       },
       browser: {
-        require: "./dist/react.cjs",
-        default: "./dist/react.js"
+        require: "./dist/web.cjs",
+        default: "./dist/web.js"
       },
-      react: {
-        require: "./dist/react.cjs",
-        default: "./dist/react.js"
+      web: {
+        require: "./dist/web.cjs",
+        default: "./dist/web.js"
       },
       "react-native": {
         require: "./dist/react-native.cjs",
@@ -4139,13 +4139,13 @@ var package_default = {
         default: "./dist/index.js"
       }
     },
-    "./react": {
+    "./web": {
       types: {
-        require: "./dist/react.d.cts",
-        default: "./dist/react.d.ts"
+        require: "./dist/web.d.cts",
+        default: "./dist/web.d.ts"
       },
-      require: "./dist/react.cjs",
-      default: "./dist/react.js"
+      require: "./dist/web.cjs",
+      default: "./dist/web.js"
     },
     "./react-native": {
       types: {

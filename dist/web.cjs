@@ -394,9 +394,9 @@ var init_platform = __esm({
   }
 });
 
-// src/react-native.ts
-var react_native_exports = {};
-__export(react_native_exports, {
+// src/web.ts
+var web_exports = {};
+__export(web_exports, {
   AquafierChainable: () => AquafierChainable,
   Err: () => Err,
   ErrResult: () => ErrResult,
@@ -416,7 +416,7 @@ __export(react_native_exports, {
   cliYellowfy: () => cliYellowfy,
   createCredentials: () => createCredentials,
   createNewAquaTree: () => createNewAquaTree,
-  default: () => react_native_default,
+  default: () => web_default,
   dict2Leaves: () => dict2Leaves,
   estimateWitnessGas: () => estimateWitnessGas,
   findFormKey: () => findFormKey,
@@ -454,7 +454,7 @@ __export(react_native_exports, {
   reorderRevisionsProperties: () => reorderRevisionsProperties,
   verifyMerkleIntegrity: () => verifyMerkleIntegrity
 });
-module.exports = __toCommonJS(react_native_exports);
+module.exports = __toCommonJS(web_exports);
 
 // src/platform/node-modules.ts
 var fs = {
@@ -4709,50 +4709,27 @@ var AquafierChainable = class {
   }
 };
 
-// src/react-native.ts
-var isReactNative2 = typeof navigator !== "undefined" && navigator.product === "ReactNative";
-var isReactOrBrowser = typeof window !== "undefined" && typeof document !== "undefined";
-if (!isReactNative2 && !isReactOrBrowser) {
+// src/web.ts
+var isBrowser2 = typeof window !== "undefined" && typeof document !== "undefined";
+if (!isBrowser2) {
   console.warn(
-    'You are importing from "aqua-js-sdk/react-native" but this does not appear to be a React Native or browser environment. This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
+    'You are importing from "aqua-js-sdk/web" but this does not appear to be a browser environment. This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
   );
 }
-if (isReactNative2 || isReactOrBrowser) {
+if (isBrowser2) {
   registerNodeModuleShims();
-}
-if (typeof global !== "undefined") {
-  if (!global.stream) {
-    global.stream = {};
-  }
-  if (!global.process) {
-    global.process = {
-      env: { NODE_ENV: "production" },
-      version: "",
-      versions: { node: "16.0.0" },
-      nextTick: (callback, ...args) => setTimeout(() => callback(...args), 0),
-      // Add minimal stdout/stderr implementations
-      stdout: { write: console.log },
-      stderr: { write: console.error },
-      // Add empty argv array
-      argv: [],
-      // Add platform info
-      platform: "react-native"
-    };
-  }
-  if (typeof global.Buffer === "undefined") {
-    try {
-      const bufferModule = require("buffer/");
-      global.Buffer = bufferModule.Buffer;
-    } catch (e) {
-      console.warn("Failed to load Buffer polyfill:", e);
+  if (typeof window !== "undefined") {
+    if (!window.Buffer) {
+      try {
+        const bufferModule = require("buffer/");
+        window.Buffer = bufferModule.Buffer;
+      } catch (e) {
+        console.warn("Failed to load Buffer polyfill:", e);
+      }
     }
   }
-  if (!global.crypto) {
-    global.crypto = {};
-  }
-  global.WebSocket = global.WebSocket || {};
 }
-var react_native_default = Aquafier;
+var web_default = Aquafier;
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   AquafierChainable,
