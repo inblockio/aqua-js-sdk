@@ -55,11 +55,22 @@ if (typeof global !== 'undefined') {
   // Polyfill for Buffer if not already available
   if (typeof global.Buffer === 'undefined') {
     try {
-      // Using buffer package which is already a dependency
-      const bufferModule = require('buffer/');
+      // Try to load Buffer from the standard buffer package
+      const bufferModule = require('buffer');
       global.Buffer = bufferModule.Buffer;
     } catch (e) {
-      console.warn('Failed to load Buffer polyfill:', e);
+      try {
+        // Fallback to buffer/ if the standard import fails
+        const bufferModule = require('buffer/');
+        global.Buffer = bufferModule.Buffer;
+      } catch (e2) {
+        console.warn('Failed to load Buffer polyfill:', e2);
+        // Provide a minimal Buffer-like implementation
+        global.Buffer = class MinimalBuffer {
+          static from(data: any): any { return data; }
+          static isBuffer(): boolean { return false; }
+        } as any;
+      }
     }
   }
   

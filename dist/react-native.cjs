@@ -30,11 +30,131 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// src/platform/node-modules.ts
+function registerNodeModuleShims() {
+  if (typeof global !== "undefined") {
+    Object.entries(nodeModules).forEach(([name, implementation]) => {
+      try {
+        if (!global[name]) {
+          global[name] = implementation;
+        }
+      } catch (e) {
+        console.error(`Failed to register Node.js module shim for ${name}:`, e);
+      }
+    });
+  }
+}
+var fs, path, http, https, crypto2, stream, util, zlib, nodeModules;
+var init_node_modules = __esm({
+  "src/platform/node-modules.ts"() {
+    "use strict";
+    fs = {
+      promises: {
+        readFile: async () => "",
+        writeFile: async () => {
+        },
+        mkdir: async () => {
+        },
+        readdir: async () => [],
+        stat: async () => ({
+          isFile: () => false,
+          isDirectory: () => false
+        }),
+        access: async () => {
+        }
+      },
+      readFileSync: () => "",
+      writeFileSync: () => {
+      },
+      existsSync: () => false,
+      mkdirSync: () => {
+      },
+      readdirSync: () => [],
+      statSync: () => ({
+        isFile: () => false,
+        isDirectory: () => false
+      })
+    };
+    path = {
+      join: (...args) => args.join("/"),
+      resolve: (...args) => args.join("/"),
+      dirname: (p) => p.split("/").slice(0, -1).join("/"),
+      basename: (p) => p.split("/").pop() || "",
+      extname: (p) => {
+        const base = p.split("/").pop() || "";
+        return base.includes(".") ? "." + base.split(".").pop() : "";
+      }
+    };
+    http = {
+      createServer: () => ({
+        listen: () => {
+        },
+        close: () => {
+        }
+      })
+    };
+    https = {
+      request: () => ({
+        on: () => {
+        },
+        end: () => {
+        }
+      })
+    };
+    crypto2 = {
+      createHash: () => ({
+        update: () => ({
+          digest: () => ""
+        })
+      }),
+      randomBytes: () => Buffer.from([])
+    };
+    stream = {
+      Readable: class {
+      },
+      Writable: class {
+      },
+      Duplex: class {
+      },
+      Transform: class {
+      }
+    };
+    util = {
+      promisify: (fn) => fn,
+      inspect: (obj) => JSON.stringify(obj)
+    };
+    zlib = {
+      gzip: (_, cb) => cb(null, Buffer.from([])),
+      gunzip: (_, cb) => cb(null, Buffer.from([]))
+    };
+    nodeModules = {
+      fs,
+      path,
+      http,
+      https,
+      crypto: crypto2,
+      stream,
+      util,
+      zlib
+    };
+  }
+});
+
 // src/platform/fs.ts
 async function getFileSystem() {
   if (isNode) {
     try {
-      const fs2 = await import("fs/promises");
+      const fs2 = await (async () => {
+        try {
+          return (await import("fs/promises")).default || await import("fs/promises");
+        } catch (e) {
+          try {
+            return (await import("fs/promises")).default || await import("fs/promises");
+          } catch (e2) {
+            return require("fs").promises;
+          }
+        }
+      })();
       return {
         readFile: async (path2, options) => {
           const fsOptions = options?.encoding ? { encoding: options.encoding } : void 0;
@@ -55,7 +175,7 @@ async function getFileSystem() {
       };
     } catch (error) {
       console.error("Failed to import Node.js fs module:", error);
-      throw new Error("File system functionality not available");
+      return getBrowserFileSystem();
     }
   } else if (isReactNative) {
     try {
@@ -98,34 +218,78 @@ async function getFileSystem() {
       console.error("Failed to import React Native file system modules:", error);
       throw new Error("File system functionality not available in this React Native environment");
     }
+  } else if (isBrowser) {
+    return getBrowserFileSystem();
   } else {
-    return {
-      readFile: async (_path, _options) => {
-        throw new Error("File system operations are not supported in browser environment");
-      },
-      writeFile: async (_path, _data, _options) => {
-        throw new Error("File system operations are not supported in browser environment");
-      },
-      exists: async (_path) => {
-        return false;
-      }
-    };
+    console.warn("Unknown environment detected, using browser file system implementation");
+    return getBrowserFileSystem();
   }
+}
+function getBrowserFileSystem() {
+  return {
+    readFile: async (path2, _options) => {
+      console.warn(`Browser environment: Cannot read file from ${path2}`);
+      if (typeof localStorage !== "undefined") {
+        const data = localStorage.getItem(`fs:${path2}`);
+        if (data !== null) return data;
+      }
+      return fs.promises.readFile();
+    },
+    writeFile: async (path2, data, _options) => {
+      console.warn(`Browser environment: Cannot write file to ${path2}`);
+      if (typeof localStorage !== "undefined") {
+        const stringData = typeof data === "string" ? data : data.toString("utf8");
+        try {
+          localStorage.setItem(`fs:${path2}`, stringData);
+        } catch (e) {
+          console.error("Failed to write to localStorage:", e);
+        }
+      }
+      return fs.promises.writeFile();
+    },
+    exists: async (path2) => {
+      if (typeof localStorage !== "undefined") {
+        return localStorage.getItem(`fs:${path2}`) !== null;
+      }
+      return false;
+    }
+  };
 }
 var init_fs = __esm({
   "src/platform/fs.ts"() {
     "use strict";
     init_platform();
+    init_node_modules();
   }
 });
 
 // src/platform/browser.ts
-var forge, import_buffer, browserCrypto;
+var forge, BufferPolyfill, Buffer2, browserCrypto;
 var init_browser = __esm({
   "src/platform/browser.ts"() {
     "use strict";
     forge = __toESM(require("node-forge"), 1);
-    import_buffer = require("buffer/");
+    try {
+      if (typeof global !== "undefined" && global.Buffer) {
+        BufferPolyfill = global.Buffer;
+      } else if (typeof window !== "undefined" && window.Buffer) {
+        BufferPolyfill = window.Buffer;
+      } else {
+        const bufferModule = require("buffer");
+        BufferPolyfill = bufferModule.Buffer;
+      }
+    } catch (e) {
+      console.warn("Buffer not available, using fallback implementation");
+      BufferPolyfill = class MinimalBuffer {
+        static from(data) {
+          return data;
+        }
+        static isBuffer() {
+          return false;
+        }
+      };
+    }
+    Buffer2 = BufferPolyfill;
     browserCrypto = {
       // Minimal implementation of crypto.verify
       verify: (_algorithm, data, publicKey, signature) => {
@@ -141,11 +305,11 @@ var init_browser = __esm({
       },
       // Minimal implementation of crypto.createSign
       createSign: (_algorithm) => {
-        let data = import_buffer.Buffer.from("");
+        let data = Buffer2.from("");
         const signer = {
           update: function(chunk) {
-            const chunkBuffer = typeof chunk === "string" ? import_buffer.Buffer.from(chunk) : chunk instanceof import_buffer.Buffer ? chunk : import_buffer.Buffer.from(chunk.toString(), "binary");
-            data = import_buffer.Buffer.concat([data, chunkBuffer]);
+            const chunkBuffer = typeof chunk === "string" ? Buffer2.from(chunk) : chunk instanceof Buffer2 ? chunk : Buffer2.from(chunk.toString(), "binary");
+            data = Buffer2.concat([data, chunkBuffer]);
             return signer;
           },
           sign: function(key) {
@@ -154,7 +318,7 @@ var init_browser = __esm({
               const md2 = forge.md.sha256.create();
               md2.update(data.toString("binary"));
               const signature = privateKey.sign(md2);
-              return import_buffer.Buffer.from(signature, "binary");
+              return Buffer2.from(signature, "binary");
             } catch (e) {
               console.error("Signing error:", e);
               throw new Error("Failed to sign data");
@@ -165,11 +329,11 @@ var init_browser = __esm({
       },
       // Minimal implementation of crypto.createVerify
       createVerify: (_algorithm) => {
-        let data = import_buffer.Buffer.from("");
+        let data = Buffer2.from("");
         const verifier = {
           update: function(chunk) {
-            const chunkBuffer = typeof chunk === "string" ? import_buffer.Buffer.from(chunk) : chunk instanceof import_buffer.Buffer ? chunk : import_buffer.Buffer.from(chunk.toString(), "binary");
-            data = import_buffer.Buffer.concat([data, chunkBuffer]);
+            const chunkBuffer = typeof chunk === "string" ? Buffer2.from(chunk) : chunk instanceof Buffer2 ? chunk : Buffer2.from(chunk.toString(), "binary");
+            data = Buffer2.concat([data, chunkBuffer]);
             return verifier;
           },
           verify: function(key, signature) {
@@ -177,7 +341,7 @@ var init_browser = __esm({
               const publicKey = forge.pki.publicKeyFromPem(key);
               const md2 = forge.md.sha256.create();
               md2.update(data.toString("binary"));
-              const sig = typeof signature === "string" ? import_buffer.Buffer.from(signature, "base64") : signature instanceof import_buffer.Buffer ? signature : import_buffer.Buffer.from(signature.toString(), "binary");
+              const sig = typeof signature === "string" ? Buffer2.from(signature, "base64") : signature instanceof Buffer2 ? signature : Buffer2.from(signature.toString(), "binary");
               return publicKey.verify(md2.digest().bytes(), sig.toString("binary"));
             } catch (e) {
               console.error("Verification error:", e);
@@ -455,96 +619,7 @@ __export(react_native_exports, {
   verifyMerkleIntegrity: () => verifyMerkleIntegrity
 });
 module.exports = __toCommonJS(react_native_exports);
-
-// src/platform/node-modules.ts
-var fs = {
-  promises: {},
-  readFileSync: () => "",
-  writeFileSync: () => {
-  },
-  existsSync: () => false,
-  mkdirSync: () => {
-  },
-  readdirSync: () => [],
-  statSync: () => ({
-    isFile: () => false,
-    isDirectory: () => false
-  })
-};
-var path = {
-  join: (...args) => args.join("/"),
-  resolve: (...args) => args.join("/"),
-  dirname: (p) => p.split("/").slice(0, -1).join("/"),
-  basename: (p) => p.split("/").pop() || "",
-  extname: (p) => {
-    const base = p.split("/").pop() || "";
-    return base.includes(".") ? "." + base.split(".").pop() : "";
-  }
-};
-var http = {
-  createServer: () => ({
-    listen: () => {
-    },
-    close: () => {
-    }
-  })
-};
-var https = {
-  request: () => ({
-    on: () => {
-    },
-    end: () => {
-    }
-  })
-};
-var crypto2 = {
-  createHash: () => ({
-    update: () => ({
-      digest: () => ""
-    })
-  }),
-  randomBytes: () => Buffer.from([])
-};
-var stream = {
-  Readable: class {
-  },
-  Writable: class {
-  },
-  Duplex: class {
-  },
-  Transform: class {
-  }
-};
-var util = {
-  promisify: (fn) => fn,
-  inspect: (obj) => JSON.stringify(obj)
-};
-var zlib = {
-  gzip: (_, cb) => cb(null, Buffer.from([])),
-  gunzip: (_, cb) => cb(null, Buffer.from([]))
-};
-var nodeModules = {
-  fs,
-  path,
-  http,
-  https,
-  crypto: crypto2,
-  stream,
-  util,
-  zlib
-};
-function registerNodeModuleShims() {
-  if (typeof global !== "undefined") {
-    Object.entries(nodeModules).forEach(([name, implementation]) => {
-      try {
-        if (!global[name]) {
-          global[name] = implementation;
-        }
-      } catch (e) {
-      }
-    });
-  }
-}
+init_node_modules();
 
 // src/types.ts
 var LogType = /* @__PURE__ */ ((LogType2) => {
@@ -4188,7 +4263,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-29",
+  version: "3.2.1-30",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
@@ -4741,10 +4816,23 @@ if (typeof global !== "undefined") {
   }
   if (typeof global.Buffer === "undefined") {
     try {
-      const bufferModule = require("buffer/");
+      const bufferModule = require("buffer");
       global.Buffer = bufferModule.Buffer;
     } catch (e) {
-      console.warn("Failed to load Buffer polyfill:", e);
+      try {
+        const bufferModule = require("buffer/");
+        global.Buffer = bufferModule.Buffer;
+      } catch (e2) {
+        console.warn("Failed to load Buffer polyfill:", e2);
+        global.Buffer = class MinimalBuffer {
+          static from(data) {
+            return data;
+          }
+          static isBuffer() {
+            return false;
+          }
+        };
+      }
     }
   }
   if (!global.crypto) {

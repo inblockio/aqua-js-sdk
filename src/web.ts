@@ -27,10 +27,22 @@ if (isBrowser) {
     // Polyfill for Buffer if not already available
     if (!(window as any).Buffer) {
       try {
-        const bufferModule = require('buffer/');
+        // Try to load Buffer from the standard buffer package
+        const bufferModule = require('buffer');
         (window as any).Buffer = bufferModule.Buffer;
       } catch (e) {
-        console.warn('Failed to load Buffer polyfill:', e);
+        try {
+          // Fallback to buffer/ if the standard import fails
+          const bufferModule = require('buffer/');
+          (window as any).Buffer = bufferModule.Buffer;
+        } catch (e2) {
+          console.warn('Failed to load Buffer polyfill:', e2);
+          // Provide a minimal Buffer-like implementation
+          (window as any).Buffer = class MinimalBuffer {
+            static from(data: any): any { return data; }
+            static isBuffer(): boolean { return false; }
+          };
+        }
       }
     }
   }

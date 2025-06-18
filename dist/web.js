@@ -1,7 +1,4 @@
 import {
-  registerNodeModuleShims
-} from "./chunk-7H4SP45P.js";
-import {
   Aquafier,
   AquafierChainable,
   Err,
@@ -58,10 +55,11 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-V6EOJAZK.js";
+} from "./chunk-JIKXCD77.js";
 import {
-  __require
-} from "./chunk-7QR3R5IB.js";
+  __require,
+  registerNodeModuleShims
+} from "./chunk-XB4QCOVJ.js";
 
 // src/web.ts
 var isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
@@ -75,10 +73,23 @@ if (isBrowser) {
   if (typeof window !== "undefined") {
     if (!window.Buffer) {
       try {
-        const bufferModule = __require("buffer/");
+        const bufferModule = __require("buffer");
         window.Buffer = bufferModule.Buffer;
       } catch (e) {
-        console.warn("Failed to load Buffer polyfill:", e);
+        try {
+          const bufferModule = __require("buffer/");
+          window.Buffer = bufferModule.Buffer;
+        } catch (e2) {
+          console.warn("Failed to load Buffer polyfill:", e2);
+          window.Buffer = class MinimalBuffer {
+            static from(data) {
+              return data;
+            }
+            static isBuffer() {
+              return false;
+            }
+          };
+        }
       }
     }
   }

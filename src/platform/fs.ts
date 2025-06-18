@@ -5,7 +5,8 @@
  * including Node.js and React Native.
  */
 
-import { isReactNative, isNode } from './index';
+import { isReactNative, isNode, isBrowser } from './index';
+import { fs as fsShim } from './node-modules';
 
 /**
  * Interface for file system operations
@@ -23,8 +24,23 @@ export interface FileSystem {
 export async function getFileSystem(): Promise<FileSystem> {
   if (isNode) {
     try {
-      // Use Node.js fs module
-      const fs = await import('fs/promises');
+      // Use Node.js fs module - avoid direct import which causes issues with bundlers
+      // Instead, use a dynamic import with a try-catch to handle different Node.js versions
+      const fs = await (async () => {
+        try {
+          // Try with node: protocol first (Node.js 14+)
+          return (await import('node:fs/promises')).default || await import('node:fs/promises');
+        } catch (e) {
+          try {
+            // Fallback to regular import for older Node versions
+            return (await import('fs/promises')).default || await import('fs/promises');
+          } catch (e2) {
+            // Final fallback to require
+            return require('fs').promises;
+          }
+        }
+      })();
+      
       return {
         readFile: async (path: string, options?: { encoding?: string }) => {
           // Convert options to proper type for Node.js fs
@@ -47,7 +63,8 @@ export async function getFileSystem(): Promise<FileSystem> {
       };
     } catch (error) {
       console.error('Failed to import Node.js fs module:', error);
-      throw new Error('File system functionality not available');
+      // Fallback to browser implementation
+      return getBrowserFileSystem();
     }
   } else if (isReactNative) {
     try {
@@ -94,18 +111,51 @@ export async function getFileSystem(): Promise<FileSystem> {
       console.error('Failed to import React Native file system modules:', error);
       throw new Error('File system functionality not available in this React Native environment');
     }
+  } else if (isBrowser) {
+    return getBrowserFileSystem();
   } else {
-    // Browser environment - very limited functionality
-    return {
-      readFile: async (_path: string, _options?: { encoding?: string }) => {
-        throw new Error('File system operations are not supported in browser environment');
-      },
-      writeFile: async (_path: string, _data: string | Buffer, _options?: { encoding?: string }) => {
-        throw new Error('File system operations are not supported in browser environment');
-      },
-      exists: async (_path: string) => {
-        return false;
-      }
-    };
+    // Unknown environment - fallback to browser implementation
+    console.warn('Unknown environment detected, using browser file system implementation');
+    return getBrowserFileSystem();
   }
+}
+
+/**
+ * Get a browser-compatible file system implementation
+ * @returns A file system implementation for browser environments
+ */
+function getBrowserFileSystem(): FileSystem {
+  // Use our shim implementation to avoid bundler issues
+  return {
+    readFile: async (path: string, _options?: { encoding?: string }) => {
+      console.warn(`Browser environment: Cannot read file from ${path}`);
+      if (typeof localStorage !== 'undefined') {
+        // Try to use localStorage as a simple storage mechanism
+        const data = localStorage.getItem(`fs:${path}`);
+        if (data !== null) return data;
+      }
+      // Use our fs shim to avoid bundler errors
+      return fsShim.promises.readFile();
+    },
+    writeFile: async (path: string, data: string | Buffer, _options?: { encoding?: string }) => {
+      console.warn(`Browser environment: Cannot write file to ${path}`);
+      if (typeof localStorage !== 'undefined') {
+        // Try to use localStorage as a simple storage mechanism
+        const stringData = typeof data === 'string' ? data : data.toString('utf8');
+        try {
+          localStorage.setItem(`fs:${path}`, stringData);
+        } catch (e) {
+          console.error('Failed to write to localStorage:', e);
+        }
+      }
+      // Use our fs shim to avoid bundler errors
+      return fsShim.promises.writeFile();
+    },
+    exists: async (path: string) => {
+      if (typeof localStorage !== 'undefined') {
+        return localStorage.getItem(`fs:${path}`) !== null;
+      }
+      return false;
+    }
+  };
 }

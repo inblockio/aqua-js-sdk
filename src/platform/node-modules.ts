@@ -7,7 +7,17 @@
 
 // Empty implementation for fs module
 export const fs = {
-  promises: {},
+  promises: {
+    readFile: async () => '',
+    writeFile: async () => {},
+    mkdir: async () => {},
+    readdir: async () => [],
+    stat: async () => ({
+      isFile: () => false,
+      isDirectory: () => false
+    }),
+    access: async () => {}
+  },
   readFileSync: () => '',
   writeFileSync: () => {},
   existsSync: () => false,
@@ -100,6 +110,7 @@ export function registerNodeModuleShims() {
         }
       } catch (e) {
         // Ignore errors when trying to set properties
+        console.error(`Failed to register Node.js module shim for ${name}:`, e);
       }
     });
   }

@@ -30,23 +30,68 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// src/platform/node-modules.ts
+var fs;
+var init_node_modules = __esm({
+  "src/platform/node-modules.ts"() {
+    "use strict";
+    fs = {
+      promises: {
+        readFile: async () => "",
+        writeFile: async () => {
+        },
+        mkdir: async () => {
+        },
+        readdir: async () => [],
+        stat: async () => ({
+          isFile: () => false,
+          isDirectory: () => false
+        }),
+        access: async () => {
+        }
+      },
+      readFileSync: () => "",
+      writeFileSync: () => {
+      },
+      existsSync: () => false,
+      mkdirSync: () => {
+      },
+      readdirSync: () => [],
+      statSync: () => ({
+        isFile: () => false,
+        isDirectory: () => false
+      })
+    };
+  }
+});
+
 // src/platform/fs.ts
 async function getFileSystem() {
   if (isNode) {
     try {
-      const fs = await import("fs/promises");
+      const fs2 = await (async () => {
+        try {
+          return (await import("fs/promises")).default || await import("fs/promises");
+        } catch (e) {
+          try {
+            return (await import("fs/promises")).default || await import("fs/promises");
+          } catch (e2) {
+            return require("fs").promises;
+          }
+        }
+      })();
       return {
         readFile: async (path, options) => {
           const fsOptions = options?.encoding ? { encoding: options.encoding } : void 0;
-          return await fs.readFile(path, fsOptions);
+          return await fs2.readFile(path, fsOptions);
         },
         writeFile: async (path, data, options) => {
           const fsOptions = options?.encoding ? { encoding: options.encoding } : void 0;
-          await fs.writeFile(path, data, fsOptions);
+          await fs2.writeFile(path, data, fsOptions);
         },
         exists: async (path) => {
           try {
-            await fs.access(path);
+            await fs2.access(path);
             return true;
           } catch {
             return false;
@@ -55,7 +100,7 @@ async function getFileSystem() {
       };
     } catch (error) {
       console.error("Failed to import Node.js fs module:", error);
-      throw new Error("File system functionality not available");
+      return getBrowserFileSystem();
     }
   } else if (isReactNative) {
     try {
@@ -98,34 +143,78 @@ async function getFileSystem() {
       console.error("Failed to import React Native file system modules:", error);
       throw new Error("File system functionality not available in this React Native environment");
     }
+  } else if (isBrowser) {
+    return getBrowserFileSystem();
   } else {
-    return {
-      readFile: async (_path, _options) => {
-        throw new Error("File system operations are not supported in browser environment");
-      },
-      writeFile: async (_path, _data, _options) => {
-        throw new Error("File system operations are not supported in browser environment");
-      },
-      exists: async (_path) => {
-        return false;
-      }
-    };
+    console.warn("Unknown environment detected, using browser file system implementation");
+    return getBrowserFileSystem();
   }
+}
+function getBrowserFileSystem() {
+  return {
+    readFile: async (path, _options) => {
+      console.warn(`Browser environment: Cannot read file from ${path}`);
+      if (typeof localStorage !== "undefined") {
+        const data = localStorage.getItem(`fs:${path}`);
+        if (data !== null) return data;
+      }
+      return fs.promises.readFile();
+    },
+    writeFile: async (path, data, _options) => {
+      console.warn(`Browser environment: Cannot write file to ${path}`);
+      if (typeof localStorage !== "undefined") {
+        const stringData = typeof data === "string" ? data : data.toString("utf8");
+        try {
+          localStorage.setItem(`fs:${path}`, stringData);
+        } catch (e) {
+          console.error("Failed to write to localStorage:", e);
+        }
+      }
+      return fs.promises.writeFile();
+    },
+    exists: async (path) => {
+      if (typeof localStorage !== "undefined") {
+        return localStorage.getItem(`fs:${path}`) !== null;
+      }
+      return false;
+    }
+  };
 }
 var init_fs = __esm({
   "src/platform/fs.ts"() {
     "use strict";
     init_platform();
+    init_node_modules();
   }
 });
 
 // src/platform/browser.ts
-var forge, import_buffer, browserCrypto;
+var forge, BufferPolyfill, Buffer2, browserCrypto;
 var init_browser = __esm({
   "src/platform/browser.ts"() {
     "use strict";
     forge = __toESM(require("node-forge"), 1);
-    import_buffer = require("buffer/");
+    try {
+      if (typeof global !== "undefined" && global.Buffer) {
+        BufferPolyfill = global.Buffer;
+      } else if (typeof window !== "undefined" && window.Buffer) {
+        BufferPolyfill = window.Buffer;
+      } else {
+        const bufferModule = require("buffer");
+        BufferPolyfill = bufferModule.Buffer;
+      }
+    } catch (e) {
+      console.warn("Buffer not available, using fallback implementation");
+      BufferPolyfill = class MinimalBuffer {
+        static from(data) {
+          return data;
+        }
+        static isBuffer() {
+          return false;
+        }
+      };
+    }
+    Buffer2 = BufferPolyfill;
     browserCrypto = {
       // Minimal implementation of crypto.verify
       verify: (_algorithm, data, publicKey, signature) => {
@@ -141,11 +230,11 @@ var init_browser = __esm({
       },
       // Minimal implementation of crypto.createSign
       createSign: (_algorithm) => {
-        let data = import_buffer.Buffer.from("");
+        let data = Buffer2.from("");
         const signer = {
           update: function(chunk) {
-            const chunkBuffer = typeof chunk === "string" ? import_buffer.Buffer.from(chunk) : chunk instanceof import_buffer.Buffer ? chunk : import_buffer.Buffer.from(chunk.toString(), "binary");
-            data = import_buffer.Buffer.concat([data, chunkBuffer]);
+            const chunkBuffer = typeof chunk === "string" ? Buffer2.from(chunk) : chunk instanceof Buffer2 ? chunk : Buffer2.from(chunk.toString(), "binary");
+            data = Buffer2.concat([data, chunkBuffer]);
             return signer;
           },
           sign: function(key) {
@@ -154,7 +243,7 @@ var init_browser = __esm({
               const md2 = forge.md.sha256.create();
               md2.update(data.toString("binary"));
               const signature = privateKey.sign(md2);
-              return import_buffer.Buffer.from(signature, "binary");
+              return Buffer2.from(signature, "binary");
             } catch (e) {
               console.error("Signing error:", e);
               throw new Error("Failed to sign data");
@@ -165,11 +254,11 @@ var init_browser = __esm({
       },
       // Minimal implementation of crypto.createVerify
       createVerify: (_algorithm) => {
-        let data = import_buffer.Buffer.from("");
+        let data = Buffer2.from("");
         const verifier = {
           update: function(chunk) {
-            const chunkBuffer = typeof chunk === "string" ? import_buffer.Buffer.from(chunk) : chunk instanceof import_buffer.Buffer ? chunk : import_buffer.Buffer.from(chunk.toString(), "binary");
-            data = import_buffer.Buffer.concat([data, chunkBuffer]);
+            const chunkBuffer = typeof chunk === "string" ? Buffer2.from(chunk) : chunk instanceof Buffer2 ? chunk : Buffer2.from(chunk.toString(), "binary");
+            data = Buffer2.concat([data, chunkBuffer]);
             return verifier;
           },
           verify: function(key, signature) {
@@ -177,7 +266,7 @@ var init_browser = __esm({
               const publicKey = forge.pki.publicKeyFromPem(key);
               const md2 = forge.md.sha256.create();
               md2.update(data.toString("binary"));
-              const sig = typeof signature === "string" ? import_buffer.Buffer.from(signature, "base64") : signature instanceof import_buffer.Buffer ? signature : import_buffer.Buffer.from(signature.toString(), "binary");
+              const sig = typeof signature === "string" ? Buffer2.from(signature, "base64") : signature instanceof Buffer2 ? signature : Buffer2.from(signature.toString(), "binary");
               return publicKey.verify(md2.digest().bytes(), sig.toString("binary"));
             } catch (e) {
               console.error("Verification error:", e);
@@ -4098,7 +4187,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-29",
+  version: "3.2.1-30",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {

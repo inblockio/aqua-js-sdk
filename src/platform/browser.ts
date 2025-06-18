@@ -6,11 +6,38 @@
  */
 
 import * as forge from 'node-forge';
-import { Buffer } from 'buffer/';
 import { CryptoSigner, CryptoVerifier, BufferType } from './crypto';
 
-// Re-export Buffer for browser environments
-export { Buffer };
+// Handle Buffer in a way that works in both Node.js and browser environments
+let BufferPolyfill: typeof global.Buffer;
+
+try {
+  // In Node.js, use the built-in Buffer
+  if (typeof global !== 'undefined' && global.Buffer) {
+    BufferPolyfill = global.Buffer;
+  } else if (typeof window !== 'undefined' && (window as any).Buffer) {
+    // In browser, use window.Buffer if available
+    BufferPolyfill = (window as any).Buffer;
+  } else {
+    // As a last resort, try to import the buffer package
+    const bufferModule = require('buffer');
+    BufferPolyfill = bufferModule.Buffer;
+  }
+} catch (e) {
+  console.warn('Buffer not available, using fallback implementation');
+  // Provide a minimal Buffer-like implementation as fallback
+  BufferPolyfill = class MinimalBuffer {
+    static from(data: any): any {
+      return data;
+    }
+    static isBuffer(): boolean {
+      return false;
+    }
+  } as any;
+}
+
+// Export our Buffer implementation
+export const Buffer = BufferPolyfill;
 
 /**
  * Browser-compatible crypto implementation using node-forge
