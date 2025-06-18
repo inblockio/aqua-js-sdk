@@ -5,8 +5,10 @@
  * It's specifically designed for web applications (React, Vue, Angular, etc.).
  */
 
-// Import Node.js module shims
+// IMPORTANT: Register Node.js module shims immediately before any other imports
+// to prevent bundlers from trying to resolve Node.js modules
 import { registerNodeModuleShims } from './platform/node-modules';
+registerNodeModuleShims();
 
 // Check if we're in a browser environment
 const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
@@ -18,31 +20,26 @@ if (!isBrowser) {
   );
 }
 
-// Register Node.js module shims for browser environments
-if (isBrowser) {
-  registerNodeModuleShims();
-  
-  // Set up global polyfills for browser environments
-  if (typeof window !== 'undefined') {
-    // Polyfill for Buffer if not already available
-    if (!(window as any).Buffer) {
+// Set up global polyfills for browser environments
+if (typeof window !== 'undefined') {
+  // Polyfill for Buffer if not already available
+  if (!(window as any).Buffer) {
+    try {
+      // Try to load Buffer from the standard buffer package
+      const bufferModule = require('buffer');
+      (window as any).Buffer = bufferModule.Buffer;
+    } catch (e) {
       try {
-        // Try to load Buffer from the standard buffer package
-        const bufferModule = require('buffer');
+        // Fallback to buffer/ if the standard import fails
+        const bufferModule = require('buffer/');
         (window as any).Buffer = bufferModule.Buffer;
-      } catch (e) {
-        try {
-          // Fallback to buffer/ if the standard import fails
-          const bufferModule = require('buffer/');
-          (window as any).Buffer = bufferModule.Buffer;
-        } catch (e2) {
-          console.warn('Failed to load Buffer polyfill:', e2);
-          // Provide a minimal Buffer-like implementation
-          (window as any).Buffer = class MinimalBuffer {
-            static from(data: any): any { return data; }
-            static isBuffer(): boolean { return false; }
-          };
-        }
+      } catch (e2) {
+        console.warn('Failed to load Buffer polyfill:', e2);
+        // Provide a minimal Buffer-like implementation
+        (window as any).Buffer = class MinimalBuffer {
+          static from(data: any): any { return data; }
+          static isBuffer(): boolean { return false; }
+        };
       }
     }
   }

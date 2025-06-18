@@ -24,22 +24,28 @@ export interface FileSystem {
 export async function getFileSystem(): Promise<FileSystem> {
   if (isNode) {
     try {
-      // Use Node.js fs module - avoid direct import which causes issues with bundlers
-      // Instead, use a dynamic import with a try-catch to handle different Node.js versions
-      const fs = await (async () => {
+      // In Node.js environments, we can safely use require
+      // This avoids issues with bundlers trying to resolve dynamic imports
+      let fs: any;
+      
+      // Use a try-catch block to handle different Node.js versions and environments
+      try {
+        // For CommonJS environments
+        fs = require('fs').promises;
+      } catch (e) {
+        console.warn('Failed to load fs module via require, trying alternative methods');
+        // If require fails, we're likely in an ESM context
+        // We'll use a Function constructor to avoid bundlers parsing the import
+        // This is a bit of a hack, but it works well to avoid bundler issues
         try {
-          // Try with node: protocol first (Node.js 14+)
-          return (await import('node:fs/promises')).default || await import('node:fs/promises');
-        } catch (e) {
-          try {
-            // Fallback to regular import for older Node versions
-            return (await import('fs/promises')).default || await import('fs/promises');
-          } catch (e2) {
-            // Final fallback to require
-            return require('fs').promises;
-          }
+          const dynamicImport = new Function('modulePath', 'return import(modulePath)');
+          fs = await dynamicImport('node:fs/promises');
+        } catch (e2) {
+          // Final fallback
+          console.error('All attempts to load Node.js fs module failed:', e2);
+          return getBrowserFileSystem();
         }
-      })();
+      }
       
       return {
         readFile: async (path: string, options?: { encoding?: string }) => {

@@ -55,11 +55,11 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-JIKXCD77.js";
+} from "./chunk-WAYD3DVS.js";
 import {
   __require,
   registerNodeModuleShims
-} from "./chunk-XB4QCOVJ.js";
+} from "./chunk-JDKV5BHT.js";
 
 // src/react-native.ts
 var isReactNative = typeof navigator !== "undefined" && navigator.product === "ReactNative";

@@ -144,17 +144,19 @@ var init_node_modules = __esm({
 async function getFileSystem() {
   if (isNode) {
     try {
-      const fs2 = await (async () => {
+      let fs2;
+      try {
+        fs2 = require("fs").promises;
+      } catch (e) {
+        console.warn("Failed to load fs module via require, trying alternative methods");
         try {
-          return (await import("fs/promises")).default || await import("fs/promises");
-        } catch (e) {
-          try {
-            return (await import("fs/promises")).default || await import("fs/promises");
-          } catch (e2) {
-            return require("fs").promises;
-          }
+          const dynamicImport = new Function("modulePath", "return import(modulePath)");
+          fs2 = await dynamicImport("node:fs/promises");
+        } catch (e2) {
+          console.error("All attempts to load Node.js fs module failed:", e2);
+          return getBrowserFileSystem();
         }
-      })();
+      }
       return {
         readFile: async (path2, options) => {
           const fsOptions = options?.encoding ? { encoding: options.encoding } : void 0;
@@ -4263,7 +4265,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-30",
+  version: "3.2.1-32",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {

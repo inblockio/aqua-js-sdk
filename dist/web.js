@@ -55,41 +55,39 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-JIKXCD77.js";
+} from "./chunk-WAYD3DVS.js";
 import {
   __require,
   registerNodeModuleShims
-} from "./chunk-XB4QCOVJ.js";
+} from "./chunk-JDKV5BHT.js";
 
 // src/web.ts
+registerNodeModuleShims();
 var isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
 if (!isBrowser) {
   console.warn(
     'You are importing from "aqua-js-sdk/web" but this does not appear to be a browser environment. This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
   );
 }
-if (isBrowser) {
-  registerNodeModuleShims();
-  if (typeof window !== "undefined") {
-    if (!window.Buffer) {
+if (typeof window !== "undefined") {
+  if (!window.Buffer) {
+    try {
+      const bufferModule = __require("buffer");
+      window.Buffer = bufferModule.Buffer;
+    } catch (e) {
       try {
-        const bufferModule = __require("buffer");
+        const bufferModule = __require("buffer/");
         window.Buffer = bufferModule.Buffer;
-      } catch (e) {
-        try {
-          const bufferModule = __require("buffer/");
-          window.Buffer = bufferModule.Buffer;
-        } catch (e2) {
-          console.warn("Failed to load Buffer polyfill:", e2);
-          window.Buffer = class MinimalBuffer {
-            static from(data) {
-              return data;
-            }
-            static isBuffer() {
-              return false;
-            }
-          };
-        }
+      } catch (e2) {
+        console.warn("Failed to load Buffer polyfill:", e2);
+        window.Buffer = class MinimalBuffer {
+          static from(data) {
+            return data;
+          }
+          static isBuffer() {
+            return false;
+          }
+        };
       }
     }
   }
