@@ -119,11 +119,89 @@ var init_fs = __esm({
   }
 });
 
+// src/platform/browser.ts
+var forge, import_buffer, browserCrypto;
+var init_browser = __esm({
+  "src/platform/browser.ts"() {
+    "use strict";
+    forge = __toESM(require("node-forge"), 1);
+    import_buffer = require("buffer/");
+    browserCrypto = {
+      // Minimal implementation of crypto.verify
+      verify: (_algorithm, data, publicKey, signature) => {
+        try {
+          const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
+          const md2 = forge.md.sha256.create();
+          md2.update(data.toString("binary"));
+          return publicKeyObj.verify(md2.digest().bytes(), signature.toString("binary"));
+        } catch (e) {
+          console.error("Verification error:", e);
+          return false;
+        }
+      },
+      // Minimal implementation of crypto.createSign
+      createSign: (_algorithm) => {
+        let data = import_buffer.Buffer.from("");
+        const signer = {
+          update: function(chunk) {
+            const chunkBuffer = typeof chunk === "string" ? import_buffer.Buffer.from(chunk) : chunk instanceof import_buffer.Buffer ? chunk : import_buffer.Buffer.from(chunk.toString(), "binary");
+            data = import_buffer.Buffer.concat([data, chunkBuffer]);
+            return signer;
+          },
+          sign: function(key) {
+            try {
+              const privateKey = forge.pki.privateKeyFromPem(key);
+              const md2 = forge.md.sha256.create();
+              md2.update(data.toString("binary"));
+              const signature = privateKey.sign(md2);
+              return import_buffer.Buffer.from(signature, "binary");
+            } catch (e) {
+              console.error("Signing error:", e);
+              throw new Error("Failed to sign data");
+            }
+          }
+        };
+        return signer;
+      },
+      // Minimal implementation of crypto.createVerify
+      createVerify: (_algorithm) => {
+        let data = import_buffer.Buffer.from("");
+        const verifier = {
+          update: function(chunk) {
+            const chunkBuffer = typeof chunk === "string" ? import_buffer.Buffer.from(chunk) : chunk instanceof import_buffer.Buffer ? chunk : import_buffer.Buffer.from(chunk.toString(), "binary");
+            data = import_buffer.Buffer.concat([data, chunkBuffer]);
+            return verifier;
+          },
+          verify: function(key, signature) {
+            try {
+              const publicKey = forge.pki.publicKeyFromPem(key);
+              const md2 = forge.md.sha256.create();
+              md2.update(data.toString("binary"));
+              const sig = typeof signature === "string" ? import_buffer.Buffer.from(signature, "base64") : signature instanceof import_buffer.Buffer ? signature : import_buffer.Buffer.from(signature.toString(), "binary");
+              return publicKey.verify(md2.digest().bytes(), sig.toString("binary"));
+            } catch (e) {
+              console.error("Verification error:", e);
+              return false;
+            }
+          }
+        };
+        return verifier;
+      }
+    };
+  }
+});
+
 // src/platform/crypto.ts
 async function getCrypto() {
   if (isNode) {
     try {
-      const nodeCrypto = await import("crypto");
+      const nodeCrypto = await (async () => {
+        try {
+          return await import("crypto");
+        } catch (e) {
+          return await import("crypto");
+        }
+      })();
       return {
         verify: nodeCrypto.verify,
         createSign: nodeCrypto.createSign,
@@ -131,18 +209,18 @@ async function getCrypto() {
       };
     } catch (error) {
       console.error("Failed to import Node.js crypto module:", error);
-      throw new Error("Crypto functionality not available");
+      return await getBrowserCrypto();
     }
   } else if (isReactNative) {
     try {
-      const forge = require("node-forge");
+      const forge2 = require("node-forge");
       return {
         verify: (_algorithm, data, publicKey, signature) => {
           try {
-            const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
-            const md = forge.md.sha256.create();
-            md.update(data.toString("binary"));
-            return publicKeyObj.verify(md.digest().bytes(), signature.toString("binary"));
+            const publicKeyObj = forge2.pki.publicKeyFromPem(publicKey);
+            const md2 = forge2.md.sha256.create();
+            md2.update(data.toString("binary"));
+            return publicKeyObj.verify(md2.digest().bytes(), signature.toString("binary"));
           } catch (e) {
             console.error("Verification error:", e);
             return false;
@@ -158,10 +236,10 @@ async function getCrypto() {
             },
             sign: (key) => {
               try {
-                const privateKey = forge.pki.privateKeyFromPem(key);
-                const md = forge.md.sha256.create();
-                md.update(data.toString("binary"));
-                const signature = privateKey.sign(md);
+                const privateKey = forge2.pki.privateKeyFromPem(key);
+                const md2 = forge2.md.sha256.create();
+                md2.update(data.toString("binary"));
+                const signature = privateKey.sign(md2);
                 return Buffer.from(signature, "binary");
               } catch (e) {
                 console.error("Signing error:", e);
@@ -180,11 +258,11 @@ async function getCrypto() {
             },
             verify: (key, signature) => {
               try {
-                const publicKey = forge.pki.publicKeyFromPem(key);
-                const md = forge.md.sha256.create();
-                md.update(data.toString("binary"));
+                const publicKey = forge2.pki.publicKeyFromPem(key);
+                const md2 = forge2.md.sha256.create();
+                md2.update(data.toString("binary"));
                 const sig = typeof signature === "string" ? Buffer.from(signature, "base64") : signature;
-                return publicKey.verify(md.digest().bytes(), sig.toString("binary"));
+                return publicKey.verify(md2.digest().bytes(), sig.toString("binary"));
               } catch (e) {
                 console.error("Verification error:", e);
                 return false;
@@ -197,23 +275,24 @@ async function getCrypto() {
       console.error("Failed to create React Native compatible crypto implementation:", error);
       throw new Error("Crypto functionality not available in this React Native environment");
     }
+  } else if (isBrowser) {
+    return await getBrowserCrypto();
   } else {
-    try {
-      const cryptoBrowserify = require("crypto-browserify");
-      return {
-        verify: cryptoBrowserify.verify,
-        createSign: cryptoBrowserify.createSign,
-        createVerify: cryptoBrowserify.createVerify
-      };
-    } catch (error) {
-      console.error("Failed to import browser compatible crypto module:", error);
-      throw new Error("Crypto functionality not available in this browser environment");
-    }
+    console.warn("Unknown environment detected, using browser crypto implementation");
+    return await getBrowserCrypto();
+  }
+}
+async function getBrowserCrypto() {
+  try {
+    return browserCrypto;
+  } catch (error) {
+    console.error("Failed to create browser compatible crypto implementation:", error);
+    throw new Error("Crypto functionality not available in this browser environment");
   }
 }
 async function getForge() {
   try {
-    return require("node-forge");
+    return await import("node-forge");
   } catch (error) {
     console.error("Failed to import node-forge:", error);
     throw new Error("Forge functionality not available");
@@ -223,6 +302,7 @@ var init_crypto = __esm({
   "src/platform/crypto.ts"() {
     "use strict";
     init_platform();
+    init_browser();
   }
 });
 
@@ -1995,16 +2075,16 @@ var P12Signer = class {
   }
   async sign(verificationHash, privateKey, password) {
     const { createSign } = await this.getCrypto();
-    const forge = await this.getForge();
-    const p12Asn1 = forge.asn1.fromDer(privateKey);
-    const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, password);
-    const bagType = forge.pki.oids.pkcs8ShroudedKeyBag;
+    const forge2 = await this.getForge();
+    const p12Asn1 = forge2.asn1.fromDer(privateKey);
+    const p12 = forge2.pkcs12.pkcs12FromAsn1(p12Asn1, password);
+    const bagType = forge2.pki.oids.pkcs8ShroudedKeyBag;
     const bag = p12.getBags({ bagType })[bagType][0];
-    const keyPem = forge.pki.privateKeyToPem(bag.key);
-    const privateKeyObj = forge.pki.privateKeyFromPem(keyPem);
-    const publicKey = forge.pki.rsa.setPublicKey(privateKeyObj.n, privateKeyObj.e);
-    const publicKeyAsn1 = forge.pki.publicKeyToAsn1(publicKey);
-    const publicKeyDer = forge.asn1.toDer(publicKeyAsn1).getBytes();
+    const keyPem = forge2.pki.privateKeyToPem(bag.key);
+    const privateKeyObj = forge2.pki.privateKeyFromPem(keyPem);
+    const publicKey = forge2.pki.rsa.setPublicKey(privateKeyObj.n, privateKeyObj.e);
+    const publicKeyAsn1 = forge2.pki.publicKeyToAsn1(publicKey);
+    const publicKeyDer = forge2.asn1.toDer(publicKeyAsn1).getBytes();
     const pubKeyString = Buffer.from(publicKeyDer, "binary").toString("hex");
     const signer = createSign("RSA-SHA256");
     signer.update(verificationHash);
@@ -2013,9 +2093,9 @@ var P12Signer = class {
       signature = signer.sign(privateKeyObj);
     } catch (error) {
       console.warn("Crypto signer failed, falling back to forge:", error);
-      const md = forge.md.sha256.create();
-      md.update(verificationHash);
-      signature = privateKeyObj.sign(md);
+      const md2 = forge2.md.sha256.create();
+      md2.update(verificationHash);
+      signature = privateKeyObj.sign(md2);
     }
     return {
       signature: Buffer.from(signature, "binary").toString("hex"),
@@ -4018,7 +4098,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-27",
+  version: "3.2.1-28",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
@@ -4028,7 +4108,7 @@ var package_default = {
   main: "dist/index.js",
   types: "dist/index.d.ts",
   scripts: {
-    build: "tsup src/index.ts src/react-native.ts --dts --format esm,cjs --out-dir dist --tsconfig tsconfig.json",
+    build: "tsup src/index.ts src/react-native.ts src/react.ts --dts --format esm,cjs --out-dir dist --tsconfig tsconfig.json",
     prepare: "npm run build",
     dev: "tsc",
     test: "NODE_OPTIONS='--experimental-vm-modules' npx jest",
@@ -4043,8 +4123,12 @@ var package_default = {
         default: "./dist/index.d.ts"
       },
       browser: {
-        require: "./dist/index.cjs",
-        default: "./dist/index.js"
+        require: "./dist/react.cjs",
+        default: "./dist/react.js"
+      },
+      react: {
+        require: "./dist/react.cjs",
+        default: "./dist/react.js"
       },
       "react-native": {
         require: "./dist/react-native.cjs",
@@ -4054,6 +4138,14 @@ var package_default = {
         require: "./dist/index.cjs",
         default: "./dist/index.js"
       }
+    },
+    "./react": {
+      types: {
+        require: "./dist/react.d.cts",
+        default: "./dist/react.d.ts"
+      },
+      require: "./dist/react.cjs",
+      default: "./dist/react.js"
     },
     "./react-native": {
       types: {

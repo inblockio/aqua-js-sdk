@@ -1,4 +1,7 @@
 import {
+  registerNodeModuleShims
+} from "./chunk-7H4SP45P.js";
+import {
   Aquafier,
   AquafierChainable,
   Err,
@@ -55,17 +58,21 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-RQEA64VQ.js";
+} from "./chunk-7UYQ4L5B.js";
 import {
   __require
-} from "./chunk-VLIZD7LI.js";
+} from "./chunk-7QR3R5IB.js";
 
 // src/react-native.ts
 var isReactNative = typeof navigator !== "undefined" && navigator.product === "ReactNative";
-if (!isReactNative) {
+var isReactOrBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+if (!isReactNative && !isReactOrBrowser) {
   console.warn(
-    'You are importing from "aqua-js-sdk/react-native" but this does not appear to be a React Native environment. This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
+    'You are importing from "aqua-js-sdk/react-native" but this does not appear to be a React Native or browser environment. This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
   );
+}
+if (isReactNative || isReactOrBrowser) {
+  registerNodeModuleShims();
 }
 if (typeof global !== "undefined") {
   if (!global.stream) {
@@ -87,8 +94,12 @@ if (typeof global !== "undefined") {
     };
   }
   if (typeof global.Buffer === "undefined") {
-    const { Buffer } = __require("buffer/");
-    global.Buffer = Buffer;
+    try {
+      const bufferModule = __require("buffer/");
+      global.Buffer = bufferModule.Buffer;
+    } catch (e) {
+      console.warn("Failed to load Buffer polyfill:", e);
+    }
   }
   if (!global.crypto) {
     global.crypto = {};

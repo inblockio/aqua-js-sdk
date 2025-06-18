@@ -1,4 +1,7 @@
 import {
+  registerNodeModuleShims
+} from "./chunk-7H4SP45P.js";
+import {
   Aquafier,
   AquafierChainable,
   Err,
@@ -56,7 +59,31 @@ import {
   reorderRevisionsProperties,
   verifyMerkleIntegrity
 } from "./chunk-7UYQ4L5B.js";
-import "./chunk-7QR3R5IB.js";
+import {
+  __require
+} from "./chunk-7QR3R5IB.js";
+
+// src/react.ts
+var isBrowser = typeof window !== "undefined" && typeof document !== "undefined";
+if (!isBrowser) {
+  console.warn(
+    'You are importing from "aqua-js-sdk/react" but this does not appear to be a browser environment. This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
+  );
+}
+if (isBrowser) {
+  registerNodeModuleShims();
+  if (typeof window !== "undefined") {
+    if (!window.Buffer) {
+      try {
+        const bufferModule = __require("buffer/");
+        window.Buffer = bufferModule.Buffer;
+      } catch (e) {
+        console.warn("Failed to load Buffer polyfill:", e);
+      }
+    }
+  }
+}
+var react_default = Aquafier;
 export {
   AquafierChainable,
   Err,
@@ -77,7 +104,7 @@ export {
   cliYellowfy,
   createCredentials,
   createNewAquaTree,
-  Aquafier as default,
+  react_default as default,
   dict2Leaves,
   estimateWitnessGas,
   findFormKey,

@@ -6,14 +6,25 @@
  * implementations that are compatible with React Native.
  */
 
+// Import Node.js module shims
+import { registerNodeModuleShims } from './platform/node-modules';
+
 // Check if we're actually in React Native
 const isReactNative = typeof navigator !== 'undefined' && navigator.product === 'ReactNative';
 
-if (!isReactNative) {
+// Check if we're in a browser or React environment
+const isReactOrBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
+
+if (!isReactNative && !isReactOrBrowser) {
   console.warn(
-    'You are importing from "aqua-js-sdk/react-native" but this does not appear to be a React Native environment. ' +
+    'You are importing from "aqua-js-sdk/react-native" but this does not appear to be a React Native or browser environment. ' +
     'This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
   );
+}
+
+// Register Node.js module shims for React Native and browser environments
+if (isReactNative || isReactOrBrowser) {
+  registerNodeModuleShims();
 }
 
 // Set up global polyfills for Node.js modules that might be used by dependencies
@@ -43,9 +54,13 @@ if (typeof global !== 'undefined') {
   
   // Polyfill for Buffer if not already available
   if (typeof global.Buffer === 'undefined') {
-    // Using buffer package which is already a dependency
-    const { Buffer } = require('buffer/');
-    global.Buffer = Buffer;
+    try {
+      // Using buffer package which is already a dependency
+      const bufferModule = require('buffer/');
+      global.Buffer = bufferModule.Buffer;
+    } catch (e) {
+      console.warn('Failed to load Buffer polyfill:', e);
+    }
   }
   
   // Polyfill for crypto
@@ -57,6 +72,8 @@ if (typeof global !== 'undefined') {
   
   // Polyfill for ws module
   (global as any).WebSocket = global.WebSocket || {};
+  
+  // Node.js module shims are now handled by registerNodeModuleShims()
 }
 
 // Re-export everything from the main entry point

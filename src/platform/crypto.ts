@@ -5,18 +5,22 @@
  * including Node.js and React Native.
  */
 
-import { isReactNative, isNode } from './index';
+import { isReactNative, isNode, isBrowser } from './index';
+import { browserCrypto } from './browser';
+
+// Type definition for a more flexible Buffer type that works across environments
+export type BufferType = Buffer | Uint8Array | { toString(encoding?: string): string };
 
 // Interface for crypto verification
 export interface CryptoVerifier {
-  update(data: string | Buffer): CryptoVerifier;
-  verify(key: string | Buffer | object, signature: Buffer | string): boolean;
+  update(data: string | BufferType): CryptoVerifier;
+  verify(key: string | BufferType | object, signature: BufferType | string): boolean;
 }
 
 // Interface for crypto signing
 export interface CryptoSigner {
-  update(data: string | Buffer): CryptoSigner;
-  sign(key: string | Buffer | any): Buffer;
+  update(data: string | BufferType): CryptoSigner;
+  sign(key: string | BufferType | any): BufferType;
 }
 
 /**
@@ -30,8 +34,18 @@ export async function getCrypto(): Promise<{
 }> {
   if (isNode) {
     try {
-      // Use Node.js crypto module
-      const nodeCrypto = await import('crypto');
+      // Use Node.js crypto module - use dynamic import with explicit path to avoid bundler issues
+      // This prevents bundlers from trying to resolve 'node:crypto' in browser environments
+      const nodeCrypto = await (async () => {
+        try {
+          // Try with node: protocol first (Node.js 14+)
+          return await import('node:crypto');
+        } catch (e) {
+          // Fallback to regular import for older Node versions
+          return await import('crypto');
+        }
+      })();
+      
       return {
         verify: nodeCrypto.verify,
         createSign: nodeCrypto.createSign,
@@ -39,7 +53,8 @@ export async function getCrypto(): Promise<{
       };
     } catch (error) {
       console.error('Failed to import Node.js crypto module:', error);
-      throw new Error('Crypto functionality not available');
+      // Fallback to browser implementation if Node.js crypto fails
+      return await getBrowserCrypto();
     }
   } else if (isReactNative) {
     // Use React Native compatible crypto implementation
@@ -118,20 +133,27 @@ export async function getCrypto(): Promise<{
       console.error('Failed to create React Native compatible crypto implementation:', error);
       throw new Error('Crypto functionality not available in this React Native environment');
     }
+  } else if (isBrowser) {
+    return await getBrowserCrypto();
   } else {
-    // Browser environment
-    try {
-      // Use crypto-browserify for browser environments too
-      const cryptoBrowserify = require('crypto-browserify');
-      return {
-        verify: cryptoBrowserify.verify,
-        createSign: cryptoBrowserify.createSign,
-        createVerify: cryptoBrowserify.createVerify
-      };
-    } catch (error) {
-      console.error('Failed to import browser compatible crypto module:', error);
-      throw new Error('Crypto functionality not available in this browser environment');
-    }
+    // Fallback for unknown environments
+    console.warn('Unknown environment detected, using browser crypto implementation');
+    return await getBrowserCrypto();
+  }
+}
+
+/**
+ * Get browser-compatible crypto implementation
+ * @returns A promise resolving to the browser crypto implementation
+ */
+async function getBrowserCrypto() {
+  try {
+    // Use the pre-configured browser crypto implementation
+    // This avoids dynamic imports which can cause issues with some bundlers
+    return browserCrypto;
+  } catch (error) {
+    console.error('Failed to create browser compatible crypto implementation:', error);
+    throw new Error('Crypto functionality not available in this browser environment');
   }
 }
 
@@ -141,8 +163,8 @@ export async function getCrypto(): Promise<{
  */
 export async function getForge() {
   try {
-    // node-forge works in both Node.js and browser/React Native environments
-    return require('node-forge');
+    // Use dynamic import for better compatibility with bundlers
+    return await import('node-forge');
   } catch (error) {
     console.error('Failed to import node-forge:', error);
     throw new Error('Forge functionality not available');
