@@ -643,11 +643,44 @@ async function verifyRevision(
     case "form":
       let res = verifyFormRevision(revision, revision.leaves,  `${identCharacter}\t\t`)
       isSuccess = res.isOk
-      // TODO: Look at this, some weird issue here
-      // logsResult = logs
-      // verification is already done in verifyRevisionMerkleTreeStructure
-      // isSuccess = true;
+     
       logs.push(...res.logs)
+
+       logs.push({
+            log: `Verified form fields veriifying json file`,
+            logType: LogType.INFO,
+            ident: `${identCharacter}\t`,
+          })
+       let fileContent1: Buffer
+      if (!!revision.content) {
+        fileContent1 = Buffer.from(revision.content, "utf8")
+      } else {
+        let fileName = aquaTree.file_index[verificationHash]
+        let fileObjectItem = getFileNameCheckingPaths(fileObjects, fileName)
+
+        if (fileObjectItem == undefined) {
+          logs.push({
+            log: `file not found in file objects`,
+            logType: LogType.ERROR,
+            ident: `${identCharacter}\t`,
+          })
+          return [false, logs]
+        }
+
+        if (fileObjectItem.fileContent instanceof Uint8Array) {
+          fileContent1 = Buffer.from(fileObjectItem.fileContent)
+        } else {
+          if (typeof fileObjectItem.fileContent === "string") {
+            fileContent1 = Buffer.from(fileObjectItem.fileContent as string)
+          } else {
+            fileContent1 = Buffer.from(
+              JSON.stringify(fileObjectItem.fileContent),
+            )
+          }
+        }
+      }
+      const fileHash1 = getHashSum(fileContent1)
+      isSuccess = fileHash1 === revision.file_hash
       break
     case "file":
       let fileContent: Buffer
