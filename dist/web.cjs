@@ -3304,7 +3304,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
             log: `Alchemy key is missing`,
             logType: "debug_data" /* DEBUGDATA */
           });
-          process.exit(1);
+          return Err(logs);
         }
         let alchemyProvider = `https://eth-${witness_network}.g.alchemy.com/v2/${credentials.alchemy_key}`;
         const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, "/v2/****");
@@ -3341,7 +3341,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
             log: `Unable to Estimate gas fee: ${gasEstimateResult.error}`,
             logType: "debug_data" /* DEBUGDATA */
           });
-          process.exit(1);
+          return Err(logs);
         }
         if (!gasEstimateResult.hasEnoughBalance) {
           logs.push({
@@ -3353,7 +3353,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
 `,
             logType: "debug_data" /* DEBUGDATA */
           });
-          process.exit(1);
+          return Err(logs);
         }
         let transactionResult = null;
         try {
@@ -3376,6 +3376,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
             logType: "error" /* ERROR */,
             log: "An error witnessing using etherium "
           });
+          return Err(logs);
         }
         if (transactionResult == null || transactionResult.error != null || !transactionResult.transactionHash) {
           logs.push({
@@ -3403,7 +3404,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
     }
     default: {
       console.error(`Unknown witness method: ${witnessType}`);
-      process.exit(1);
+      return Err(logs);
     }
   }
   const witness = {
@@ -4318,7 +4319,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-33",
+  version: "3.2.1-35",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
