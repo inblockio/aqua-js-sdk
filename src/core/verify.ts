@@ -682,6 +682,15 @@ async function verifyRevision(
       }
       const fileHash1 = getHashSum(fileContent1)
       isSuccess = fileHash1 === revision.file_hash
+
+      if(!isSuccess){
+
+        logs.push({
+          log: `File hash verification failed for form revision`,
+          logType: LogType.ERROR,
+          ident: `${identCharacter}\t`,
+        })
+      }
       break
     case "file":
       let fileContent: Buffer
@@ -714,6 +723,15 @@ async function verifyRevision(
       }
       const fileHash = getHashSum(fileContent)
       isSuccess = fileHash === revision.file_hash
+
+      if(!isSuccess){
+
+        logs.push({
+          log: `File hash verification failed for form revision`,
+          logType: LogType.ERROR,
+          ident: `${identCharacter}\t`,
+        })
+      }
       break
     case "signature":
       // Verify signature
@@ -952,7 +970,7 @@ async function verifyRevision(
     return [true, logs]
   } else {
     logs.push({
-      log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash} - \n isSuccess ${isSuccess} - isScalarSuccess ${isScalarSuccess} `,
+      log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash}. `,
       logType: LogType.ERROR,
       ident: `${identCharacter}\t`,
     })
