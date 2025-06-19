@@ -467,7 +467,8 @@ export async function verifyWitness(
     let isValid: boolean = false;
 
     // Check for internet connection first
-    const hasInternet = await checkInternetConnection();
+    // TODO: Check for internet connection. FIX ME!!!
+    const hasInternet = true// await checkInternetConnection();
     if (!hasInternet) {
         logs.push({
             log: `No internet connection available. Witness verification requires internet access.`,
