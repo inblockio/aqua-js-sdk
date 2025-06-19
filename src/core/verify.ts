@@ -660,7 +660,8 @@ async function verifyRevision(
 
         if (fileObjectItem == undefined) {
           logs.push({
-            log: `file not found in file objects`,
+            // log: `file not found in file objects (form) fileObjectItem ${fileObjectItem} verificationHash ${verificationHash} fileObjects ${JSON.stringify(fileObjects, null, 4)}`,
+            log: `file not found in file objects (form).`,
             logType: LogType.ERROR,
             ident: `${identCharacter}\t`,
           })

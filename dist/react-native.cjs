@@ -3914,6 +3914,40 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
       let res = verifyFormRevision(revision, revision.leaves, `${identCharacter}		`);
       isSuccess = res.isOk;
       logs.push(...res.logs);
+      logs.push({
+        log: `Verified form fields veriifying json file`,
+        logType: "info" /* INFO */,
+        ident: `${identCharacter}	`
+      });
+      let fileContent1;
+      if (!!revision.content) {
+        fileContent1 = Buffer.from(revision.content, "utf8");
+      } else {
+        let fileName = aquaTree.file_index[verificationHash];
+        let fileObjectItem = getFileNameCheckingPaths(fileObjects, fileName);
+        if (fileObjectItem == void 0) {
+          logs.push({
+            // log: `file not found in file objects (form) fileObjectItem ${fileObjectItem} verificationHash ${verificationHash} fileObjects ${JSON.stringify(fileObjects, null, 4)}`,
+            log: `file not found in file objects (form).`,
+            logType: "error" /* ERROR */,
+            ident: `${identCharacter}	`
+          });
+          return [false, logs];
+        }
+        if (fileObjectItem.fileContent instanceof Uint8Array) {
+          fileContent1 = Buffer.from(fileObjectItem.fileContent);
+        } else {
+          if (typeof fileObjectItem.fileContent === "string") {
+            fileContent1 = Buffer.from(fileObjectItem.fileContent);
+          } else {
+            fileContent1 = Buffer.from(
+              JSON.stringify(fileObjectItem.fileContent)
+            );
+          }
+        }
+      }
+      const fileHash1 = getHashSum(fileContent1);
+      isSuccess = fileHash1 === revision.file_hash;
       break;
     case "file":
       let fileContent;
@@ -4265,7 +4299,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-32",
+  version: "3.2.1-33",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
