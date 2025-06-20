@@ -194,7 +194,20 @@ export type WitnessPlatformType = "cli" | "metamask"
 /** Network used for witnessing */
 export type WitnessNetwork = "sepolia" | "mainnet" | "holesky"
 /** Type of signing method */
-export type SignType = "cli" | "metamask" | "did" | "p12"
+export type SignType = "metamask" | "cli" | "did" | "p12"
+
+/**
+ * Configuration options specific to React Native MetaMask integration
+ * 
+ * @property deepLinkUrl - The deep link URL for the MetaMask mobile app
+ * @property callbackUrl - The callback URL that MetaMask will redirect to after signing
+ * @property onDeepLinkReady - Callback function when deep link is ready to be opened
+ */
+export interface ReactNativeMetaMaskOptions {
+  deepLinkUrl?: string;
+  callbackUrl?: string;
+  onDeepLinkReady?: (url: string) => void;
+}
 
 /** Environment where witnessing occurs */
 export type WitnessEnvironment = "node" | "browser"

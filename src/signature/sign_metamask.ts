@@ -1,6 +1,11 @@
 import { ethers } from 'ethers';
 import { getChainIdFromNetwork } from '../utils';
 
+// For React Native environment detection
+declare const global: {
+    HermesInternal?: object;
+};
+
 /**
  * Configuration options for MetaMask signer
  * 
@@ -8,12 +13,26 @@ import { getChainIdFromNetwork } from '../utils';
  * @property host - Host address for local server (default: 'localhost')
  * @property maxAttempts - Maximum polling attempts (default: 24)
  * @property pollInterval - Interval between polls in ms (default: 5000)
+ * @property reactNativeOptions - Options specific to React Native environment
  */
 interface MetaMaskSignerOptions {
     port?: number;
     host?: string;
     maxAttempts?: number;
     pollInterval?: number;
+    reactNativeOptions?: ReactNativeMetaMaskOptions;
+}
+
+/**
+ * Configuration options specific to React Native MetaMask integration
+ * 
+ * @property deepLinkUrl - The deep link URL for the MetaMask mobile app
+ * @property callbackUrl - The callback URL that MetaMask will redirect to after signing
+ */
+interface ReactNativeMetaMaskOptions {
+    deepLinkUrl?: string;
+    callbackUrl?: string;
+    onDeepLinkReady?: (url: string) => void;
 }
 
 interface SignatureResult {
@@ -48,6 +67,7 @@ export class MetaMaskSigner {
     private pollInterval: number;
     private server: any | null; // Type will be http.Server in Node environment
     private lastResult: SignatureResult | null;
+    private reactNativeOptions: ReactNativeMetaMaskOptions;
 
     constructor(options: MetaMaskSignerOptions = {}) {
         this.port = options.port || 3001;
@@ -57,6 +77,10 @@ export class MetaMaskSigner {
         this.pollInterval = options.pollInterval || 5000;
         this.server = null;
         this.lastResult = null;
+        this.reactNativeOptions = options.reactNativeOptions || {
+            deepLinkUrl: 'metamask://',
+            callbackUrl: 'aqua-js-sdk://callback'
+        };
     }
 
     /**
@@ -315,20 +339,66 @@ export class MetaMaskSigner {
     }
 
     /**
+ * Handles signing process in React Native environment
+ * 
+ * @param verificationHash - Hash of the revision to sign
+ * @param network - Ethereum network to use
+ * @returns Promise resolving to [signature, wallet address, public key]
+ * 
+ * This method:
+ * - Creates a deep link to open MetaMask mobile app
+ * - Handles the callback with signature data
+ * - Recovers public key from signature
+ */
+    private async signInReactNative(verificationHash: string, network: string): Promise<[string, string, string]> {
+        const message = this.createMessage(verificationHash);
+        const chainId = getChainIdFromNetwork(network);
+        
+        // Create a deep link to MetaMask mobile app
+        const encodedMessage = encodeURIComponent(message);
+        const deepLink = `${this.reactNativeOptions.deepLinkUrl}dapp/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
+        
+        // Notify caller that deep link is ready
+        if (this.reactNativeOptions.onDeepLinkReady) {
+            this.reactNativeOptions.onDeepLinkReady(deepLink);
+        }
+        
+        // In a real implementation, we would need to:
+        // 1. Open the deep link using Linking API
+        // 2. Set up a listener for the callback URL
+        // 3. Parse the signature from the callback URL
+        // 4. Recover the public key
+        
+        // For now, we'll throw an error indicating this needs to be implemented by the app
+        throw new Error(
+            "React Native MetaMask signing requires app-specific implementation. " +
+            "Please use the deep link URL provided through onDeepLinkReady callback " +
+            "and implement the URL scheme handling in your React Native app."
+        );
+    }
+
+    /**
  * Signs a verification hash using MetaMask
  * 
  * @param verificationHash - Hash of the revision to sign
  * @returns Promise resolving to [signature, wallet address, public key]
  * 
  * This method:
- * - Detects environment (Node.js or browser)
+ * - Detects environment (Node.js, browser, or React Native)
  * - Routes to appropriate signing method
  * - Returns complete signature information
  */
     public async sign(verificationHash: string, network: string): Promise<[string, string, string]> {
-        const isNode = typeof window === 'undefined';
-        return isNode ?
-            this.signInNode(verificationHash) :
-            this.signInBrowser(verificationHash, network);
+        // Detect React Native environment
+        const isReactNative = typeof global !== 'undefined' && !!global.HermesInternal;
+        const isNode = typeof window === 'undefined' && !isReactNative;
+        
+        if (isReactNative) {
+            return this.signInReactNative(verificationHash, network);
+        } else if (isNode) {
+            return this.signInNode(verificationHash);
+        } else {
+            return this.signInBrowser(verificationHash, network);
+        }
     }
 }

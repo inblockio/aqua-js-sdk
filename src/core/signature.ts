@@ -9,6 +9,7 @@ import {
   SignatureData,
 } from "../types"
 import { MetaMaskSigner } from "../signature/sign_metamask"
+import { ReactNativeMetaMaskOptions } from "../types"
 import { CLISigner } from "../signature/sign_cli"
 import {
   dict2Leaves,
@@ -46,6 +47,7 @@ export async function signAquaTreeUtil(
   credentials: CredentialsData,
   enableScalar: boolean = false,
   identCharacter: string = "",
+  reactNativeOptions?: ReactNativeMetaMaskOptions,
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let aquaTree = aquaTreeWrapper.aquaTree
   let logs: Array<LogData> = []
@@ -69,7 +71,9 @@ export async function signAquaTreeUtil(
 
   switch (signType) {
     case "metamask":
-      let sign = new MetaMaskSigner()
+      let sign = new MetaMaskSigner({
+        reactNativeOptions: reactNativeOptions
+      })
       ;[signature, walletAddress, publicKey] =
         await sign.sign(targetRevisionHash, credentials.witness_eth_network)
       signature_type = "ethereum:eip-191"
@@ -196,20 +200,25 @@ export async function signAquaTreeUtil(
 /**
  * Signs multiple Aqua Trees (Currently unimplemented)
  *
- * @param _aquaTrees - Array of Aqua Tree wrappers to sign
- * @param _signType - Type of signature to use
- * @param _credentials - Credentials data required for signing
- * @param _enableScalar - Optional flag to use scalar mode
+ * @param aquaTrees - Array of Aqua Tree wrappers to sign
+ * @param signType - Type of signature to use
+ * @param credentials - Credentials data required for signing
+ * @param reactNativeOptions - Options for React Native MetaMask integration
+ * @param enableScalar - Optional flag to use scalar mode
  * @param identCharacter - Optional identifier character for logging
  * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
  */
 export async function signMultipleAquaTreesUtil(
-  _aquaTrees: AquaTreeWrapper[],
-  _signType: SignType,
-  _credentials: CredentialsData,
-  _enableScalar: boolean = false,
+  aquaTrees: AquaTreeWrapper[],
+  signType: SignType,
+  credentials: CredentialsData,
+  reactNativeOptions?: ReactNativeMetaMaskOptions,
+  enableScalar: boolean = false,
   identCharacter: string = "",
 ): Promise<Result<AquaOperationData, LogData[]>> {
+
+  // console log all unused parameters
+  console.log("signMultipleAquaTreesUtil unused parameters:", aquaTrees, signType, credentials, reactNativeOptions, enableScalar, identCharacter)
   let logs: Array<LogData> = []
   logs.push({
     log: "unimplmented need to be fixes",

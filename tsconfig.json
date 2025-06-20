@@ -6,6 +6,7 @@
       "ES2022",
       "DOM"
     ],
+    "jsx": "react",
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",

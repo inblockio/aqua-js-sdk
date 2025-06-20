@@ -1900,6 +1900,10 @@ var MetaMaskSigner = class {
     this.pollInterval = options.pollInterval || 5e3;
     this.server = null;
     this.lastResult = null;
+    this.reactNativeOptions = options.reactNativeOptions || {
+      deepLinkUrl: "metamask://",
+      callbackUrl: "aqua-js-sdk://callback"
+    };
   }
   /**
   * Creates a standardized message for signing
@@ -2123,19 +2127,50 @@ var MetaMaskSigner = class {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   /**
+  * Handles signing process in React Native environment
+  * 
+  * @param verificationHash - Hash of the revision to sign
+  * @param network - Ethereum network to use
+  * @returns Promise resolving to [signature, wallet address, public key]
+  * 
+  * This method:
+  * - Creates a deep link to open MetaMask mobile app
+  * - Handles the callback with signature data
+  * - Recovers public key from signature
+  */
+  async signInReactNative(verificationHash, network) {
+    const message = this.createMessage(verificationHash);
+    const chainId = getChainIdFromNetwork(network);
+    const encodedMessage = encodeURIComponent(message);
+    const deepLink = `${this.reactNativeOptions.deepLinkUrl}dapp/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
+    if (this.reactNativeOptions.onDeepLinkReady) {
+      this.reactNativeOptions.onDeepLinkReady(deepLink);
+    }
+    throw new Error(
+      "React Native MetaMask signing requires app-specific implementation. Please use the deep link URL provided through onDeepLinkReady callback and implement the URL scheme handling in your React Native app."
+    );
+  }
+  /**
   * Signs a verification hash using MetaMask
   * 
   * @param verificationHash - Hash of the revision to sign
   * @returns Promise resolving to [signature, wallet address, public key]
   * 
   * This method:
-  * - Detects environment (Node.js or browser)
+  * - Detects environment (Node.js, browser, or React Native)
   * - Routes to appropriate signing method
   * - Returns complete signature information
   */
   async sign(verificationHash, network) {
-    const isNode2 = typeof window === "undefined";
-    return isNode2 ? this.signInNode(verificationHash) : this.signInBrowser(verificationHash, network);
+    const isReactNative2 = typeof global !== "undefined" && !!global.HermesInternal;
+    const isNode2 = typeof window === "undefined" && !isReactNative2;
+    if (isReactNative2) {
+      return this.signInReactNative(verificationHash, network);
+    } else if (isNode2) {
+      return this.signInNode(verificationHash);
+    } else {
+      return this.signInBrowser(verificationHash, network);
+    }
   }
 };
 
@@ -2274,7 +2309,7 @@ var P12Signer = class {
 
 // src/core/signature.ts
 var import_ethers3 = require("ethers");
-async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableScalar = false, identCharacter = "") {
+async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableScalar = false, identCharacter = "", reactNativeOptions) {
   let aquaTree = aquaTreeWrapper.aquaTree;
   let logs = [];
   let targetRevisionHash = "";
@@ -2288,7 +2323,9 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
   let signature, walletAddress, publicKey, signature_type;
   switch (signType) {
     case "metamask":
-      let sign = new MetaMaskSigner();
+      let sign = new MetaMaskSigner({
+        reactNativeOptions
+      });
       [signature, walletAddress, publicKey] = await sign.sign(targetRevisionHash, credentials.witness_eth_network);
       signature_type = "ethereum:eip-191";
       break;
@@ -2392,7 +2429,8 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
   };
   return Ok(result);
 }
-async function signMultipleAquaTreesUtil(_aquaTrees, _signType, _credentials, _enableScalar = false, identCharacter = "") {
+async function signMultipleAquaTreesUtil(aquaTrees, signType, credentials, reactNativeOptions, enableScalar = false, identCharacter = "") {
+  console.log("signMultipleAquaTreesUtil unused parameters:", aquaTrees, signType, credentials, reactNativeOptions, enableScalar, identCharacter);
   let logs = [];
   logs.push({
     log: "unimplmented need to be fixes",
@@ -3948,6 +3986,13 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
       }
       const fileHash1 = getHashSum(fileContent1);
       isSuccess = fileHash1 === revision.file_hash;
+      if (!isSuccess) {
+        logs.push({
+          log: `File hash verification failed for form revision`,
+          logType: "error" /* ERROR */,
+          ident: `${identCharacter}	`
+        });
+      }
       break;
     case "file":
       let fileContent;
@@ -3978,6 +4023,13 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
       }
       const fileHash = getHashSum(fileContent);
       isSuccess = fileHash === revision.file_hash;
+      if (!isSuccess) {
+        logs.push({
+          log: `File hash verification failed for form revision`,
+          logType: "error" /* ERROR */,
+          ident: `${identCharacter}	`
+        });
+      }
       break;
     case "signature":
       ;
@@ -4167,8 +4219,7 @@ async function verifyRevision(aquaTree, revisionPar, verificationHash, fileObjec
     return [true, logs];
   } else {
     logs.push({
-      log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash} - 
- isSuccess ${isSuccess} - isScalarSuccess ${isScalarSuccess} `,
+      log: `Error verifying revision type:${revision.revision_type} with hash ${verificationHash}. `,
       logType: "error" /* ERROR */,
       ident: `${identCharacter}	`
     });
