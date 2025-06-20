@@ -2135,7 +2135,7 @@ var MetaMaskSigner = class {
   * 
   * This method:
   * - Creates a deep link to open MetaMask mobile app
-  * - Handles the callback with signature data
+  * - Returns a promise that resolves when the signature is received
   * - Recovers public key from signature
   */
   async signInReactNative(verificationHash, network) {
@@ -2143,12 +2143,28 @@ var MetaMaskSigner = class {
     const chainId = getChainIdFromNetwork(network);
     const encodedMessage = encodeURIComponent(message);
     const deepLink = `${this.reactNativeOptions.deepLinkUrl}dapp/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
-    if (this.reactNativeOptions.onDeepLinkReady) {
-      this.reactNativeOptions.onDeepLinkReady(deepLink);
-    }
-    throw new Error(
-      "React Native MetaMask signing requires app-specific implementation. Please use the deep link URL provided through onDeepLinkReady callback and implement the URL scheme handling in your React Native app."
-    );
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error("Signature timeout: No response from MetaMask"));
+      }, this.maxAttempts * this.pollInterval);
+      global.__aquaMetaMaskResolve = async (signature, address) => {
+        clearTimeout(timeoutId);
+        try {
+          const cleanedAddress = import_ethers2.ethers.getAddress(address);
+          const publicKey = await this.recoverPublicKey(message, signature);
+          resolve([signature, cleanedAddress, publicKey]);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      global.__aquaMetaMaskReject = (error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      };
+      if (this.reactNativeOptions.onDeepLinkReady) {
+        this.reactNativeOptions.onDeepLinkReady(deepLink);
+      }
+    });
   }
   /**
   * Signs a verification hash using MetaMask
@@ -4357,7 +4373,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-38",
+  version: "3.2.1-40",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {

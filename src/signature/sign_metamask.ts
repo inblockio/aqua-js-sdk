@@ -347,7 +347,7 @@ export class MetaMaskSigner {
  * 
  * This method:
  * - Creates a deep link to open MetaMask mobile app
- * - Handles the callback with signature data
+ * - Returns a promise that resolves when the signature is received
  * - Recovers public key from signature
  */
     private async signInReactNative(verificationHash: string, network: string): Promise<[string, string, string]> {
@@ -358,23 +358,36 @@ export class MetaMaskSigner {
         const encodedMessage = encodeURIComponent(message);
         const deepLink = `${this.reactNativeOptions.deepLinkUrl}dapp/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
         
-        // Notify caller that deep link is ready
-        if (this.reactNativeOptions.onDeepLinkReady) {
-            this.reactNativeOptions.onDeepLinkReady(deepLink);
-        }
-        
-        // In a real implementation, we would need to:
-        // 1. Open the deep link using Linking API
-        // 2. Set up a listener for the callback URL
-        // 3. Parse the signature from the callback URL
-        // 4. Recover the public key
-        
-        // For now, we'll throw an error indicating this needs to be implemented by the app
-        throw new Error(
-            "React Native MetaMask signing requires app-specific implementation. " +
-            "Please use the deep link URL provided through onDeepLinkReady callback " +
-            "and implement the URL scheme handling in your React Native app."
-        );
+        // Return a promise that resolves when the signature is received
+        return new Promise((resolve, reject) => {
+            // Set a timeout to reject the promise if no signature is received
+            const timeoutId = setTimeout(() => {
+                reject(new Error('Signature timeout: No response from MetaMask'));
+            }, this.maxAttempts * this.pollInterval);
+            
+            // Store the resolve and reject functions to be called when the signature is received
+            // This would typically be done in a global state or context in a real app
+            (global as any).__aquaMetaMaskResolve = async (signature: string, address: string) => {
+                clearTimeout(timeoutId);
+                try {
+                    const cleanedAddress = ethers.getAddress(address);
+                    const publicKey = await this.recoverPublicKey(message, signature);
+                    resolve([signature, cleanedAddress, publicKey]);
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            
+            (global as any).__aquaMetaMaskReject = (error: Error) => {
+                clearTimeout(timeoutId);
+                reject(error);
+            };
+            
+            // Notify caller that deep link is ready
+            if (this.reactNativeOptions.onDeepLinkReady) {
+                this.reactNativeOptions.onDeepLinkReady(deepLink);
+            }
+        });
     }
 
     /**
