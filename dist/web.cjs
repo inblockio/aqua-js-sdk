@@ -4611,8 +4611,8 @@ var Aquafier = class {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    this.signAquaTree = async (aquaTree, signType, credentials, enableScalar = true) => {
-      return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar);
+    this.signAquaTree = async (aquaTree, signType, credentials, enableScalar = true, reactNativeOptions) => {
+      return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar, "", reactNativeOptions);
     };
     /**
      * @method signMultipleAquaTrees

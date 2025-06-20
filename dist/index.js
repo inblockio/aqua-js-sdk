@@ -55,7 +55,7 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-ADRI5DRP.js";
+} from "./chunk-G25TYBXM.js";
 import "./chunk-R4XJC7WN.js";
 export {
   AquafierChainable,

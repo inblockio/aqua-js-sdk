@@ -6,7 +6,7 @@ import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
 import { verifyAndGetGraphDataRevisionUtil, verifyAndGetGraphDataUtil, verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
 import { Result } from "./type_guards";
-import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData } from "./types"
+import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData, ReactNativeMetaMaskOptions } from "./types"
 import { default as packageJson } from "./../package.json";
 import { logAquaTree } from "./aquavhtree";
 import {  getHashSum } from "./utils";
@@ -170,9 +170,9 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+    signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = true, reactNativeOptions?: ReactNativeMetaMaskOptions): Promise<Result<AquaOperationData, LogData[]>> => {
 
-        return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar)
+        return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar, "", reactNativeOptions)
     }
 
     /**

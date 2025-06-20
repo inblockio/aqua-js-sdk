@@ -1031,7 +1031,7 @@ declare class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    signAquaTree: (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
+    signAquaTree: (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar?: boolean, reactNativeOptions?: ReactNativeMetaMaskOptions) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method signMultipleAquaTrees
      * @description This method signs multiple aqua trees
