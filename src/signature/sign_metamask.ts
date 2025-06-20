@@ -350,30 +350,33 @@ export class MetaMaskSigner {
  * - Returns a promise that resolves when the signature is received
  * - Recovers public key from signature
  */
-    private async signInReactNative(verificationHash: string, network: string): Promise<[string, string, string]> {
-        const message = this.createMessage(verificationHash);
-        const chainId = getChainIdFromNetwork(network);
+private async signInReactNative(verificationHash: string, network: string): Promise<[string, string, string]> {
+    const message = this.createMessage(verificationHash);
+    const chainId = getChainIdFromNetwork(network);
+    
+    // Create a deep link to MetaMask mobile app
+    const encodedMessage = encodeURIComponent(message);
+    
+    // MetaMask mobile uses a different format for deep links
+    // Try the ethereum/sign format which is more reliable for direct signing
+    const deepLink = `metamask://ethereum/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
         
-        // Create a deep link to MetaMask mobile app
-        const encodedMessage = encodeURIComponent(message);
-        const deepLink = `${this.reactNativeOptions.deepLinkUrl}dapp/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
+    // Return a promise that resolves when the signature is received
+    return new Promise((resolve, reject) => {
+        // Set a timeout to reject the promise if no signature is received
+        const timeoutId = setTimeout(() => {
+            reject(new Error('Signature timeout: No response from MetaMask'));
+        }, this.maxAttempts * this.pollInterval);
         
-        // Return a promise that resolves when the signature is received
-        return new Promise((resolve, reject) => {
-            // Set a timeout to reject the promise if no signature is received
-            const timeoutId = setTimeout(() => {
-                reject(new Error('Signature timeout: No response from MetaMask'));
-            }, this.maxAttempts * this.pollInterval);
-            
-            // Store the resolve and reject functions to be called when the signature is received
-            // This would typically be done in a global state or context in a real app
-            (global as any).__aquaMetaMaskResolve = async (signature: string, address: string) => {
-                clearTimeout(timeoutId);
-                try {
-                    const cleanedAddress = ethers.getAddress(address);
-                    const publicKey = await this.recoverPublicKey(message, signature);
-                    resolve([signature, cleanedAddress, publicKey]);
-                } catch (error) {
+        // Store the resolve and reject functions to be called when the signature is received
+        // This would typically be done in a global state or context in a real app
+        (global as any).__aquaMetaMaskResolve = async (signature: string, address: string) => {
+            clearTimeout(timeoutId);
+            try {
+                const cleanedAddress = ethers.getAddress(address);
+                const publicKey = await this.recoverPublicKey(message, signature);
+                resolve([signature, cleanedAddress, publicKey]);
+            } catch (error) {
                     reject(error);
                 }
             };

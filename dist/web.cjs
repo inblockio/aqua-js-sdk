@@ -2142,7 +2142,7 @@ var MetaMaskSigner = class {
     const message = this.createMessage(verificationHash);
     const chainId = getChainIdFromNetwork(network);
     const encodedMessage = encodeURIComponent(message);
-    const deepLink = `${this.reactNativeOptions.deepLinkUrl}dapp/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
+    const deepLink = `metamask://ethereum/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         reject(new Error("Signature timeout: No response from MetaMask"));
@@ -4373,7 +4373,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-40",
+  version: "3.2.1-41",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
