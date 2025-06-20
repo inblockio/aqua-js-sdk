@@ -2913,6 +2913,10 @@ var import_pure = require("nostr-tools/pure");
 var import_relay = require("nostr-tools/relay");
 
 // node_modules/@noble/hashes/esm/utils.js
+var hasHexBuiltin = /* @__PURE__ */ (() => (
+  // @ts-ignore
+  typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function"
+))();
 var asciis = { _0: 48, _9: 57, A: 65, F: 70, a: 97, f: 102 };
 function asciiToBase16(ch) {
   if (ch >= asciis._0 && ch <= asciis._9)
@@ -2926,6 +2930,8 @@ function asciiToBase16(ch) {
 function hexToBytes(hex) {
   if (typeof hex !== "string")
     throw new Error("hex string expected, got " + typeof hex);
+  if (hasHexBuiltin)
+    return Uint8Array.fromHex(hex);
   const hl = hex.length;
   const al = hl / 2;
   if (hl % 2)
@@ -4275,7 +4281,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-37",
+  version: "3.2.1-38",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
@@ -4349,11 +4355,11 @@ var package_default = {
     buffer: "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "did-resolver": "^4.1.0",
-    dids: "^4.0.4",
-    ethers: "^6.7.1",
+    dids: "^5.0.3",
+    ethers: "^6.13.5",
     "http-status-codes": "^2.2.0",
     "js-sha3": "^0.9.3",
-    "key-did-provider-ed25519": "^3.0.2",
+    "key-did-provider-ed25519": "^4.0.2",
     "key-did-resolver": "^4.0.0",
     merkletreejs: "^0.4.0",
     "node-forge": "^1.3.1",
@@ -4381,9 +4387,9 @@ var package_default = {
     "ts-jest": "^29.2.5",
     tsup: "^8.3.6",
     typedoc: "^0.28.5",
-    "typedoc-plugin-markdown": "^4.4.2",
+    "typedoc-plugin-markdown": "^4.6.4",
     typescript: "^5.3.3",
-    vitest: "^3.2.4"
+    vitest: "^1.3.1"
   }
 };
 
