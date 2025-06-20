@@ -295,7 +295,7 @@ const prepareWitness = async (
                         log: `Alchemy key is missing`,
                         logType: LogType.DEBUGDATA
                     });
-                    process.exit(1);
+                    return Err(logs)
                 }
 
 
@@ -343,7 +343,7 @@ const prepareWitness = async (
                         log: `Unable to Estimate gas fee: ${gasEstimateResult.error}`,
                         logType: LogType.DEBUGDATA
                     });
-                    process.exit(1);
+                    return Err(logs)
                 }
 
                 if (!gasEstimateResult.hasEnoughBalance) {
@@ -355,7 +355,7 @@ const prepareWitness = async (
                         log: `Add some faucets to this wallet address: ${walletAddress}\n`,
                         logType: LogType.DEBUGDATA
                     });
-                    process.exit(1);
+                    return Err(logs)
                 }
 
                 let transactionResult: TransactionResult | null = null;
@@ -384,6 +384,7 @@ const prepareWitness = async (
                         logType: LogType.ERROR,
                         log: "An error witnessing using etherium "
                     })
+                    return Err(logs)
                 }
 
                 if (transactionResult == null || transactionResult.error != null || !transactionResult.transactionHash) {
@@ -420,7 +421,7 @@ const prepareWitness = async (
         }
         default: {
             console.error(`Unknown witness method: ${witnessType}`);
-            process.exit(1);
+            return Err(logs)
         }
     }
 

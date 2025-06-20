@@ -1,551 +1,9 @@
-"use strict";
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __esm = (fn, res) => function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
-};
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-
-// src/platform/node-modules.ts
-var fs;
-var init_node_modules = __esm({
-  "src/platform/node-modules.ts"() {
-    "use strict";
-    fs = {
-      promises: {
-        readFile: async () => "",
-        writeFile: async () => {
-        },
-        mkdir: async () => {
-        },
-        readdir: async () => [],
-        stat: async () => ({
-          isFile: () => false,
-          isDirectory: () => false
-        }),
-        access: async () => {
-        }
-      },
-      readFileSync: () => "",
-      writeFileSync: () => {
-      },
-      existsSync: () => false,
-      mkdirSync: () => {
-      },
-      readdirSync: () => [],
-      statSync: () => ({
-        isFile: () => false,
-        isDirectory: () => false
-      })
-    };
-  }
-});
-
-// src/platform/fs.ts
-async function getFileSystem() {
-  if (isNode) {
-    try {
-      let fs2;
-      try {
-        fs2 = require("fs").promises;
-      } catch (e) {
-        console.warn("Failed to load fs module via require, trying alternative methods");
-        try {
-          const dynamicImport = new Function("modulePath", "return import(modulePath)");
-          fs2 = await dynamicImport("node:fs/promises");
-        } catch (e2) {
-          console.error("All attempts to load Node.js fs module failed:", e2);
-          return getBrowserFileSystem();
-        }
-      }
-      return {
-        readFile: async (path, options) => {
-          const fsOptions = options?.encoding ? { encoding: options.encoding } : void 0;
-          return await fs2.readFile(path, fsOptions);
-        },
-        writeFile: async (path, data, options) => {
-          const fsOptions = options?.encoding ? { encoding: options.encoding } : void 0;
-          await fs2.writeFile(path, data, fsOptions);
-        },
-        exists: async (path) => {
-          try {
-            await fs2.access(path);
-            return true;
-          } catch {
-            return false;
-          }
-        }
-      };
-    } catch (error) {
-      console.error("Failed to import Node.js fs module:", error);
-      return getBrowserFileSystem();
-    }
-  } else if (isReactNative) {
-    try {
-      try {
-        const RNFS = require("react-native-fs");
-        return {
-          readFile: async (path, options) => {
-            const encoding = options?.encoding || "utf8";
-            return await RNFS.readFile(path, encoding);
-          },
-          writeFile: async (path, data, options) => {
-            const encoding = options?.encoding || "utf8";
-            const stringData = typeof data === "string" ? data : data.toString(encoding);
-            await RNFS.writeFile(path, stringData, encoding);
-          },
-          exists: async (path) => {
-            return await RNFS.exists(path);
-          }
-        };
-      } catch (rnfsError) {
-        console.warn("react-native-fs not available, falling back to AsyncStorage for limited storage");
-        const AsyncStorage = require("@react-native-async-storage/async-storage");
-        return {
-          readFile: async (path, _options) => {
-            const data = await AsyncStorage.getItem(path);
-            if (data === null) throw new Error(`File not found: ${path}`);
-            return data;
-          },
-          writeFile: async (path, data, _options) => {
-            const stringData = typeof data === "string" ? data : data.toString("utf8");
-            await AsyncStorage.setItem(path, stringData);
-          },
-          exists: async (path) => {
-            const data = await AsyncStorage.getItem(path);
-            return data !== null;
-          }
-        };
-      }
-    } catch (error) {
-      console.error("Failed to import React Native file system modules:", error);
-      throw new Error("File system functionality not available in this React Native environment");
-    }
-  } else if (isBrowser) {
-    return getBrowserFileSystem();
-  } else {
-    console.warn("Unknown environment detected, using browser file system implementation");
-    return getBrowserFileSystem();
-  }
-}
-function getBrowserFileSystem() {
-  return {
-    readFile: async (path, _options) => {
-      console.warn(`Browser environment: Cannot read file from ${path}`);
-      if (typeof localStorage !== "undefined") {
-        const data = localStorage.getItem(`fs:${path}`);
-        if (data !== null) return data;
-      }
-      return fs.promises.readFile();
-    },
-    writeFile: async (path, data, _options) => {
-      console.warn(`Browser environment: Cannot write file to ${path}`);
-      if (typeof localStorage !== "undefined") {
-        const stringData = typeof data === "string" ? data : data.toString("utf8");
-        try {
-          localStorage.setItem(`fs:${path}`, stringData);
-        } catch (e) {
-          console.error("Failed to write to localStorage:", e);
-        }
-      }
-      return fs.promises.writeFile();
-    },
-    exists: async (path) => {
-      if (typeof localStorage !== "undefined") {
-        return localStorage.getItem(`fs:${path}`) !== null;
-      }
-      return false;
-    }
-  };
-}
-var init_fs = __esm({
-  "src/platform/fs.ts"() {
-    "use strict";
-    init_platform();
-    init_node_modules();
-  }
-});
-
-// src/platform/browser.ts
-var forge, BufferPolyfill, Buffer2, browserCrypto;
-var init_browser = __esm({
-  "src/platform/browser.ts"() {
-    "use strict";
-    forge = __toESM(require("node-forge"), 1);
-    try {
-      if (typeof global !== "undefined" && global.Buffer) {
-        BufferPolyfill = global.Buffer;
-      } else if (typeof window !== "undefined" && window.Buffer) {
-        BufferPolyfill = window.Buffer;
-      } else {
-        const bufferModule = require("buffer");
-        BufferPolyfill = bufferModule.Buffer;
-      }
-    } catch (e) {
-      console.warn("Buffer not available, using fallback implementation");
-      BufferPolyfill = class MinimalBuffer {
-        static from(data) {
-          return data;
-        }
-        static isBuffer() {
-          return false;
-        }
-      };
-    }
-    Buffer2 = BufferPolyfill;
-    browserCrypto = {
-      // Minimal implementation of crypto.verify
-      verify: (_algorithm, data, publicKey, signature) => {
-        try {
-          const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
-          const md2 = forge.md.sha256.create();
-          md2.update(data.toString("binary"));
-          return publicKeyObj.verify(md2.digest().bytes(), signature.toString("binary"));
-        } catch (e) {
-          console.error("Verification error:", e);
-          return false;
-        }
-      },
-      // Minimal implementation of crypto.createSign
-      createSign: (_algorithm) => {
-        let data = Buffer2.from("");
-        const signer = {
-          update: function(chunk) {
-            const chunkBuffer = typeof chunk === "string" ? Buffer2.from(chunk) : chunk instanceof Buffer2 ? chunk : Buffer2.from(chunk.toString(), "binary");
-            data = Buffer2.concat([data, chunkBuffer]);
-            return signer;
-          },
-          sign: function(key) {
-            try {
-              const privateKey = forge.pki.privateKeyFromPem(key);
-              const md2 = forge.md.sha256.create();
-              md2.update(data.toString("binary"));
-              const signature = privateKey.sign(md2);
-              return Buffer2.from(signature, "binary");
-            } catch (e) {
-              console.error("Signing error:", e);
-              throw new Error("Failed to sign data");
-            }
-          }
-        };
-        return signer;
-      },
-      // Minimal implementation of crypto.createVerify
-      createVerify: (_algorithm) => {
-        let data = Buffer2.from("");
-        const verifier = {
-          update: function(chunk) {
-            const chunkBuffer = typeof chunk === "string" ? Buffer2.from(chunk) : chunk instanceof Buffer2 ? chunk : Buffer2.from(chunk.toString(), "binary");
-            data = Buffer2.concat([data, chunkBuffer]);
-            return verifier;
-          },
-          verify: function(key, signature) {
-            try {
-              const publicKey = forge.pki.publicKeyFromPem(key);
-              const md2 = forge.md.sha256.create();
-              md2.update(data.toString("binary"));
-              const sig = typeof signature === "string" ? Buffer2.from(signature, "base64") : signature instanceof Buffer2 ? signature : Buffer2.from(signature.toString(), "binary");
-              return publicKey.verify(md2.digest().bytes(), sig.toString("binary"));
-            } catch (e) {
-              console.error("Verification error:", e);
-              return false;
-            }
-          }
-        };
-        return verifier;
-      }
-    };
-  }
-});
-
-// src/platform/crypto.ts
-async function getCrypto() {
-  if (isNode) {
-    try {
-      const nodeCrypto = await (async () => {
-        try {
-          return await import("crypto");
-        } catch (e) {
-          return await import("crypto");
-        }
-      })();
-      return {
-        verify: nodeCrypto.verify,
-        createSign: nodeCrypto.createSign,
-        createVerify: nodeCrypto.createVerify
-      };
-    } catch (error) {
-      console.error("Failed to import Node.js crypto module:", error);
-      return await getBrowserCrypto();
-    }
-  } else if (isReactNative) {
-    try {
-      const forge2 = require("node-forge");
-      return {
-        verify: (_algorithm, data, publicKey, signature) => {
-          try {
-            const publicKeyObj = forge2.pki.publicKeyFromPem(publicKey);
-            const md2 = forge2.md.sha256.create();
-            md2.update(data.toString("binary"));
-            return publicKeyObj.verify(md2.digest().bytes(), signature.toString("binary"));
-          } catch (e) {
-            console.error("Verification error:", e);
-            return false;
-          }
-        },
-        createSign: (_algorithm) => {
-          let data = Buffer.from("");
-          return {
-            update: (chunk) => {
-              const chunkBuffer = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
-              data = Buffer.concat([data, chunkBuffer]);
-              return this;
-            },
-            sign: (key) => {
-              try {
-                const privateKey = forge2.pki.privateKeyFromPem(key);
-                const md2 = forge2.md.sha256.create();
-                md2.update(data.toString("binary"));
-                const signature = privateKey.sign(md2);
-                return Buffer.from(signature, "binary");
-              } catch (e) {
-                console.error("Signing error:", e);
-                throw new Error("Failed to sign data");
-              }
-            }
-          };
-        },
-        createVerify: (_algorithm) => {
-          let data = Buffer.from("");
-          return {
-            update: (chunk) => {
-              const chunkBuffer = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
-              data = Buffer.concat([data, chunkBuffer]);
-              return this;
-            },
-            verify: (key, signature) => {
-              try {
-                const publicKey = forge2.pki.publicKeyFromPem(key);
-                const md2 = forge2.md.sha256.create();
-                md2.update(data.toString("binary"));
-                const sig = typeof signature === "string" ? Buffer.from(signature, "base64") : signature;
-                return publicKey.verify(md2.digest().bytes(), sig.toString("binary"));
-              } catch (e) {
-                console.error("Verification error:", e);
-                return false;
-              }
-            }
-          };
-        }
-      };
-    } catch (error) {
-      console.error("Failed to create React Native compatible crypto implementation:", error);
-      throw new Error("Crypto functionality not available in this React Native environment");
-    }
-  } else if (isBrowser) {
-    return await getBrowserCrypto();
-  } else {
-    console.warn("Unknown environment detected, using browser crypto implementation");
-    return await getBrowserCrypto();
-  }
-}
-async function getBrowserCrypto() {
-  try {
-    return browserCrypto;
-  } catch (error) {
-    console.error("Failed to create browser compatible crypto implementation:", error);
-    throw new Error("Crypto functionality not available in this browser environment");
-  }
-}
-async function getForge() {
-  try {
-    return await import("node-forge");
-  } catch (error) {
-    console.error("Failed to import node-forge:", error);
-    throw new Error("Forge functionality not available");
-  }
-}
-var init_crypto = __esm({
-  "src/platform/crypto.ts"() {
-    "use strict";
-    init_platform();
-    init_browser();
-  }
-});
-
-// src/platform/index.ts
-var platform_exports = {};
-__export(platform_exports, {
-  checkInternetConnectivity: () => checkInternetConnectivity,
-  createHttpServer: () => createHttpServer,
-  getCrypto: () => getCrypto,
-  getFileSystem: () => getFileSystem,
-  getForge: () => getForge,
-  isBrowser: () => isBrowser,
-  isNode: () => isNode,
-  isReactNative: () => isReactNative
-});
-async function createHttpServer(requestListener) {
-  if (isNode) {
-    try {
-      const { createServer } = await import("http");
-      return createServer(requestListener);
-    } catch (error) {
-      console.error("Failed to create HTTP server:", error);
-      return null;
-    }
-  } else if (isReactNative) {
-    console.warn("HTTP server is not supported in React Native. Consider using a different approach.");
-    return {
-      listen: (port, host, callback) => {
-        console.warn(`[Mock] HTTP server would listen on ${host}:${port}`);
-        if (callback) callback();
-      },
-      close: () => {
-        console.warn("[Mock] HTTP server would close");
-      }
-    };
-  } else {
-    console.warn("HTTP server is only supported in Node.js environment");
-    return null;
-  }
-}
-async function checkInternetConnectivity() {
-  if (isBrowser || isReactNative) {
-    return new Promise((resolve) => {
-      const isOnline = typeof navigator !== "undefined" && navigator.onLine;
-      if (!isOnline) {
-        resolve(false);
-        return;
-      }
-      fetch("https://www.google.com/favicon.ico", {
-        mode: "no-cors",
-        cache: "no-store"
-      }).then(() => resolve(true)).catch(() => resolve(false));
-      setTimeout(() => resolve(false), 5e3);
-    });
-  } else if (isNode) {
-    try {
-      const { request } = await import("https");
-      return new Promise((resolve) => {
-        const req = request(
-          "https://www.google.com",
-          { method: "HEAD", timeout: 5e3 },
-          (res) => {
-            resolve(res.statusCode >= 200 && res.statusCode < 300);
-            res.resume();
-          }
-        );
-        req.on("error", () => resolve(false));
-        req.on("timeout", () => {
-          req.destroy();
-          resolve(false);
-        });
-        req.end();
-      });
-    } catch (error) {
-      return false;
-    }
-  }
-  return false;
-}
-var isReactNative, isNode, isBrowser;
-var init_platform = __esm({
-  "src/platform/index.ts"() {
-    "use strict";
-    init_fs();
-    init_crypto();
-    isReactNative = typeof navigator !== "undefined" && navigator.product === "ReactNative";
-    isNode = typeof process !== "undefined" && process.versions != null && process.versions.node != null;
-    isBrowser = typeof window !== "undefined" && !isReactNative;
-  }
-});
-
-// src/index.ts
-var index_exports = {};
-__export(index_exports, {
-  AquafierChainable: () => AquafierChainable,
-  Err: () => Err,
-  ErrResult: () => ErrResult,
-  LogType: () => LogType,
-  LogTypeEmojis: () => LogTypeEmojis,
-  None: () => None,
-  NoneOption: () => NoneOption,
-  Ok: () => Ok,
-  OkResult: () => OkResult,
-  OrderRevisionInAquaTree: () => OrderRevisionInAquaTree,
-  Some: () => Some,
-  SomeOption: () => SomeOption,
-  checkFileHashAlreadyNotarized: () => checkFileHashAlreadyNotarized,
-  checkInternetConnection: () => checkInternetConnection,
-  cliGreenify: () => cliGreenify,
-  cliRedify: () => cliRedify,
-  cliYellowfy: () => cliYellowfy,
-  createCredentials: () => createCredentials,
-  createNewAquaTree: () => createNewAquaTree,
-  default: () => Aquafier,
-  dict2Leaves: () => dict2Leaves,
-  estimateWitnessGas: () => estimateWitnessGas,
-  findFormKey: () => findFormKey,
-  findNextRevisionHashByArrayofRevisions: () => findNextRevisionHashByArrayofRevisions,
-  formatMwTimestamp: () => formatMwTimestamp,
-  getAquaTreeFileName: () => getAquaTreeFileName,
-  getAquaTreeFileObject: () => getAquaTreeFileObject,
-  getChainIdFromNetwork: () => getChainIdFromNetwork,
-  getEntropy: () => getEntropy,
-  getFileHashSum: () => getFileHashSum,
-  getFileNameCheckingPaths: () => getFileNameCheckingPaths,
-  getGenesisHash: () => getGenesisHash,
-  getHashSum: () => getHashSum,
-  getLatestVH: () => getLatestVH,
-  getMerkleRoot: () => getMerkleRoot,
-  getPreviousVerificationHash: () => getPreviousVerificationHash,
-  getTimestamp: () => getTimestamp,
-  getWallet: () => getWallet,
-  isAquaTree: () => isAquaTree,
-  isErr: () => isErr,
-  isNone: () => isNone,
-  isOk: () => isOk,
-  isSome: () => isSome,
-  log_dim: () => log_dim,
-  log_red: () => log_red,
-  log_success: () => log_success,
-  log_yellow: () => log_yellow,
-  maybeUpdateFileIndex: () => maybeUpdateFileIndex,
-  prepareNonce: () => prepareNonce,
-  printGraphData: () => printGraphData,
-  printLogs: () => printLogs,
-  printlinkedGraphData: () => printlinkedGraphData,
-  recoverWalletAddress: () => recoverWalletAddress,
-  reorderAquaTreeRevisionsProperties: () => reorderAquaTreeRevisionsProperties,
-  reorderRevisionsProperties: () => reorderRevisionsProperties,
-  verifyMerkleIntegrity: () => verifyMerkleIntegrity
-});
-module.exports = __toCommonJS(index_exports);
+import {
+  __require,
+  createHttpServer,
+  getCrypto,
+  getForge
+} from "./chunk-JDKV5BHT.js";
 
 // src/types.ts
 var LogType = /* @__PURE__ */ ((LogType2) => {
@@ -587,9 +45,9 @@ var LogTypeEmojis = {
 };
 
 // src/utils.ts
-var import_ethers = require("ethers");
-var import_sha = __toESM(require("sha.js"), 1);
-var import_merkletreejs = require("merkletreejs");
+import { ethers, Wallet, Mnemonic } from "ethers";
+import shajs from "sha.js";
+import { MerkleTree } from "merkletreejs";
 
 // src/type_guards.ts
 var OkResult = class {
@@ -774,7 +232,7 @@ function getFileHashSum(fileContent) {
   return getHashSum(fileContent);
 }
 function getHashSum(data) {
-  let hash = (0, import_sha.default)("sha256").update(data).digest("hex");
+  let hash = shajs("sha256").update(data).digest("hex");
   return hash;
 }
 function createNewAquaTree() {
@@ -799,7 +257,7 @@ function prepareNonce() {
   return getHashSum(Date.now().toString());
 }
 async function getWallet(mnemonic) {
-  const wallet = import_ethers.Wallet.fromPhrase(mnemonic.trim());
+  const wallet = Wallet.fromPhrase(mnemonic.trim());
   const { ethers: ethers5 } = await import("ethers");
   const walletAddress = ethers5.getAddress(wallet.address);
   return [wallet, walletAddress, wallet.publicKey, wallet.privateKey];
@@ -808,7 +266,7 @@ function getEntropy() {
   if (typeof window !== "undefined" && window.crypto) {
     return crypto.getRandomValues(new Uint8Array(16));
   } else {
-    const nodeCrypto = require("crypto");
+    const nodeCrypto = __require("crypto");
     return new Uint8Array(nodeCrypto.randomBytes(16));
   }
 }
@@ -837,7 +295,7 @@ var getFileNameCheckingPaths = (fileObjects, fileName) => {
 function createCredentials() {
   console.log("Credential file  does not exist. Creating wallet");
   const entropy = getEntropy();
-  const mnemonic = import_ethers.Mnemonic.fromEntropy(entropy);
+  const mnemonic = Mnemonic.fromEntropy(entropy);
   let credentialsObject = {
     mnemonic: mnemonic.phrase,
     nostr_sk: "",
@@ -863,10 +321,10 @@ var estimateWitnessGas = async (wallet_address, witness_event_verification_hash,
     let provider;
     try {
       if (providerUrl) {
-        provider = new import_ethers.ethers.JsonRpcProvider(providerUrl, ethNetwork);
+        provider = new ethers.JsonRpcProvider(providerUrl, ethNetwork);
         await provider.getNetwork();
       } else {
-        provider = import_ethers.ethers.getDefaultProvider(ethNetwork, {
+        provider = ethers.getDefaultProvider(ethNetwork, {
           // Increase the timeout to handle potential rate limiting
           staticNetwork: true,
           timeout: 3e4
@@ -880,14 +338,14 @@ var estimateWitnessGas = async (wallet_address, witness_event_verification_hash,
       throw error;
     }
     const tx = {
-      from: import_ethers.ethers.getAddress(wallet_address),
-      to: import_ethers.ethers.getAddress(smart_contract_address),
+      from: ethers.getAddress(wallet_address),
+      to: ethers.getAddress(smart_contract_address),
       // Replace with actual contract address
       data: "0x9cef4ea1" + witness_event_verification_hash.replace("0x", "")
       // Function selector + hash
     };
     const balance = await provider.getBalance(wallet_address);
-    const balanceInEth = import_ethers.ethers.formatEther(balance);
+    const balanceInEth = ethers.formatEther(balance);
     logData.push({
       log: `Sender Balance: ${balanceInEth} ETH`,
       logType: "debug_data" /* DEBUGDATA */
@@ -904,11 +362,11 @@ var estimateWitnessGas = async (wallet_address, witness_event_verification_hash,
     });
     const gasPrice = feeData.gasPrice ? feeData.gasPrice : BigInt(0);
     logData.push({
-      log: `Gas Price: ${import_ethers.ethers.formatUnits(gasPrice, "gwei")} Gwei`,
+      log: `Gas Price: ${ethers.formatUnits(gasPrice, "gwei")} Gwei`,
       logType: "debug_data" /* DEBUGDATA */
     });
     const gasCost = estimatedGas * gasPrice;
-    const gasCostInEth = import_ethers.ethers.formatEther(gasCost);
+    const gasCostInEth = ethers.formatEther(gasCost);
     logData.push({
       log: `Estimated Gas Fee: ${gasCostInEth} ETH`,
       logType: "debug_data" /* DEBUGDATA */
@@ -942,7 +400,7 @@ function verifyMerkleIntegrity(merkleBranch, merkleRoot) {
   return merkleRootOk;
 }
 var getMerkleRoot = (leaves) => {
-  const tree = new import_merkletreejs.MerkleTree(leaves, getHashSum, {
+  const tree = new MerkleTree(leaves, getHashSum, {
     duplicateOdd: false
   });
   const hexRoot = tree.getHexRoot();
@@ -959,8 +417,8 @@ var getTimestamp = () => {
 };
 async function checkInternetConnection() {
   try {
-    const { checkInternetConnectivity: checkInternetConnectivity2 } = await Promise.resolve().then(() => (init_platform(), platform_exports));
-    return await checkInternetConnectivity2();
+    const { checkInternetConnectivity } = await import("./platform-QZWU5DGM.js");
+    return await checkInternetConnectivity();
   } catch (error) {
     console.error("Error checking internet connection:", error);
     return false;
@@ -1814,7 +1272,7 @@ function getLastRevisionUtil(aquaTree) {
 }
 
 // src/signature/sign_metamask.ts
-var import_ethers2 = require("ethers");
+import { ethers as ethers2 } from "ethers";
 var MetaMaskSigner = class {
   constructor(options = {}) {
     this.port = options.port || 3001;
@@ -1824,10 +1282,6 @@ var MetaMaskSigner = class {
     this.pollInterval = options.pollInterval || 5e3;
     this.server = null;
     this.lastResult = null;
-    this.reactNativeOptions = options.reactNativeOptions || {
-      deepLinkUrl: "metamask://",
-      callbackUrl: "aqua-js-sdk://callback"
-    };
   }
   /**
   * Creates a standardized message for signing
@@ -1952,7 +1406,7 @@ var MetaMaskSigner = class {
   * - Cleans up server after signing
   */
   async signInNode(verificationHash) {
-    const { createHttpServer: createHttpServer2 } = await Promise.resolve().then(() => (init_platform(), platform_exports));
+    const { createHttpServer: createHttpServer2 } = await import("./platform-QZWU5DGM.js");
     const message = this.createMessage(verificationHash);
     const html = this.createHtml(message);
     const server = await createHttpServer2(this.createRequestListener(html));
@@ -2020,7 +1474,7 @@ var MetaMaskSigner = class {
     while (attempts < this.maxAttempts) {
       if (this.lastResult && this.lastResult.signature) {
         const { signature, wallet_address } = this.lastResult;
-        const cleanedAddress = import_ethers2.ethers.getAddress(wallet_address);
+        const cleanedAddress = ethers2.getAddress(wallet_address);
         const publicKey = await this.recoverPublicKey(message, signature);
         return [signature, cleanedAddress, publicKey];
       }
@@ -2051,50 +1505,19 @@ var MetaMaskSigner = class {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   /**
-  * Handles signing process in React Native environment
-  * 
-  * @param verificationHash - Hash of the revision to sign
-  * @param network - Ethereum network to use
-  * @returns Promise resolving to [signature, wallet address, public key]
-  * 
-  * This method:
-  * - Creates a deep link to open MetaMask mobile app
-  * - Handles the callback with signature data
-  * - Recovers public key from signature
-  */
-  async signInReactNative(verificationHash, network) {
-    const message = this.createMessage(verificationHash);
-    const chainId = getChainIdFromNetwork(network);
-    const encodedMessage = encodeURIComponent(message);
-    const deepLink = `${this.reactNativeOptions.deepLinkUrl}dapp/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
-    if (this.reactNativeOptions.onDeepLinkReady) {
-      this.reactNativeOptions.onDeepLinkReady(deepLink);
-    }
-    throw new Error(
-      "React Native MetaMask signing requires app-specific implementation. Please use the deep link URL provided through onDeepLinkReady callback and implement the URL scheme handling in your React Native app."
-    );
-  }
-  /**
   * Signs a verification hash using MetaMask
   * 
   * @param verificationHash - Hash of the revision to sign
   * @returns Promise resolving to [signature, wallet address, public key]
   * 
   * This method:
-  * - Detects environment (Node.js, browser, or React Native)
+  * - Detects environment (Node.js or browser)
   * - Routes to appropriate signing method
   * - Returns complete signature information
   */
   async sign(verificationHash, network) {
-    const isReactNative2 = typeof global !== "undefined" && !!global.HermesInternal;
-    const isNode2 = typeof window === "undefined" && !isReactNative2;
-    if (isReactNative2) {
-      return this.signInReactNative(verificationHash, network);
-    } else if (isNode2) {
-      return this.signInNode(verificationHash);
-    } else {
-      return this.signInBrowser(verificationHash, network);
-    }
+    const isNode = typeof window === "undefined";
+    return isNode ? this.signInNode(verificationHash) : this.signInBrowser(verificationHash, network);
   }
 };
 
@@ -2120,9 +1543,9 @@ var CLISigner = class {
 };
 
 // src/signature/sign_did.ts
-var import_dids = require("dids");
-var import_key_did_provider_ed25519 = require("key-did-provider-ed25519");
-var KeyResolver = __toESM(require("key-did-resolver"), 1);
+import { DID } from "dids";
+import { Ed25519Provider } from "key-did-provider-ed25519";
+import * as KeyResolver from "key-did-resolver";
 var DIDSigner = class {
   /**
   * Verifies a DID-signed JWS against a verification hash
@@ -2141,7 +1564,7 @@ var DIDSigner = class {
     const expected = { message: `I sign this revision: [${hash}]` };
     try {
       const resolver = KeyResolver.getResolver();
-      const result = await new import_dids.DID({ resolver }).verifyJWS(jws);
+      const result = await new DID({ resolver }).verifyJWS(jws);
       if (!result.payload || expected.message !== result.payload.message) return false;
       if (key !== result.kid.split("#")[0]) return false;
     } catch (e) {
@@ -2167,9 +1590,9 @@ var DIDSigner = class {
     const payload = {
       message: `I sign this revision: [${verificationHash}]`
     };
-    const provider = new import_key_did_provider_ed25519.Ed25519Provider(privateKey);
+    const provider = new Ed25519Provider(privateKey);
     const resolver = KeyResolver.getResolver();
-    const did = new import_dids.DID({ provider, resolver });
+    const did = new DID({ provider, resolver });
     await did.authenticate();
     const jws = await did.createJWS(payload);
     return { jws, key: did.id };
@@ -2177,7 +1600,6 @@ var DIDSigner = class {
 };
 
 // src/signature/sign_p12.ts
-init_crypto();
 var P12Signer = class {
   // Use our platform compatibility layer instead of direct Node.js imports
   async getCrypto() {
@@ -2201,16 +1623,16 @@ var P12Signer = class {
   }
   async sign(verificationHash, privateKey, password) {
     const { createSign } = await this.getCrypto();
-    const forge2 = await this.getForge();
-    const p12Asn1 = forge2.asn1.fromDer(privateKey);
-    const p12 = forge2.pkcs12.pkcs12FromAsn1(p12Asn1, password);
-    const bagType = forge2.pki.oids.pkcs8ShroudedKeyBag;
+    const forge = await this.getForge();
+    const p12Asn1 = forge.asn1.fromDer(privateKey);
+    const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, password);
+    const bagType = forge.pki.oids.pkcs8ShroudedKeyBag;
     const bag = p12.getBags({ bagType })[bagType][0];
-    const keyPem = forge2.pki.privateKeyToPem(bag.key);
-    const privateKeyObj = forge2.pki.privateKeyFromPem(keyPem);
-    const publicKey = forge2.pki.rsa.setPublicKey(privateKeyObj.n, privateKeyObj.e);
-    const publicKeyAsn1 = forge2.pki.publicKeyToAsn1(publicKey);
-    const publicKeyDer = forge2.asn1.toDer(publicKeyAsn1).getBytes();
+    const keyPem = forge.pki.privateKeyToPem(bag.key);
+    const privateKeyObj = forge.pki.privateKeyFromPem(keyPem);
+    const publicKey = forge.pki.rsa.setPublicKey(privateKeyObj.n, privateKeyObj.e);
+    const publicKeyAsn1 = forge.pki.publicKeyToAsn1(publicKey);
+    const publicKeyDer = forge.asn1.toDer(publicKeyAsn1).getBytes();
     const pubKeyString = Buffer.from(publicKeyDer, "binary").toString("hex");
     const signer = createSign("RSA-SHA256");
     signer.update(verificationHash);
@@ -2219,9 +1641,9 @@ var P12Signer = class {
       signature = signer.sign(privateKeyObj);
     } catch (error) {
       console.warn("Crypto signer failed, falling back to forge:", error);
-      const md2 = forge2.md.sha256.create();
-      md2.update(verificationHash);
-      signature = privateKeyObj.sign(md2);
+      const md = forge.md.sha256.create();
+      md.update(verificationHash);
+      signature = privateKeyObj.sign(md);
     }
     return {
       signature: Buffer.from(signature, "binary").toString("hex"),
@@ -2232,8 +1654,8 @@ var P12Signer = class {
 };
 
 // src/core/signature.ts
-var import_ethers3 = require("ethers");
-async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableScalar = false, identCharacter = "", reactNativeOptions) {
+import { ethers as ethers3 } from "ethers";
+async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableScalar = false, identCharacter = "") {
   let aquaTree = aquaTreeWrapper.aquaTree;
   let logs = [];
   let targetRevisionHash = "";
@@ -2247,9 +1669,7 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
   let signature, walletAddress, publicKey, signature_type;
   switch (signType) {
     case "metamask":
-      let sign = new MetaMaskSigner({
-        reactNativeOptions
-      });
+      let sign = new MetaMaskSigner();
       [signature, walletAddress, publicKey] = await sign.sign(targetRevisionHash, credentials.witness_eth_network);
       signature_type = "ethereum:eip-191";
       break;
@@ -2353,8 +1773,7 @@ async function signAquaTreeUtil(aquaTreeWrapper, signType, credentials, enableSc
   };
   return Ok(result);
 }
-async function signMultipleAquaTreesUtil(aquaTrees, signType, credentials, reactNativeOptions, enableScalar = false, identCharacter = "") {
-  console.log("signMultipleAquaTreesUtil unused parameters:", aquaTrees, signType, credentials, reactNativeOptions, enableScalar, identCharacter);
+async function signMultipleAquaTreesUtil(_aquaTrees, _signType, _credentials, _enableScalar = false, identCharacter = "") {
   let logs = [];
   logs.push({
     log: "unimplmented need to be fixes",
@@ -2366,8 +1785,8 @@ async function signMultipleAquaTreesUtil(aquaTrees, signType, credentials, react
 function recoverWalletAddress(verificationHash, signature) {
   try {
     const message = `I sign this revision: [${verificationHash}]`;
-    const messageHash = import_ethers3.ethers.hashMessage(message);
-    const recoveredAddress = import_ethers3.ethers.recoverAddress(messageHash, signature);
+    const messageHash = ethers3.hashMessage(message);
+    const recoveredAddress = ethers3.recoverAddress(messageHash, signature);
     return recoveredAddress;
   } catch (error) {
     console.error("Error recovering wallet address:", error);
@@ -2401,8 +1820,8 @@ async function verifySignature(data, verificationHash, identCharacter = "") {
     case "ethereum:eip-191":
       const paddedMessage = `I sign this revision: [${verificationHash}]`;
       try {
-        const recoveredAddress = import_ethers3.ethers.recoverAddress(
-          import_ethers3.ethers.hashMessage(paddedMessage),
+        const recoveredAddress = ethers3.recoverAddress(
+          ethers3.hashMessage(paddedMessage),
           data.signature
         );
         signatureOk = recoveredAddress.toLowerCase() === data.signature_wallet_address.toLowerCase();
@@ -2426,8 +1845,7 @@ async function verifySignature(data, verificationHash, identCharacter = "") {
 }
 
 // src/witness/wintess_eth.ts
-var import_ethers4 = require("ethers");
-init_platform();
+import { ethers as ethers4 } from "ethers";
 var WitnessEth = class {
   // Utility Methods
   /**
@@ -2679,13 +2097,13 @@ var WitnessEth = class {
   static async witnessCli(walletPrivateKey, witnessEventVerificationHash, smartContractAddress, WitnessNetwork3, providerUrl, _alchemyKey) {
     const logData = [];
     try {
-      const fetchRequest = new import_ethers4.ethers.FetchRequest(providerUrl);
+      const fetchRequest = new ethers4.FetchRequest(providerUrl);
       fetchRequest.timeout = 6e3;
-      const provider = new import_ethers4.ethers.JsonRpcProvider(fetchRequest, {
+      const provider = new ethers4.JsonRpcProvider(fetchRequest, {
         name: WitnessNetwork3,
         chainId: Number(this.ethChainIdMap[WitnessNetwork3])
       });
-      const wallet = new import_ethers4.ethers.Wallet(walletPrivateKey, provider);
+      const wallet = new ethers4.Wallet(walletPrivateKey, provider);
       const sender = wallet.address;
       console.log(`Using wallet: ${sender}`);
       if (!witnessEventVerificationHash.startsWith("0x")) {
@@ -2697,7 +2115,7 @@ var WitnessEth = class {
         data: `0x9cef4ea1${witnessEventVerificationHash.slice(2)}`
       };
       const balance = await provider.getBalance(sender);
-      const balanceInEth = import_ethers4.ethers.formatEther(balance);
+      const balanceInEth = ethers4.formatEther(balance);
       logData.push({
         log: `Sender Balance: ${balanceInEth} ETH`,
         logType: "debug_data" /* DEBUGDATA */
@@ -2714,11 +2132,11 @@ var WitnessEth = class {
       });
       const gasPrice = feeData.gasPrice ? feeData.gasPrice : BigInt(0);
       logData.push({
-        log: `Gas Price: ${import_ethers4.ethers.formatUnits(gasPrice, "gwei")} Gwei`,
+        log: `Gas Price: ${ethers4.formatUnits(gasPrice, "gwei")} Gwei`,
         logType: "debug_data" /* DEBUGDATA */
       });
       const gasCost = estimatedGas * gasPrice;
-      const gasCostInEth = import_ethers4.ethers.formatEther(gasCost);
+      const gasCostInEth = ethers4.formatEther(gasCost);
       logData.push({
         log: `Estimated Gas Fee: ${gasCostInEth} ETH`,
         logType: "debug_data" /* DEBUGDATA */
@@ -2750,9 +2168,9 @@ var WitnessEth = class {
   }
   // Verify Transaction Method
   static async verify(witnessNetwork, transactionHash, expectedMR, _expectedTimestamp, providerUrl, _alchemyKey) {
-    const fetchRequest = new import_ethers4.ethers.FetchRequest(providerUrl);
+    const fetchRequest = new ethers4.FetchRequest(providerUrl);
     fetchRequest.timeout = 6e3;
-    const provider = new import_ethers4.ethers.JsonRpcProvider(fetchRequest, {
+    const provider = new ethers4.JsonRpcProvider(fetchRequest, {
       name: witnessNetwork,
       chainId: Number(this.ethChainIdMap[witnessNetwork])
     });
@@ -2781,8 +2199,8 @@ WitnessEth.ethChainIdMap = {
 };
 
 // src/witness/witness_tsa.ts
-var asn1js = __toESM(require("asn1js"), 1);
-var pkijs = __toESM(require("pkijs"), 1);
+import * as asn1js from "asn1js";
+import * as pkijs from "pkijs";
 var WitnessTSA = class {
   constructor() {
     /**
@@ -2909,8 +2327,8 @@ var WitnessTSA = class {
 };
 
 // src/witness/witness_nostr.ts
-var import_pure = require("nostr-tools/pure");
-var import_relay = require("nostr-tools/relay");
+import { finalizeEvent, getPublicKey } from "nostr-tools/pure";
+import { Relay } from "nostr-tools/relay";
 
 // node_modules/@noble/hashes/esm/utils.js
 var asciis = { _0: 48, _9: 57, A: 65, F: 70, a: 97, f: 102 };
@@ -2944,8 +2362,8 @@ function hexToBytes(hex) {
 }
 
 // src/witness/witness_nostr.ts
-var nip19 = __toESM(require("nostr-tools/nip19"), 1);
-var import_ws = __toESM(require("ws"), 1);
+import * as nip19 from "nostr-tools/nip19";
+import ws from "ws";
 var WitnessNostr = class {
   constructor() {
     /**
@@ -3020,7 +2438,7 @@ var WitnessNostr = class {
         throw new Error("Nostr SK key is required. Please get an API key from https://snort.social/login/sign-up");
       }
       const sk = hexToBytes(skHex);
-      const pk = (0, import_pure.getPublicKey)(sk);
+      const pk = getPublicKey(sk);
       const npub = nip19.npubEncode(pk);
       console.log("npub: ", npub);
       console.log("Witness event verification hash: ", witnessEventVerificationHash);
@@ -3031,15 +2449,15 @@ var WitnessNostr = class {
         tags: [],
         content: witnessEventVerificationHash
       };
-      const event = (0, import_pure.finalizeEvent)(eventTemplate, sk);
-      const isNode2 = typeof window === "undefined";
+      const event = finalizeEvent(eventTemplate, sk);
+      const isNode = typeof window === "undefined";
       let websocket;
-      if (isNode2) {
-        websocket = import_ws.default;
+      if (isNode) {
+        websocket = ws;
         global.WebSocket = websocket;
       }
-      console.log("Is node: ", isNode2);
-      const relay = await import_relay.Relay.connect(relayUrl);
+      console.log("Is node: ", isNode);
+      const relay = await Relay.connect(relayUrl);
       console.log(`connected to ${relay.url}`);
       await relay.publish(event);
       const publishEvent = await this.waitForEventAuthor(relay, pk);
@@ -3073,14 +2491,14 @@ var WitnessNostr = class {
       if (decoded.type !== "nevent") {
         return false;
       }
-      const isNode2 = typeof window === "undefined";
+      const isNode = typeof window === "undefined";
       let websocket;
-      if (isNode2) {
-        websocket = import_ws.default;
+      if (isNode) {
+        websocket = ws;
         global.WebSocket = websocket;
       }
-      console.log("Is node: ", isNode2);
-      const relay = await import_relay.Relay.connect(relayUrl);
+      console.log("Is node: ", isNode);
+      const relay = await Relay.connect(relayUrl);
       const publishEvent = await this.waitForEventId(relay, decoded.data.id);
       relay.close();
       if (expectedTimestamp !== publishEvent.created_at) {
@@ -3260,7 +2678,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
             log: `Alchemy key is missing`,
             logType: "debug_data" /* DEBUGDATA */
           });
-          return Err(logs);
+          process.exit(1);
         }
         let alchemyProvider = `https://eth-${witness_network}.g.alchemy.com/v2/${credentials.alchemy_key}`;
         const maskedAlchemyUrl = alchemyProvider.replace(/(\/v2\/)([a-zA-Z0-9]+)/, "/v2/****");
@@ -3297,7 +2715,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
             log: `Unable to Estimate gas fee: ${gasEstimateResult.error}`,
             logType: "debug_data" /* DEBUGDATA */
           });
-          return Err(logs);
+          process.exit(1);
         }
         if (!gasEstimateResult.hasEnoughBalance) {
           logs.push({
@@ -3309,7 +2727,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
 `,
             logType: "debug_data" /* DEBUGDATA */
           });
-          return Err(logs);
+          process.exit(1);
         }
         let transactionResult = null;
         try {
@@ -3332,7 +2750,6 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
             logType: "error" /* ERROR */,
             log: "An error witnessing using etherium "
           });
-          return Err(logs);
         }
         if (transactionResult == null || transactionResult.error != null || !transactionResult.transactionHash) {
           logs.push({
@@ -3360,7 +2777,7 @@ var prepareWitness = async (verificationHash, witnessType, WitnessPlatformType2,
     }
     default: {
       console.error(`Unknown witness method: ${witnessType}`);
-      return Err(logs);
+      process.exit(1);
     }
   }
   const witness = {
@@ -4275,7 +3692,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-37",
+  version: "3.2.1-33",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
@@ -4349,11 +3766,11 @@ var package_default = {
     buffer: "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "did-resolver": "^4.1.0",
-    dids: "^4.0.4",
-    ethers: "^6.7.1",
+    dids: "^5.0.3",
+    ethers: "^6.13.5",
     "http-status-codes": "^2.2.0",
     "js-sha3": "^0.9.3",
-    "key-did-provider-ed25519": "^3.0.2",
+    "key-did-provider-ed25519": "^4.0.2",
     "key-did-resolver": "^4.0.0",
     merkletreejs: "^0.4.0",
     "node-forge": "^1.3.1",
@@ -4380,10 +3797,10 @@ var package_default = {
     prettier: "^3.2.5",
     "ts-jest": "^29.2.5",
     tsup: "^8.3.6",
-    typedoc: "^0.28.5",
+    typedoc: "^0.27.7",
     "typedoc-plugin-markdown": "^4.4.2",
     typescript: "^5.3.3",
-    vitest: "^3.2.4"
+    vitest: "^1.3.1"
   }
 };
 
@@ -4795,64 +4212,65 @@ var AquafierChainable = class {
     return this.logs;
   }
 };
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  AquafierChainable,
-  Err,
-  ErrResult,
+
+export {
   LogType,
   LogTypeEmojis,
-  None,
-  NoneOption,
-  Ok,
   OkResult,
-  OrderRevisionInAquaTree,
-  Some,
+  ErrResult,
+  Ok,
+  Err,
+  isOk,
+  isErr,
   SomeOption,
-  checkFileHashAlreadyNotarized,
-  checkInternetConnection,
-  cliGreenify,
-  cliRedify,
-  cliYellowfy,
-  createCredentials,
-  createNewAquaTree,
-  dict2Leaves,
-  estimateWitnessGas,
+  NoneOption,
+  Some,
+  None,
+  isSome,
+  isNone,
+  isAquaTree,
+  reorderRevisionsProperties,
+  reorderAquaTreeRevisionsProperties,
+  getPreviousVerificationHash,
   findFormKey,
-  findNextRevisionHashByArrayofRevisions,
+  maybeUpdateFileIndex,
+  dict2Leaves,
+  getFileHashSum,
+  getHashSum,
+  createNewAquaTree,
+  checkFileHashAlreadyNotarized,
+  prepareNonce,
+  getWallet,
+  getEntropy,
+  getFileNameCheckingPaths,
+  createCredentials,
   formatMwTimestamp,
+  estimateWitnessGas,
+  verifyMerkleIntegrity,
+  getMerkleRoot,
+  getLatestVH,
+  getTimestamp,
+  checkInternetConnection,
+  printLogs,
+  printlinkedGraphData,
+  printGraphData,
+  OrderRevisionInAquaTree,
+  getGenesisHash,
+  findNextRevisionHashByArrayofRevisions,
   getAquaTreeFileName,
   getAquaTreeFileObject,
   getChainIdFromNetwork,
-  getEntropy,
-  getFileHashSum,
-  getFileNameCheckingPaths,
-  getGenesisHash,
-  getHashSum,
-  getLatestVH,
-  getMerkleRoot,
-  getPreviousVerificationHash,
-  getTimestamp,
-  getWallet,
-  isAquaTree,
-  isErr,
-  isNone,
-  isOk,
-  isSome,
-  log_dim,
-  log_red,
-  log_success,
-  log_yellow,
-  maybeUpdateFileIndex,
-  prepareNonce,
-  printGraphData,
-  printLogs,
-  printlinkedGraphData,
   recoverWalletAddress,
-  reorderAquaTreeRevisionsProperties,
-  reorderRevisionsProperties,
-  verifyMerkleIntegrity
-});
+  cliRedify,
+  cliYellowfy,
+  cliGreenify,
+  log_red,
+  log_yellow,
+  log_dim,
+  log_success,
+  Aquafier,
+  AquafierChainable
+};
 /*! Bundled license information:
 
 @noble/hashes/esm/utils.js:
