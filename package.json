@@ -1,6 +1,6 @@
 {
   "name": "aqua-js-sdk",
-  "version": "3.2.1-41",
+  "version": "3.2.1-42",
   "description": "A TypeScript SDK Library for Aqua Protocol for data accounting",
   "type": "module",
   "repository": {
@@ -13,7 +13,7 @@
     "build": "tsup src/index.ts src/react-native.ts src/web.ts --dts --format esm,cjs --out-dir dist --tsconfig tsconfig.json",
     "prepare": "npm run build",
     "dev": "tsc",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' npx jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' npx jest --verbose",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts",
     "docs": "typedoc --out docs src"
