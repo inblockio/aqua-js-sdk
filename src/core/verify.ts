@@ -647,7 +647,7 @@ async function verifyRevision(
       logs.push(...res.logs)
 
        logs.push({
-            log: `Verified form fields veriifying json file`,
+            log: `Verified form fields verifying json file`,
             logType: LogType.INFO,
             ident: `${identCharacter}\t`,
           })
