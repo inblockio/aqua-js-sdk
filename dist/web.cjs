@@ -1793,11 +1793,16 @@ async function createGenesisRevision(fileObject, isForm, enableContent, enableSc
       for (let key of formDataSortedKeys) {
         const formValue = formDataJson[key];
         let value = formValue;
-        if (typeof formValue !== "string" || typeof formValue !== "number") {
+        console.log(`form value ${typeof formValue}  formValue ${formValue}`);
+        if (typeof formValue == "string" || typeof formValue == "number") {
+          console.log(`Here i am ....`);
+        } else {
+          console.log(`in stringify block`);
           value = JSON.stringify(formValue);
         }
         formDataSortedWithPrefix[`forms_${key}`] = value;
       }
+      console.log(`formDataSortedWithPrefix ${JSON.stringify(formDataSortedWithPrefix, null, 4)}`);
       verificationData = {
         ...verificationData,
         ...formDataSortedWithPrefix
@@ -3010,10 +3015,6 @@ var import_pure = require("nostr-tools/pure");
 var import_relay = require("nostr-tools/relay");
 
 // node_modules/@noble/hashes/esm/utils.js
-var hasHexBuiltin = /* @__PURE__ */ (() => (
-  // @ts-ignore
-  typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function"
-))();
 var asciis = { _0: 48, _9: 57, A: 65, F: 70, a: 97, f: 102 };
 function asciiToBase16(ch) {
   if (ch >= asciis._0 && ch <= asciis._9)
@@ -3027,8 +3028,6 @@ function asciiToBase16(ch) {
 function hexToBytes(hex) {
   if (typeof hex !== "string")
     throw new Error("hex string expected, got " + typeof hex);
-  if (hasHexBuiltin)
-    return Uint8Array.fromHex(hex);
   const hl = hex.length;
   const al = hl / 2;
   if (hl % 2)
@@ -4378,7 +4377,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-43",
+  version: "3.2.1-45",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {
@@ -4458,7 +4457,7 @@ var package_default = {
     "js-sha3": "^0.9.3",
     "key-did-provider-ed25519": "^4.0.2",
     "key-did-resolver": "^4.0.0",
-    merkletreejs: "^0.4.0",
+    merkletreejs: "^0.5.0",
     "node-forge": "^1.3.1",
     "nostr-tools": "^2.10.4",
     open: "^10.1.0",
@@ -4471,12 +4470,12 @@ var package_default = {
   devDependencies: {
     "@types/asn1js": "^3.0.11",
     "@types/jest": "^29.5.14",
-    "@types/node": "^20.11.24",
+    "@types/node": "^22.0.0",
     "@types/pkijs": "^3.0.1",
     "@types/sha.js": "^2.4.4",
     "@types/ws": "^8.5.14",
-    "@typescript-eslint/eslint-plugin": "^7.1.1",
-    "@typescript-eslint/parser": "^7.1.1",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
     eslint: "^8.57.0",
     jest: "^29.7.0",
     "jsdoc-to-markdown": "^9.1.1",
@@ -4486,7 +4485,7 @@ var package_default = {
     typedoc: "^0.28.5",
     "typedoc-plugin-markdown": "^4.6.4",
     typescript: "^5.3.3",
-    vitest: "^1.3.1"
+    vitest: "^3.0.0"
   }
 };
 
