@@ -55,11 +55,11 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-ECWEYD7Q.js";
+} from "./chunk-WAYLIT2U.js";
 import {
   __require,
   registerNodeModuleShims
-} from "./chunk-JDKV5BHT.js";
+} from "./chunk-R4XJC7WN.js";
 
 // src/web.ts
 registerNodeModuleShims();

@@ -323,7 +323,17 @@ export async function verifyAndGetGraphDataUtil(
   const genesisRevisionType =
     aquaTree.revisions[verificationHashes[0]].revision_type
 
+   
   if (genesisRevisionData.revision_type === "form") {
+     if(genesisRevisionData.leaves == undefined){
+       logs.push({
+          logType: LogType.ERROR,
+          log: `Leaves are required in a form revision.\n`,
+          ident: `${identCharacter}\t`,
+        })
+
+            return Err(logs)
+    }
     let { formKeysGraphData } = verifyFormRevision(
       genesisRevisionData,
       genesisRevisionData.leaves,
@@ -997,8 +1007,8 @@ async function verifyRevision(
  * - Tracks form key states (active/deleted)
  */
 function verifyFormRevision(
-  input: any,
-  leaves: any,
+  input: Revision,
+  leaves: string[],
   identCharacter: string = "",
 ): FormVerificationResponseData {
   let logs: Array<LogData> = []

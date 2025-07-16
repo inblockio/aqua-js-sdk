@@ -1716,12 +1716,10 @@ async function createGenesisRevision(fileObject, isForm, enableContent, enableSc
       let formDataSortedWithPrefix = {};
       for (let key of formDataSortedKeys) {
         const formValue = formDataJson[key];
-        let value = formValue;
-        console.log(`form value ${typeof formValue}  formValue ${formValue}`);
+        let value;
         if (typeof formValue == "string" || typeof formValue == "number") {
-          console.log(`Here i am ....`);
+          value = formValue;
         } else {
-          console.log(`in stringify block`);
           value = JSON.stringify(formValue);
         }
         formDataSortedWithPrefix[`forms_${key}`] = value;
@@ -2939,6 +2937,10 @@ var import_pure = require("nostr-tools/pure");
 var import_relay = require("nostr-tools/relay");
 
 // node_modules/@noble/hashes/esm/utils.js
+var hasHexBuiltin = /* @__PURE__ */ (() => (
+  // @ts-ignore
+  typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function"
+))();
 var asciis = { _0: 48, _9: 57, A: 65, F: 70, a: 97, f: 102 };
 function asciiToBase16(ch) {
   if (ch >= asciis._0 && ch <= asciis._9)
@@ -2952,6 +2954,8 @@ function asciiToBase16(ch) {
 function hexToBytes(hex) {
   if (typeof hex !== "string")
     throw new Error("hex string expected, got " + typeof hex);
+  if (hasHexBuiltin)
+    return Uint8Array.fromHex(hex);
   const hl = hex.length;
   const al = hl / 2;
   if (hl % 2)
@@ -3659,6 +3663,15 @@ async function verifyAndGetGraphDataUtil(_aquaTree, fileObject, identCharacter =
   );
   const genesisRevisionType = aquaTree.revisions[verificationHashes[0]].revision_type;
   if (genesisRevisionData.revision_type === "form") {
+    if (genesisRevisionData.leaves == void 0) {
+      logs.push({
+        logType: "error" /* ERROR */,
+        log: `Leaves are required in a form revision.
+`,
+        ident: `${identCharacter}	`
+      });
+      return Err(logs);
+    }
     let { formKeysGraphData } = verifyFormRevision(
       genesisRevisionData,
       genesisRevisionData.leaves
@@ -4301,7 +4314,7 @@ function verifyRevisionMerkleTreeStructure(input, verificationHash) {
 // package.json
 var package_default = {
   name: "aqua-js-sdk",
-  version: "3.2.1-45",
+  version: "3.2.1-44",
   description: "A TypeScript SDK Library for Aqua Protocol for data accounting",
   type: "module",
   repository: {

@@ -217,7 +217,7 @@ export async function createGenesisRevision(
       for (let key of formDataSortedKeys) {
         const formValue = formDataJson[key]
         // if the value is not a string or a number, we need to stringify it
-        let value: any 
+        let value: string | number
         if(typeof formValue == "string" || typeof formValue == "number"){
          value = formValue
         }else{
@@ -225,7 +225,7 @@ export async function createGenesisRevision(
         }
         formDataSortedWithPrefix[`forms_${key}`] = value
       }
-      console.log(`formDataSortedWithPrefix ${JSON.stringify(formDataSortedWithPrefix, null, 4)}`)
+      // console.log(`formDataSortedWithPrefix ${JSON.stringify(formDataSortedWithPrefix, null, 4)}`)
 
       verificationData = {
         ...verificationData,
