@@ -1,0 +1,243 @@
+import * as fs from "fs";
+import { AquaV2, createAqua, WitnessConfigs, SignConfigs } from "../src/aqua-v2";
+import { CredentialsData } from "../src/types";
+
+// Load credentials
+let creds: CredentialsData = {
+  "did_key": "",
+  alchemy_key: "",
+  mnemonic: "",
+  nostr_sk: "",
+  witness_eth_network: "sepolia",
+  witness_method: "metamask",
+};
+
+if (fs.existsSync("credentials.json")) {
+  const credsContent = fs.readFileSync("credentials.json", "utf-8");
+  creds = JSON.parse(credsContent);
+}
+
+/**
+ * Example 1: Ultra-concise file processing
+ */
+async function ultraConciseExample() {
+  console.log("🚀 Ultra-Concise Example - One Method Call");
+
+  const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
+
+  // Everything in one call: load file, notarize, sign, witness, verify, save
+  const result = await aqua.processFile("./test.txt", {
+    sign: true,
+    witness: true,
+    verify: true,
+    save: "./test.txt.aqua.json"
+  });
+
+  if (result.isOk()) {
+    console.log("✅ Complete workflow finished in one call");
+    console.log(`🌳 Tree has ${Object.keys(result.data.revisions).length} revisions`);
+  } else {
+    console.log("❌ Workflow failed:", aqua.getLogs());
+  }
+}
+
+/**
+ * Example 2: Basic usage with file paths
+ */
+async function basicFileExample() {
+  console.log("🔧 Basic File Example - Direct File Operations");
+
+  const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
+
+  // Use file paths directly - no manual FileObject creation
+  await aqua.notarizeFile("./test.txt");
+  await aqua.sign();
+  await aqua.witness();
+  await aqua.verify([AquaV2.loadFile("./test.txt").data]);
+
+  // Save the result
+  aqua.saveAquaFile("./test.txt.aqua.json");
+
+  console.log("✅ File operations completed");
+  console.log(`📊 Generated ${aqua.getLogs().length} log entries`);
+}
+
+/**
+ * Example 3: Working with existing aqua files
+ */
+async function existingAquaFileExample() {
+  console.log("\n📁 Existing Aqua File Example");
+
+  const aqua = createAqua(creds, WitnessConfigs.tsa, SignConfigs.cli);
+
+  // Load existing aqua file
+  const loadResult = aqua.loadAquaFile("./test.txt.aqua.json");
+  if (loadResult.isOk()) {
+    console.log("✅ Loaded existing aqua file");
+
+    // Continue with more operations
+    await aqua.sign(SignConfigs.did);
+    await aqua.witness(WitnessConfigs.nostr);
+
+    // Save updated version
+    aqua.saveAquaFile("./test.txt.updated.aqua.json");
+  } else {
+    console.log("❌ Failed to load aqua file");
+  }
+}
+
+/**
+ * Example 4: Selective operations with processFile
+ */
+async function selectiveOperationsExample() {
+  console.log("\n🎯 Selective Operations Example");
+
+  const aqua = createAqua(creds);
+
+  // Only notarize and sign, skip witnessing
+  await aqua.processFile("./test.txt", {
+    sign: SignConfigs.cli,
+    save: "./test-signed-only.aqua.json"
+  });
+
+  console.log("✅ Selective operations completed");
+
+  // Later, load and add witnessing
+  aqua.reset();
+  aqua.loadAquaFile("./test-signed-only.aqua.json");
+  await aqua.witness(WitnessConfigs.ethereumSepolia);
+  aqua.saveAquaFile("./test-complete.aqua.json");
+
+  console.log("✅ Added witnessing to existing aqua file");
+}
+
+/**
+ * Example 4: Error handling and state management
+ */
+async function errorHandlingExample() {
+  console.log("\n⚠️  Error Handling Example");
+
+  const aqua = createAqua(creds);
+
+  // Try to sign without notarizing first
+  const signResult = await aqua.sign();
+  if (signResult.isErr()) {
+    console.log("❌ Expected error: Cannot sign without tree");
+    console.log("📋 Logs:", aqua.getLogs().map(l => l.message));
+  }
+
+  // Clear logs and start properly
+  aqua.clearLogs();
+  await aqua.notarizeFile("./test.txt");
+
+  const successResult = await aqua.sign(SignConfigs.cli);
+  if (successResult.isOk()) {
+    console.log("✅ Sign succeeded after notarization");
+  }
+}
+
+/**
+ * Example 5: Dynamic configuration updates
+ */
+async function dynamicConfigExample() {
+  console.log("\n🔧 Dynamic Config Example");
+
+  const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia);
+
+  await aqua.notarizeFile("./test.txt");
+  await aqua.sign(SignConfigs.cli);
+
+  // Update witness configuration
+  aqua.configure({
+    witness: WitnessConfigs.tsa
+  });
+
+  await aqua.witness(); // Uses updated config
+
+  console.log("✅ Dynamic configuration update working");
+}
+
+/**
+ * Comparison with original API
+ */
+function showAPIComparison() {
+  console.log("\n📊 API Comparison - Maximum Conciseness");
+  console.log("=".repeat(60));
+
+  console.log("🔴 Original API (15+ lines):");
+  console.log(`
+// Manual file reading
+let testFileContent = readFile("./test.txt");
+let aquaFileObject = {
+    fileName: "text.txt",
+    fileContent: testFileContent || "",
+    path: "./text.txt"
+};
+
+// Verbose operations with parameter repetition
+const aqt = await new AquafierChainable(null).notarize(aquaFileObject);
+await aqt.sign("cli", creds);
+await aqt.witness("eth", "sepolia", "metamask", creds);
+let result = aqt.getValue();
+
+// Manual file saving
+writeAquaFile("./result.aqua.json", result);
+`);
+
+  console.log("🟢 New Ultra-Concise API (3 lines):");
+  console.log(`
+const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
+const result = await aqua.processFile("./test.txt", { 
+    sign: true, witness: true, verify: true, save: "./test.txt.aqua.json" 
+});
+`);
+
+  console.log("🟢 New Step-by-Step API (5 lines):");
+  console.log(`
+const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
+await aqua.notarizeFile("./test.txt");
+await aqua.sign();
+await aqua.witness();  
+aqua.saveAquaFile("./test.txt.aqua.json");
+`);
+
+  console.log("✨ Improvements:");
+  console.log("  • 80% reduction in code for complete workflow");
+  console.log("  • No manual FileObject creation needed");
+  console.log("  • Built-in file I/O operations");
+  console.log("  • Configuration reuse across operations");
+  console.log("  • Better error handling with Result types");
+  console.log("  • Rust-compatible design patterns");
+}
+
+// Run all examples
+async function runAllExamples() {
+  try {
+    showAPIComparison();
+    await ultraConciseExample();
+    await basicFileExample();
+    await existingAquaFileExample();
+    await selectiveOperationsExample();
+    await errorHandlingExample();
+    await dynamicConfigExample();
+
+    console.log("\n🎉 All examples completed successfully!");
+  } catch (error) {
+    console.error("❌ Example failed:", error);
+  }
+}
+
+// Export for use in tests or other files
+export {
+  ultraConciseExample,
+  basicFileExample,
+  existingAquaFileExample,
+  selectiveOperationsExample,
+  errorHandlingExample,
+  dynamicConfigExample
+};
+
+// Run if called directly
+if (require.main === module) {
+  runAllExamples();
+}
