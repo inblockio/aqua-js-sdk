@@ -1,6 +1,6 @@
 import * as fs from "fs";
-import { AquaV2, createAqua, WitnessConfigs, SignConfigs } from "../src/aqua-v2";
-import { CredentialsData } from "../src/types";
+import { Aqua, createAqua, WitnessConfigs, SignConfigs } from "aqua-js-sdk";
+import { CredentialsData } from "aqua-js-sdk";
 
 // Load credentials
 let creds: CredentialsData = {
@@ -29,7 +29,7 @@ async function ultraConciseExample() {
   const result = await aqua.processFile("./test.txt", {
     sign: true,
     witness: true,
-    verify: true,
+    verify: false, // Verification is failing because JSON RPC cannot be reached
     save: "./test.txt.aqua.json"
   });
 
@@ -50,13 +50,18 @@ async function basicFileExample() {
   const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
 
   // Use file paths directly - no manual FileObject creation
-  await aqua.notarizeFile("./test.txt");
+  await aqua.create("./test.txt");
   await aqua.sign();
   await aqua.witness();
-  await aqua.verify([AquaV2.loadFile("./test.txt").data]);
+  const fileResult = Aqua.loadFile("./test.txt")
+  if(fileResult.isOk()){
+    let data = fileResult.data
+    console.log("✅ File loaded successfully")
+    await aqua.verify([data]);
+  }
 
   // Save the result
-  aqua.saveAquaFile("./test.txt.aqua.json");
+  aqua.save("./test.txt.aqua.json");
 
   console.log("✅ File operations completed");
   console.log(`📊 Generated ${aqua.getLogs().length} log entries`);
@@ -80,7 +85,31 @@ async function existingAquaFileExample() {
     await aqua.witness(WitnessConfigs.nostr);
 
     // Save updated version
-    aqua.saveAquaFile("./test.txt.updated.aqua.json");
+    aqua.save("./test.txt.updated.aqua.json");
+  } else {
+    console.log("❌ Failed to load aqua file");
+  }
+}
+
+/**
+ * Example 3.1: Working with existing aqua tree
+ */
+async function existingAquaTreeExample() {
+  console.log("\n📁 Existing Aqua Tree Example");
+
+  const aqua = createAqua(creds, WitnessConfigs.tsa, SignConfigs.cli);
+  const aquaTree = fs.readFileSync("./test.txt.aqua.json", "utf-8");
+  // Load existing aqua file
+  const loadResult = aqua.loadAquaTree(JSON.parse(aquaTree));
+  if (loadResult.isOk()) {
+    console.log("✅ Loaded existing aqua file");
+
+    // Continue with more operations
+    await aqua.sign(SignConfigs.did);
+    await aqua.witness(WitnessConfigs.nostr);
+
+    // Save updated version
+    aqua.save("./test.txt.updated.aqua.json");
   } else {
     console.log("❌ Failed to load aqua file");
   }
@@ -106,7 +135,7 @@ async function selectiveOperationsExample() {
   aqua.reset();
   aqua.loadAquaFile("./test-signed-only.aqua.json");
   await aqua.witness(WitnessConfigs.ethereumSepolia);
-  aqua.saveAquaFile("./test-complete.aqua.json");
+  aqua.save("./test-complete.aqua.json");
 
   console.log("✅ Added witnessing to existing aqua file");
 }
@@ -123,12 +152,12 @@ async function errorHandlingExample() {
   const signResult = await aqua.sign();
   if (signResult.isErr()) {
     console.log("❌ Expected error: Cannot sign without tree");
-    console.log("📋 Logs:", aqua.getLogs().map(l => l.message));
+    console.log("📋 Logs:", aqua.getLogs().map(l => l.log));
   }
 
   // Clear logs and start properly
   aqua.clearLogs();
-  await aqua.notarizeFile("./test.txt");
+  await aqua.create("./test.txt");
 
   const successResult = await aqua.sign(SignConfigs.cli);
   if (successResult.isOk()) {
@@ -144,15 +173,18 @@ async function dynamicConfigExample() {
 
   const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia);
 
-  await aqua.notarizeFile("./test.txt");
+  await aqua.create("./test.txt");
   await aqua.sign(SignConfigs.cli);
+
+  let currentAquaFile = aqua.getTree()
+  console.log("Aqua Tree: ", JSON.stringify(currentAquaFile, null, 4))
 
   // Update witness configuration
   aqua.configure({
     witness: WitnessConfigs.tsa
   });
 
-  await aqua.witness(); // Uses updated config
+  // await aqua.witness(); // Uses updated config
 
   console.log("✅ Dynamic configuration update working");
 }
@@ -213,12 +245,13 @@ aqua.saveAquaFile("./test.txt.aqua.json");
 // Run all examples
 async function runAllExamples() {
   try {
-    showAPIComparison();
-    await ultraConciseExample();
-    await basicFileExample();
+    // showAPIComparison();
+    // await ultraConciseExample();
+    // await basicFileExample();
     await existingAquaFileExample();
-    await selectiveOperationsExample();
-    await errorHandlingExample();
+    await existingAquaTreeExample();
+    // await selectiveOperationsExample();
+    // await errorHandlingExample();
     await dynamicConfigExample();
 
     console.log("\n🎉 All examples completed successfully!");
@@ -232,12 +265,13 @@ export {
   ultraConciseExample,
   basicFileExample,
   existingAquaFileExample,
+  existingAquaTreeExample,
   selectiveOperationsExample,
   errorHandlingExample,
   dynamicConfigExample
 };
 
 // Run if called directly
-if (require.main === module) {
-  runAllExamples();
-}
+// if (require.main === module) {
+// }
+runAllExamples();

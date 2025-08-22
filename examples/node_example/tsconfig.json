@@ -2,14 +2,19 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "outDir": "dist",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmitOnError": false,
+    "declaration": false,
+    "isolatedModules": true
   },
-  "include": ["index.ts"]
+  "include": ["./index.ts", "./aqua-v2-example.ts"],
+  "exclude": ["node_modules", "dist", "src"]
 }
 
 // {

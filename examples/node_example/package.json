@@ -5,12 +5,14 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsc && node ./dist/index.js"
+    "dev": "tsc && node ./dist/index.js",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aqua-protocol": "github:inblockio/aqua-verifier-js-lib"
-  
+    "aqua-js-sdk": "file:../../aqua-js-sdk-3.2.1-46.tgz",
+    "aqua-protocol": "github:inblockio/aqua-verifier-js-lib",
+    "aquafier-js-sdk": "^3.2.0"
   }
 }

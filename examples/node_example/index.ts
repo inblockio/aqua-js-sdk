@@ -67,7 +67,7 @@ let aquaFileObject: FileObject = {
 }
 
 let creds : CredentialsData  = {
-    "did_key":"",
+    "did:key":"",
     alchemy_key:"",
     mnemonic:"",
     nostr_sk:"",
@@ -87,14 +87,15 @@ async function chainExampleWithMultipleParameters() {
     // await result.witness()
 
     await aqt.sign("cli", creds);
-    await aqt.witness("eth", "sepolia", "metamask", creds);
+    // await aqt.witness("eth", "sepolia", "cli", creds);
     await aqt.sign("cli", creds);
 
     let result = aqt.getValue();
+    console.log("Successful result: \n", JSON.stringify(result, null, 4))
 
 };
 
-// chainExampleWithMultipleParameters()
+chainExampleWithMultipleParameters()
 
 
 // async function displayGraphTree(){
@@ -112,3 +113,25 @@ async function chainExampleWithMultipleParameters() {
 // }
 
 // displayGraphTree()
+
+// async function createGenesisRevision(){
+//     let aquafier = new Aquafier()
+//     let result = await aquafier.createGenesisRevision(aquaFileObject, false, true, false)
+//     if(result.isOk()){
+//         console.log("Successful result: \n", JSON.stringify(result.data, null, 4))
+//         return result.data
+//     }else{
+//         console.log("Failed result: \n", JSON.stringify(result.data, null, 4))
+//         return null
+//     }
+// }
+
+// let aquaTreeGenesis = createGenesisRevision()
+// if(aquaTreeGenesis){
+//     let aquaTreeWrapper = new AquaTreeWrapper(aquaTreeGenesis)
+//     aquaTreeWrapper.sign("cli", creds)
+//     aquaTreeWrapper.witness("eth", "sepolia", "metamask", creds)
+//     aquaTreeWrapper.sign("cli", creds)
+//     let aquaTree = aquaTreeWrapper.getValue()
+//     console.log("Successful result: \n", JSON.stringify(aquaTree, null, 4))
+// }
