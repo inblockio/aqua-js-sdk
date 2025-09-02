@@ -2,94 +2,162 @@
  * React Native entry point for aqua-js-sdk
  * 
  * This file provides a React Native compatible version of the aqua-js-sdk library.
- * It exports all the same functionality as the main library but uses platform-specific
- * implementations that are compatible with React Native.
+ * It automatically sets up all necessary polyfills and platform-specific implementations.
+ * 
+ * Zero configuration required - just import and use!
  */
 
-// Import Node.js module shims
-import { registerNodeModuleShims } from './platform/node-modules';
+// Import crypto polyfill directly to bundle it
+import 'crypto-browserify';
 
-// Check if we're actually in React Native
-const isReactNative = typeof navigator !== 'undefined' && navigator.product === 'ReactNative';
-
-// Check if we're in a browser or React environment
-const isReactOrBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
-
-if (!isReactNative && !isReactOrBrowser) {
-  console.warn(
-    'You are importing from "aqua-js-sdk/react-native" but this does not appear to be a React Native or browser environment. ' +
-    'This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.'
-  );
+// Essential polyfills - wrapped in try/catch for graceful fallbacks
+try {
+  require('react-native-get-random-values');
+} catch (e) {
+  console.warn('react-native-get-random-values not available, using fallback');
 }
 
-// Register Node.js module shims for React Native and browser environments
-if (isReactNative || isReactOrBrowser) {
-  registerNodeModuleShims();
-}
-
-// Set up global polyfills for Node.js modules that might be used by dependencies
-if (typeof global !== 'undefined') {
-  // Polyfill for stream
-  if (!global.stream) {
-    global.stream = {};
+// Set up global Buffer with proper error handling
+if (typeof global !== 'undefined' && typeof global.Buffer === 'undefined') {
+  try {
+    const { Buffer } = require('buffer');
+    global.Buffer = Buffer;
+  } catch (e) {
+    console.warn('Buffer polyfill failed, providing minimal implementation');
+    global.Buffer = class MinimalBuffer {
+      static from(data: any): any { return data; }
+      static isBuffer(_obj: any): boolean { return false; }
+      static alloc(size: number): any { return new Uint8Array(size); }
+    } as any;
   }
+}
+
+// Set up global process with comprehensive implementation
+if (typeof global !== 'undefined' && typeof global.process === 'undefined') {
+  global.process = {
+    env: { NODE_ENV: process?.env?.NODE_ENV || 'production' },
+    version: '16.0.0',
+    versions: { node: '16.0.0' },
+    nextTick: (callback: Function, ...args: any[]) => {
+      setTimeout(() => {
+        try {
+          callback(...args);
+        } catch (error) {
+          console.error('Process.nextTick callback error:', error);
+        }
+      }, 0);
+    },
+    stdout: { 
+      write: (data: any) => console.log(data),
+      on: () => {},
+      once: () => {},
+      emit: () => {}
+    },
+    stderr: { 
+      write: (data: any) => console.error(data),
+      on: () => {},
+      once: () => {},
+      emit: () => {}
+    },
+    argv: [],
+    platform: 'react-native',
+    browser: true,
+    cwd: () => '/',
+    chdir: () => {},
+    exit: () => {},
+    kill: () => {},
+    pid: 1,
+    ppid: 0,
+    title: 'react-native',
+    arch: 'arm64',
+    uptime: () => Date.now() / 1000,
+    hrtime: () => [Math.floor(Date.now() / 1000), (Date.now() % 1000) * 1000000],
+    memoryUsage: () => ({ rss: 0, heapTotal: 0, heapUsed: 0, external: 0 })
+  } as any;
+}
+
+// Set up crypto polyfill with comprehensive fallbacks
+if (typeof global !== 'undefined' && typeof global.crypto === 'undefined') {
+  let cryptoImpl: any = {};
   
-  // Polyfill for process
-  if (!global.process) {
-    // Cast to any to avoid TypeScript errors with Process interface
-    (global as any).process = {
-      env: { NODE_ENV: 'production' },
-      version: '',
-      versions: { node: '16.0.0' },
-      nextTick: (callback: Function, ...args: any[]) => setTimeout(() => callback(...args), 0),
-      // Add minimal stdout/stderr implementations
-      stdout: { write: console.log },
-      stderr: { write: console.error },
-      // Add empty argv array
-      argv: [],
-      // Add platform info
-      platform: 'react-native'
+  try {
+    // Try expo-crypto first
+    const expoCrypto = require('expo-crypto');
+    cryptoImpl = {
+      getRandomValues: (array: any) => {
+        try {
+          const randomBytes = expoCrypto.getRandomBytes(array.length);
+          for (let i = 0; i < array.length; i++) {
+            array[i] = randomBytes[i];
+          }
+          return array;
+        } catch (e) {
+          // Fallback to Math.random
+          for (let i = 0; i < array.length; i++) {
+            array[i] = Math.floor(Math.random() * 256);
+          }
+          return array;
+        }
+      },
+      randomUUID: () => {
+        try {
+          return expoCrypto.randomUUID();
+        } catch (e) {
+          // Simple UUID v4 fallback
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+        }
+      },
+      subtle: {
+        digest: async (_algorithm: string, data: any) => {
+          try {
+            return await expoCrypto.digest(expoCrypto.CryptoDigestAlgorithm.SHA256, data);
+          } catch (e) {
+            throw new Error('Crypto.subtle.digest not available');
+          }
+        }
+      }
+    };
+  } catch (e) {
+    // Fallback crypto implementation
+    cryptoImpl = {
+      getRandomValues: (array: any) => {
+        for (let i = 0; i < array.length; i++) {
+          array[i] = Math.floor(Math.random() * 256);
+        }
+        return array;
+      },
+      randomUUID: () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      },
+      subtle: {
+        digest: async () => {
+          throw new Error('Crypto.subtle.digest not available in fallback mode');
+        }
+      }
     };
   }
   
-  // Polyfill for Buffer if not already available
-  if (typeof global.Buffer === 'undefined') {
-    try {
-      // Try to load Buffer from the standard buffer package
-      const bufferModule = require('buffer');
-      global.Buffer = bufferModule.Buffer;
-    } catch (e) {
-      try {
-        // Fallback to buffer/ if the standard import fails
-        const bufferModule = require('buffer/');
-        global.Buffer = bufferModule.Buffer;
-      } catch (e2) {
-        console.warn('Failed to load Buffer polyfill:', e2);
-        // Provide a minimal Buffer-like implementation
-        global.Buffer = class MinimalBuffer {
-          static from(data: any): any { return data; }
-          static isBuffer(): boolean { return false; }
-        } as any;
-      }
-    }
-  }
-  
-  // Polyfill for crypto
-  if (!global.crypto) {
-    // Don't use crypto-browserify directly as it's not compatible with Hermes
-    // Instead, we'll use our platform-specific crypto implementation
-    (global as any).crypto = {};
-  }
-  
-  // Polyfill for ws module
-  (global as any).WebSocket = global.WebSocket || {};
-  
-  // Node.js module shims are now handled by registerNodeModuleShims()
+  global.crypto = cryptoImpl;
+}
+
+// Import and register Node.js module shims
+try {
+  const { registerNodeModuleShims } = require('./platform/node-modules');
+  registerNodeModuleShims();
+} catch (e) {
+  console.warn('Failed to register Node.js module shims:', e);
 }
 
 // Re-export everything from the main entry point
 export * from './index';
 
 // Default export
-import Aquafier from './index';
-export default Aquafier;
+export { default } from './index';

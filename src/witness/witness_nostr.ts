@@ -1,7 +1,5 @@
-import { finalizeEvent, Event, EventTemplate, getPublicKey } from 'nostr-tools/pure'
-import { Relay } from 'nostr-tools/relay'
+import { finalizeEvent, Event, EventTemplate, getPublicKey, Relay, nip19 } from 'nostr-tools'
 import { hexToBytes } from '@noble/hashes/utils'
-import * as nip19 from 'nostr-tools/nip19'
 import { CredentialsData, WitnessNostrVerifyResult } from '../types'
 import ws from 'ws';
 

@@ -1,83 +1,283 @@
-/**
- * React Native entry point for aqua-js-sdk
- *
- * This file provides a React Native compatible version of the aqua-js-sdk library.
- * It exports all the same functionality as the main library but uses platform-specific
- * implementations that are compatible with React Native.
- */
-// Import Node.js module shims
-import { registerNodeModuleShims } from './platform/node-modules';
-// Check if we're actually in React Native
-const isReactNative = typeof navigator !== 'undefined' && navigator.product === 'ReactNative';
-// Check if we're in a browser or React environment
-const isReactOrBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
-if (!isReactNative && !isReactOrBrowser) {
-    console.warn('You are importing from "aqua-js-sdk/react-native" but this does not appear to be a React Native or browser environment. ' +
-        'This may cause unexpected behavior. Consider importing from "aqua-js-sdk" instead.');
+import {
+  Aqua,
+  Aquafier,
+  AquafierChainable,
+  Err,
+  ErrResult,
+  LogType,
+  LogTypeEmojis,
+  None,
+  NoneOption,
+  Ok,
+  OkResult,
+  OrderRevisionInAquaTree,
+  SignConfigs,
+  Some,
+  SomeOption,
+  WitnessConfigs,
+  checkFileHashAlreadyNotarized,
+  checkInternetConnection,
+  cliGreenify,
+  cliRedify,
+  cliYellowfy,
+  createAqua,
+  createCredentials,
+  createNewAquaTree,
+  dict2Leaves,
+  estimateWitnessGas,
+  findFormKey,
+  findNextRevisionHashByArrayofRevisions,
+  formatMwTimestamp,
+  getAquaTreeFileName,
+  getAquaTreeFileObject,
+  getChainIdFromNetwork,
+  getEntropy,
+  getFileHashSum,
+  getFileNameCheckingPaths,
+  getGenesisHash,
+  getHashSum,
+  getLatestVH,
+  getMerkleRoot,
+  getPreviousVerificationHash,
+  getTimestamp,
+  getWallet,
+  isAquaTree,
+  isErr,
+  isNone,
+  isOk,
+  isSome,
+  log_dim,
+  log_red,
+  log_success,
+  log_yellow,
+  maybeUpdateFileIndex,
+  prepareNonce,
+  printGraphData,
+  printLogs,
+  printlinkedGraphData,
+  recoverWalletAddress,
+  reorderAquaTreeRevisionsProperties,
+  reorderRevisionsProperties,
+  verifyMerkleIntegrity
+} from "./chunk-4WVGB4X3.js";
+import {
+  init_node_modules,
+  node_modules_exports
+} from "./chunk-PX4VARQD.js";
+import "./chunk-RSUMAFLK.js";
+import "./chunk-72Y2DYY5.js";
+import "./chunk-BZOC2F5B.js";
+import {
+  __require,
+  __toCommonJS
+} from "./chunk-OQJUWTZV.js";
+
+// src/react-native.ts
+import "crypto-browserify";
+try {
+  __require("react-native-get-random-values");
+} catch (e) {
+  console.warn("react-native-get-random-values not available, using fallback");
 }
-// Register Node.js module shims for React Native and browser environments
-if (isReactNative || isReactOrBrowser) {
-    registerNodeModuleShims();
+if (typeof global !== "undefined" && typeof global.Buffer === "undefined") {
+  try {
+    const { Buffer } = __require("buffer");
+    global.Buffer = Buffer;
+  } catch (e) {
+    console.warn("Buffer polyfill failed, providing minimal implementation");
+    global.Buffer = class MinimalBuffer {
+      static from(data) {
+        return data;
+      }
+      static isBuffer(_obj) {
+        return false;
+      }
+      static alloc(size) {
+        return new Uint8Array(size);
+      }
+    };
+  }
 }
-// Set up global polyfills for Node.js modules that might be used by dependencies
-if (typeof global !== 'undefined') {
-    // Polyfill for stream
-    if (!global.stream) {
-        global.stream = {};
-    }
-    // Polyfill for process
-    if (!global.process) {
-        // Cast to any to avoid TypeScript errors with Process interface
-        global.process = {
-            env: { NODE_ENV: 'production' },
-            version: '',
-            versions: { node: '16.0.0' },
-            nextTick: (callback, ...args) => setTimeout(() => callback(...args), 0),
-            // Add minimal stdout/stderr implementations
-            stdout: { write: console.log },
-            stderr: { write: console.error },
-            // Add empty argv array
-            argv: [],
-            // Add platform info
-            platform: 'react-native'
-        };
-    }
-    // Polyfill for Buffer if not already available
-    if (typeof global.Buffer === 'undefined') {
+if (typeof global !== "undefined" && typeof global.process === "undefined") {
+  global.process = {
+    env: { NODE_ENV: process?.env?.NODE_ENV || "production" },
+    version: "16.0.0",
+    versions: { node: "16.0.0" },
+    nextTick: (callback, ...args) => {
+      setTimeout(() => {
         try {
-            // Try to load Buffer from the standard buffer package
-            const bufferModule = require('buffer');
-            global.Buffer = bufferModule.Buffer;
+          callback(...args);
+        } catch (error) {
+          console.error("Process.nextTick callback error:", error);
         }
-        catch (e) {
-            try {
-                // Fallback to buffer/ if the standard import fails
-                const bufferModule = require('buffer/');
-                global.Buffer = bufferModule.Buffer;
-            }
-            catch (e2) {
-                console.warn('Failed to load Buffer polyfill:', e2);
-                // Provide a minimal Buffer-like implementation
-                global.Buffer = class MinimalBuffer {
-                    static from(data) { return data; }
-                    static isBuffer() { return false; }
-                };
-            }
-        }
-    }
-    // Polyfill for crypto
-    if (!global.crypto) {
-        // Don't use crypto-browserify directly as it's not compatible with Hermes
-        // Instead, we'll use our platform-specific crypto implementation
-        global.crypto = {};
-    }
-    // Polyfill for ws module
-    global.WebSocket = global.WebSocket || {};
-    // Node.js module shims are now handled by registerNodeModuleShims()
+      }, 0);
+    },
+    stdout: {
+      write: (data) => console.log(data),
+      on: () => {
+      },
+      once: () => {
+      },
+      emit: () => {
+      }
+    },
+    stderr: {
+      write: (data) => console.error(data),
+      on: () => {
+      },
+      once: () => {
+      },
+      emit: () => {
+      }
+    },
+    argv: [],
+    platform: "react-native",
+    browser: true,
+    cwd: () => "/",
+    chdir: () => {
+    },
+    exit: () => {
+    },
+    kill: () => {
+    },
+    pid: 1,
+    ppid: 0,
+    title: "react-native",
+    arch: "arm64",
+    uptime: () => Date.now() / 1e3,
+    hrtime: () => [Math.floor(Date.now() / 1e3), Date.now() % 1e3 * 1e6],
+    memoryUsage: () => ({ rss: 0, heapTotal: 0, heapUsed: 0, external: 0 })
+  };
 }
-// Re-export everything from the main entry point
-export * from './index';
-// Default export
-import Aquafier from './index';
-export default Aquafier;
-//# sourceMappingURL=react-native.js.map
+if (typeof global !== "undefined" && typeof global.crypto === "undefined") {
+  let cryptoImpl = {};
+  try {
+    const expoCrypto = __require("expo-crypto");
+    cryptoImpl = {
+      getRandomValues: (array) => {
+        try {
+          const randomBytes = expoCrypto.getRandomBytes(array.length);
+          for (let i = 0; i < array.length; i++) {
+            array[i] = randomBytes[i];
+          }
+          return array;
+        } catch (e) {
+          for (let i = 0; i < array.length; i++) {
+            array[i] = Math.floor(Math.random() * 256);
+          }
+          return array;
+        }
+      },
+      randomUUID: () => {
+        try {
+          return expoCrypto.randomUUID();
+        } catch (e) {
+          return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === "x" ? r : r & 3 | 8;
+            return v.toString(16);
+          });
+        }
+      },
+      subtle: {
+        digest: async (_algorithm, data) => {
+          try {
+            return await expoCrypto.digest(expoCrypto.CryptoDigestAlgorithm.SHA256, data);
+          } catch (e) {
+            throw new Error("Crypto.subtle.digest not available");
+          }
+        }
+      }
+    };
+  } catch (e) {
+    cryptoImpl = {
+      getRandomValues: (array) => {
+        for (let i = 0; i < array.length; i++) {
+          array[i] = Math.floor(Math.random() * 256);
+        }
+        return array;
+      },
+      randomUUID: () => {
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+          const r = Math.random() * 16 | 0;
+          const v = c === "x" ? r : r & 3 | 8;
+          return v.toString(16);
+        });
+      },
+      subtle: {
+        digest: async () => {
+          throw new Error("Crypto.subtle.digest not available in fallback mode");
+        }
+      }
+    };
+  }
+  global.crypto = cryptoImpl;
+}
+try {
+  const { registerNodeModuleShims } = (init_node_modules(), __toCommonJS(node_modules_exports));
+  registerNodeModuleShims();
+} catch (e) {
+  console.warn("Failed to register Node.js module shims:", e);
+}
+export {
+  Aqua,
+  AquafierChainable,
+  Err,
+  ErrResult,
+  LogType,
+  LogTypeEmojis,
+  None,
+  NoneOption,
+  Ok,
+  OkResult,
+  OrderRevisionInAquaTree,
+  SignConfigs,
+  Some,
+  SomeOption,
+  WitnessConfigs,
+  checkFileHashAlreadyNotarized,
+  checkInternetConnection,
+  cliGreenify,
+  cliRedify,
+  cliYellowfy,
+  createAqua,
+  createCredentials,
+  createNewAquaTree,
+  Aquafier as default,
+  dict2Leaves,
+  estimateWitnessGas,
+  findFormKey,
+  findNextRevisionHashByArrayofRevisions,
+  formatMwTimestamp,
+  getAquaTreeFileName,
+  getAquaTreeFileObject,
+  getChainIdFromNetwork,
+  getEntropy,
+  getFileHashSum,
+  getFileNameCheckingPaths,
+  getGenesisHash,
+  getHashSum,
+  getLatestVH,
+  getMerkleRoot,
+  getPreviousVerificationHash,
+  getTimestamp,
+  getWallet,
+  isAquaTree,
+  isErr,
+  isNone,
+  isOk,
+  isSome,
+  log_dim,
+  log_red,
+  log_success,
+  log_yellow,
+  maybeUpdateFileIndex,
+  prepareNonce,
+  printGraphData,
+  printLogs,
+  printlinkedGraphData,
+  recoverWalletAddress,
+  reorderAquaTreeRevisionsProperties,
+  reorderRevisionsProperties,
+  verifyMerkleIntegrity
+};
