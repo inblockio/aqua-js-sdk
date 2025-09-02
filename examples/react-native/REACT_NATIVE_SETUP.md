@@ -1,6 +1,7 @@
 # React Native Setup Guide for aqua-js-sdk
 
 This guide will help you set up your React Native project to work with the aqua-js-sdk library.
+All the required files are under `example_setup`
 
 ## Installation
 
