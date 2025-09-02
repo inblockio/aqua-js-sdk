@@ -19,7 +19,7 @@ Then, navigate to example/node_example
 Run,
 
 ```bash
-npm link aqua-protocol
+npm link aqua-js-sdk
 ```
 
 If you update the main libray, always run the build command

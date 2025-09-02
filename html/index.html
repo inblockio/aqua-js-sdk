@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua JS test</title>
+    <!-- Load ethers as external dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
+    <!-- Load the webpack bundle -->
+    <script src="../../dist/aqua-js-sdk.min.js"></script>
+</head>
+
+<body>
+    <script>
+        async function testAquaSDK() {
+            console.log("Hello World");
+            console.log("AquaSDK available:", typeof AquaSDK !== 'undefined');
+            console.log("AquaSDK contents:", AquaSDK);
+
+            // Test different ways to access Aquafier
+            if (typeof AquaSDK !== 'undefined') {
+                try {
+                    // Try as named export
+                    if (AquaSDK.Aquafier) {
+                        const aquafier1 = new AquaSDK.Aquafier();
+                        console.log("✅ Aquafier via named export:", aquafier1);
+                        const fileObject = {
+                            fileName: "test.txt",
+                            fileContent: "Sample content",
+                            path: "/fake/path/test.txt"
+                        };
+
+                        const result = await aquafier1.createGenesisRevision(fileObject);
+                        console.log("✅ Result: ", JSON.stringify(result, null, 4))
+                        if (result.isOk()) {
+                            const creds = {
+                                "did:key": "",
+                                alchemy_key: "",
+                                mnemonic: "",
+                                nostr_sk: "",
+                                witness_eth_network: "sepolia",
+                                witness_method: "metmask",
+                            }
+                            const aquaTree = result.data.aquaTree
+                            const aquaTreeView = {
+                              aquaTree: aquaTree,
+                              revision: ''
+                            }
+                            const signingResult = await aquafier1.signAquaTree(aquaTreeView, "metamask", creds)
+                            console.log("✅ Signing Result: ", JSON.stringify(signingResult, null, 4))
+                        }
+                    }
+
+                    // Try as default export (UMD should expose the default export directly)
+                    if (typeof AquaSDK === 'function') {
+                        const aquafier2 = new AquaSDK();
+                        console.log("✅ Aquafier via default export:", aquafier2);
+                    }
+
+                    // Try accessing default property
+                    if (AquaSDK.default) {
+                        const aquafier3 = new AquaSDK.default();
+                        console.log("✅ Aquafier via default property:", aquafier3);
+                    }
+                } catch (error) {
+                    console.error("❌ Error creating Aquafier:", error);
+                }
+            } else {
+                console.error("AquaSDK not loaded properly");
+            }
+        }
+
+        // Run the test function
+        testAquaSDK();
+    </script>
+</body>
+
+</html>
