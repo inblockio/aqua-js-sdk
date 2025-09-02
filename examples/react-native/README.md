@@ -9,7 +9,7 @@ This is a complete React Native example project demonstrating how to use the aqu
 - Node.js >= 16
 - React Native development environment set up
 - Android Studio (for Android development)
-- Xcode (for iOS development, macOS only)
+- Xcode (for iOS development, macOS only).
 
 ### Installation
 

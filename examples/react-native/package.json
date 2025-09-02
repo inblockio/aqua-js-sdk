@@ -15,7 +15,7 @@
     "clean": "react-native clean-project-auto",
     "pod-install": "cd ios && pod install",
     "setup": "npm install && npx react-native setup-ios-permissions && npm run pod-install"
-  },
+  }, 
   "dependencies": {
     "react": "18.2.0",
     "react-native": "0.72.6",
