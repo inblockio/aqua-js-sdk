@@ -1,9 +1,9 @@
-import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeView, WitnessNetwork, WitnessType, WitnessResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
 import { checkInternetConnection, dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
-import { createAquaTree } from "../aquavhtree";
+import { createAquaTree } from "../aquatreevisualization";
 import { Err, isErr, Ok, Result } from "../type_guards";
 
 
@@ -12,7 +12,7 @@ import { Err, isErr, Ok, Result } from "../type_guards";
 /**
  * Creates a witness revision for an Aqua Tree
  * 
- * @param aquaTreeWrapper - Wrapper containing the Aqua Tree to witness
+ * @param aquaTreeView - View containing the Aqua Tree to witness
  * @param witnessType - Type of witness (nostr, tsa, etc.)
  * @param witnessNetwork - Network to witness on (e.g., sepolia)
  * @param witnessPlatform - Platform type for witnessing
@@ -26,15 +26,15 @@ import { Err, isErr, Ok, Result } from "../type_guards";
  * - Creates verification data with Merkle tree or scalar hash
  * - Updates Aqua Tree with witness revision
  */
-export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessAquaTreeUtil(aquaTreeView: AquaTreeView, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
     let lastRevisionHash = "";
-    if (aquaTreeWrapper.revision == undefined || aquaTreeWrapper.revision == null || aquaTreeWrapper.revision.length == 0) {
-        const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions);
+    if (aquaTreeView.revision == undefined || aquaTreeView.revision == null || aquaTreeView.revision.length == 0) {
+        const verificationHashes = Object.keys(aquaTreeView.aquaTree.revisions);
         lastRevisionHash = verificationHashes[verificationHashes.length - 1];
     } else {
-        lastRevisionHash = aquaTreeWrapper.revision;
+        lastRevisionHash = aquaTreeView.revision;
     }
 
     const now = new Date().toISOString()
@@ -73,10 +73,10 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
         verificationData.leaves = leaves
     }
 
-    const revisions = aquaTreeWrapper.aquaTree.revisions
+    const revisions = aquaTreeView.aquaTree.revisions
     revisions[verification_hash] = verificationData
 
-    let aquaTreeWithTree = createAquaTree(aquaTreeWrapper.aquaTree)
+    let aquaTreeWithTree = createAquaTree(aquaTreeView.aquaTree)
     if (!aquaTreeWithTree) {
         logs.push({
             log: `Failed to create AquaTree`,
@@ -101,7 +101,7 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
 /**
  * Creates witness revisions for multiple Aqua Trees in a batch
  * 
- * @param aquaTrees - Array of Aqua Tree wrappers to witness
+ * @param aquaTrees - Array of Aqua Tree views to witness
  * @param witnessType - Type of witness (nostr, tsa, etc.)
  * @param witnessNetwork - Network to witness on
  * @param witnessPlatform - Platform type for witnessing
@@ -115,7 +115,7 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
  * - Updates each tree with witness revision
  * - Handles batch witnessing efficiently
  */
-export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeView[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     let lastRevisionOrSpecifiedHashes: string[] = [];
 

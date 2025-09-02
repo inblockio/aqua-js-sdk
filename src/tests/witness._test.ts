@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
 // import Aquafier from "../index";  // Adjust the path based on your structure
-// import { AquaTreeWrapper, FileObject } from "../types";
+// import { AquaTreeView, FileObject } from "../types";
 // // import { createAquaTreeTree } from "../aquavhtree";
 // //check readme
 // import { default as credentialsData } from "../credentials.json";
@@ -51,12 +51,12 @@ describe("P12", () => {
 
     //     if (result.isOk() && result.data.aquaTree) {
     //         const data = result.data
-    //         const aquaTreeWrapper: AquaTreeWrapper = {
+    //         const aquaTreeView: AquaTreeView = {
     //             aquaTree: data.aquaTree,
     //             fileObject: fileObject,
     //             revision: ""
     //         }
-    //         const witnessResult = await aquafier.witnessAquaTree(aquaTreeWrapper, "eth", "sepolia", "cli", credentialsData)
+    //         const witnessResult = await aquafier.witnessAquaTree(aquaTreeView, "eth", "sepolia", "cli", credentialsData)
     //         // expect(witnessResult.isOk()).toBe(true)
 
     //         if (witnessResult.isOk()) {

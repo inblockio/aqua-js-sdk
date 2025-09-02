@@ -1,14 +1,14 @@
 
-import { createAquaTree } from "../aquavhtree";
+import { createAquaTree } from "../aquatreevisualization";
 import { Err, isErr, Ok, Result } from "../type_guards";
-import { AquaOperationData, LogData, AquaTreeWrapper, LogType, FileObject } from "../types";
+import { AquaOperationData, LogData, AquaTreeView, LogType, FileObject } from "../types";
 import { checkFileHashAlreadyNotarized, dict2Leaves, findFormKey, getHashSum, getLatestVH, getMerkleRoot, getTimestamp, maybeUpdateFileIndex, prepareNonce } from "../utils";
 
 
 /**
  * Creates a new form revision in the Aqua Tree
  * 
- * @param aquaTreeWrapper - Wrapper containing the Aqua Tree data structure
+ * @param aquaTreeView - View containing the Aqua Tree data structure
  * @param fileObject - Object containing form data as JSON content
  * @param enableScalar - Optional flag to use scalar mode instead of tree mode (default: false)
  * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
@@ -20,19 +20,19 @@ import { checkFileHashAlreadyNotarized, dict2Leaves, findFormKey, getHashSum, ge
  * - Creates verification data with Merkle tree or scalar hash
  * - Updates the Aqua Tree with new form revision
  */
-export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function createFormRevisionUtil(aquaTreeView: AquaTreeView, fileObject: FileObject, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
 
     let logs: Array<LogData> = [];
     let targetHash = "";
     let revisionType = "form";
-    if (aquaTreeWrapper.revision == null || aquaTreeWrapper.revision == undefined || aquaTreeWrapper.revision.length == 0) {
+    if (aquaTreeView.revision == null || aquaTreeView.revision == undefined || aquaTreeView.revision.length == 0) {
 
         logs.push({
             log: `using the last revision `,
             logType: LogType.INFO
         });
 
-        const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions)
+        const verificationHashes = Object.keys(aquaTreeView.aquaTree.revisions)
         targetHash = verificationHashes[verificationHashes.length - 1]
 
     }
@@ -45,7 +45,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
 
     // Calculate the hash of the file
     let fileHash = getHashSum(fileObject.fileContent as string)
-    let alreadyFormified = checkFileHashAlreadyNotarized(fileHash, aquaTreeWrapper.aquaTree)
+    let alreadyFormified = checkFileHashAlreadyNotarized(fileHash, aquaTreeView.aquaTree)
 
     if (alreadyFormified) {
         logs.push({
@@ -106,7 +106,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
     }
 
 
-    const aquaTree = aquaTreeWrapper.aquaTree;
+    const aquaTree = aquaTreeView.aquaTree;
     aquaTree.revisions[verificationHash] = verificationData;
 
 
@@ -139,7 +139,7 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
 /**
  * Hides (soft deletes) a form element by marking it as deleted
  * 
- * @param aquaTreeWrapper - Wrapper containing the Aqua Tree data structure
+ * @param aquaTreeView - View containing the Aqua Tree data structure
  * @param keyToHide - Key of the form element to hide
  * @returns Result containing either updated AquaOperationData or error logs
  * 
@@ -148,20 +148,20 @@ export async function createFormRevisionUtil(aquaTreeWrapper: AquaTreeWrapper, f
  * - Locates the form key to hide
  * - Creates a new revision with the element marked as deleted
  */
-export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide: string): Result<AquaOperationData, LogData[]> {
+export function hideFormElementsUtil(aquaTreeView: AquaTreeView, keyToHide: string): Result<AquaOperationData, LogData[]> {
 
     let logs: Array<LogData> = [];
 
     let targetRevisionHash = "";
 
 
-    if (aquaTreeWrapper.revision.length > 1) {
-        targetRevisionHash = aquaTreeWrapper.revision
+    if (aquaTreeView.revision.length > 1) {
+        targetRevisionHash = aquaTreeView.revision
     } else {
-        targetRevisionHash = getLatestVH(aquaTreeWrapper.aquaTree)
+        targetRevisionHash = getLatestVH(aquaTreeView.aquaTree)
     }
 
-    const targetRevision = aquaTreeWrapper.aquaTree.revisions[targetRevisionHash];
+    const targetRevision = aquaTreeView.aquaTree.revisions[targetRevisionHash];
 
     if (targetRevisionHash == "" || targetRevision == undefined) {
 
@@ -185,7 +185,7 @@ export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide
     }
 
 
-    const revisions: any = aquaTreeWrapper.aquaTree.revisions;
+    const revisions: any = aquaTreeView.aquaTree.revisions;
 
     // Update in place by renaming the key and setting value to empty string
     const deletedKey = `${formKey}.deleted`;
@@ -202,7 +202,7 @@ export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide
 
 
     let data: AquaOperationData = {
-        aquaTree: aquaTreeWrapper.aquaTree,
+        aquaTree: aquaTreeView.aquaTree,
         aquaTrees: [],
         logData: logs
     }
@@ -214,7 +214,7 @@ export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide
 /**
  * Restores a previously hidden form element
  * 
- * @param aquaTreeWrapper - Wrapper containing the Aqua Tree data structure
+ * @param aquaTreeView - View containing the Aqua Tree data structure
  * @param keyToUnHide - Key of the form element to restore
  * @param content - New content to set for the restored element
  * @returns Result containing either updated AquaOperationData or error logs
@@ -224,20 +224,20 @@ export function hideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToHide
  * - Locates the deleted form key
  * - Creates a new revision with the element restored and updated content
  */
-export function unHideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToUnHide: string, content: string): Result<AquaOperationData, LogData[]> {
+export function unHideFormElementsUtil(aquaTreeView: AquaTreeView, keyToUnHide: string, content: string): Result<AquaOperationData, LogData[]> {
 
     let logs: Array<LogData> = [];
 
     let targetRevisionHash = "";
 
 
-    if (aquaTreeWrapper.revision.length > 1) {
-        targetRevisionHash = aquaTreeWrapper.revision
+    if (aquaTreeView.revision.length > 1) {
+        targetRevisionHash = aquaTreeView.revision
     } else {
-        targetRevisionHash = getLatestVH(aquaTreeWrapper.aquaTree)
+        targetRevisionHash = getLatestVH(aquaTreeView.aquaTree)
     }
 
-    const targetRevision = aquaTreeWrapper.aquaTree.revisions[targetRevisionHash];
+    const targetRevision = aquaTreeView.aquaTree.revisions[targetRevisionHash];
 
     if (targetRevisionHash == "" || targetRevision == undefined) {
 
@@ -261,7 +261,7 @@ export function unHideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToUn
     }
 
 
-    const revisions: any = aquaTreeWrapper.aquaTree.revisions;
+    const revisions: any = aquaTreeView.aquaTree.revisions;
 
 
     // Update operation
@@ -286,7 +286,7 @@ export function unHideFormElementsUtil(aquaTreeWrapper: AquaTreeWrapper, keyToUn
 
 
     let data: AquaOperationData = {
-        aquaTree: aquaTreeWrapper.aquaTree,
+        aquaTree: aquaTreeView.aquaTree,
         aquaTrees: [],
         logData: logs
     }

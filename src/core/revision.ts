@@ -16,7 +16,7 @@ import {
   prepareNonce,
   reorderRevisionsProperties,
 } from "../utils"
-import { createAquaTree } from "../aquavhtree"
+import { createAquaTree } from "../aquatreevisualization"
 import { Err, isErr, Ok, Result } from "../type_guards"
 
 /**

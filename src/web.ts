@@ -48,6 +48,7 @@ if (typeof window !== 'undefined') {
 // Re-export everything from the main entry point
 export * from './index';
 
-// Default export
+// Import and re-export Aquafier as both named and default export
 import Aquafier from './index';
+export { Aquafier };
 export default Aquafier;

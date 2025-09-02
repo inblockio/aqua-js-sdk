@@ -1,6 +1,6 @@
 import { jest } from "@jest/globals";
-import Aquafier, { AquaOperationData, AquaTree, AquaTreeWrapper, FileObject, LogData, Result, Revision } from "../index";  // Adjust the path based on your structure
-// import { AquaTree, AquaTreeWrapper, CredentialsData, FileObject } from "../types";
+import Aquafier, { AquaOperationData, AquaTree, AquaTreeView, FileObject, LogData, Result, Revision } from "../index";  // Adjust the path based on your structure
+// import { AquaTree, AquaTreeView, CredentialsData, FileObject } from "../types";
 // import { mockAquaTreeOnerevision, mockAquaTreeTworevisions, mockAquaTreeTworevisionsReArranged } from "./test_revisions";
 // // import { createAquaTreeTree } from "../aquavhtree";
 import { default as credentialsData } from "./../credentials.json";
@@ -237,13 +237,13 @@ describe("Aquafier", () => {
             const test2Result = await aquafier.createGenesisRevision(fileObject2, false, true, false);
 
             if (test1Result.isOk() && test2Result.isOk()) {
-                const test1AquaTreeWrapper: AquaTreeWrapper = {
+                const test1AquaTreeWrapper: AquaTreeView = {
                     aquaTree: test1Result.data.aquaTree!,
                     revision: "",
                     fileObject: fileObject1
                 }
 
-                const test2AquaTreeWrapper: AquaTreeWrapper = {
+                const test2AquaTreeWrapper: AquaTreeView = {
                     aquaTree: test2Result.data.aquaTree!,
                     revision: "",
                     fileObject: fileObject2
@@ -329,13 +329,13 @@ describe("Aquafier", () => {
                 aquaTree = aquaTreeCreationResult.data.aquaTree;
                 firstRevision = aquaTree!.revisions[Object.keys(aquaTree!.revisions)[0]];
 
-                const aquaTreeWrapper: AquaTreeWrapper = {
+                const aquaTreeView: AquaTreeView = {
                     aquaTree: aquaTree!,
                     revision: "",
                     fileObject: fileObject
                 }
 
-                result = await aquafier.signAquaTree(aquaTreeWrapper, "cli", credentialsData, true);
+                result = await aquafier.signAquaTree(aquaTreeView, "cli", credentialsData, true);
                 if (result.isOk()) {
                     const signedAquaTree = result.data.aquaTree;
                     aquaTree = signedAquaTree;
@@ -392,13 +392,13 @@ describe("Aquafier", () => {
                 aquaTree = aquaTreeCreationResult.data.aquaTree;
                 firstRevision = aquaTree!.revisions[Object.keys(aquaTree!.revisions)[0]];
 
-                const aquaTreeWrapper: AquaTreeWrapper = {
+                const aquaTreeView: AquaTreeView = {
                     aquaTree: aquaTree!,
                     revision: "",
                     fileObject: fileObject
                 }
 
-                result = await aquafier.signAquaTree(aquaTreeWrapper, "metamask", credentialsData, true);
+                result = await aquafier.signAquaTree(aquaTreeView, "metamask", credentialsData, true);
                 if (result.isOk()) {
                     const signedAquaTree = result.data.aquaTree;
                     aquaTree = signedAquaTree;
@@ -451,13 +451,13 @@ describe("Aquafier", () => {
                 aquaTree = aquaTreeCreationResult.data.aquaTree;
                 firstRevision = aquaTree!.revisions[Object.keys(aquaTree!.revisions)[0]];
 
-                const aquaTreeWrapper: AquaTreeWrapper = {
+                const aquaTreeView: AquaTreeView = {
                     aquaTree: aquaTree!,
                     revision: "",
                     fileObject: fileObject
                 }
 
-                result = await aquafier.signAquaTree(aquaTreeWrapper, "did", credentialsData, true);
+                result = await aquafier.signAquaTree(aquaTreeView, "did", credentialsData, true);
                 if (result.isOk()) {
                     const signedAquaTree = result.data.aquaTree;
                     aquaTree = signedAquaTree;
@@ -510,13 +510,13 @@ describe("Aquafier", () => {
                 aquaTree = aquaTreeCreationResult.data.aquaTree;
                 firstRevision = aquaTree!.revisions[Object.keys(aquaTree!.revisions)[0]];
 
-                const aquaTreeWrapper: AquaTreeWrapper = {
+                const aquaTreeView: AquaTreeView = {
                     aquaTree: aquaTree!,
                     revision: "",
                     fileObject: fileObject
                 }
 
-                result = await aquafier.witnessAquaTree(aquaTreeWrapper, "eth", "sepolia", "cli", credentialsData, true);
+                result = await aquafier.witnessAquaTree(aquaTreeView, "eth", "sepolia", "cli", credentialsData, true);
                 if (result.isOk()) {
                     const signedAquaTree = result.data.aquaTree;
                     aquaTree = signedAquaTree;
@@ -571,13 +571,13 @@ describe("Aquafier", () => {
                 aquaTree = aquaTreeCreationResult.data.aquaTree;
                 firstRevision = aquaTree!.revisions[Object.keys(aquaTree!.revisions)[0]];
 
-                const aquaTreeWrapper: AquaTreeWrapper = {
+                const aquaTreeView: AquaTreeView = {
                     aquaTree: aquaTree!,
                     revision: "",
                     fileObject: fileObject
                 }
 
-                result = await aquafier.witnessAquaTree(aquaTreeWrapper, "eth", "sepolia", "metamask", credentialsData, true);
+                result = await aquafier.witnessAquaTree(aquaTreeView, "eth", "sepolia", "metamask", credentialsData, true);
                 if (result.isOk()) {
                     const signedAquaTree = result.data.aquaTree;
                     aquaTree = signedAquaTree;
@@ -633,13 +633,13 @@ describe("Aquafier", () => {
                 aquaTree = aquaTreeCreationResult.data.aquaTree;
                 firstRevision = aquaTree!.revisions[Object.keys(aquaTree!.revisions)[0]];
 
-                const aquaTreeWrapper: AquaTreeWrapper = {
+                const aquaTreeView: AquaTreeView = {
                     aquaTree: aquaTree!,
                     revision: "",
                     fileObject: fileObject
                 }
 
-                result = await aquafier.witnessAquaTree(aquaTreeWrapper, "tsa", "sepolia", "cli", credentialsData, true);
+                result = await aquafier.witnessAquaTree(aquaTreeView, "tsa", "sepolia", "cli", credentialsData, true);
                 if (result.isOk()) {
                     const signedAquaTree = result.data.aquaTree;
                     aquaTree = signedAquaTree;
@@ -690,13 +690,13 @@ describe("Aquafier", () => {
                 aquaTree = aquaTreeCreationResult.data.aquaTree;
                 firstRevision = aquaTree!.revisions[Object.keys(aquaTree!.revisions)[0]];
 
-                const aquaTreeWrapper: AquaTreeWrapper = {
+                const aquaTreeView: AquaTreeView = {
                     aquaTree: aquaTree!,
                     revision: "",
                     fileObject: fileObject
                 }
 
-                result = await aquafier.witnessAquaTree(aquaTreeWrapper, "nostr", "sepolia", "cli", credentialsData, true);
+                result = await aquafier.witnessAquaTree(aquaTreeView, "nostr", "sepolia", "cli", credentialsData, true);
                 if (result.isOk()) {
                     const signedAquaTree = result.data.aquaTree;
                     aquaTree = signedAquaTree;
@@ -734,7 +734,7 @@ describe("Aquafier", () => {
     describe("13. Hide form in form revision item", () => {
         let mockAquaTree: AquaTree;
         let fileObject: FileObject;
-        let aquaTreeWrapper: AquaTreeWrapper;
+        let aquaTreeView: AquaTreeView;
         let resultFormRevision: Result<AquaOperationData, LogData[]>;
         let resultHide: Result<AquaOperationData, LogData[]>;
         
@@ -745,15 +745,15 @@ describe("Aquafier", () => {
                 fileContent: '{"name":"kenn","age":200}',
                 path: "/fake/path/test.json"
             };
-            aquaTreeWrapper = {
+            aquaTreeView = {
                 aquaTree: mockAquaTree,
                 fileObject: fileObject,
                 revision: ""
             };
             
-            resultFormRevision = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+            resultFormRevision = await aquafier.createFormRevision(aquaTreeView, fileObject);
             if (resultFormRevision.isOk()) {
-                resultHide = await aquafier.hideFormElements(aquaTreeWrapper, "name");
+                resultHide = await aquafier.hideFormElements(aquaTreeView, "name");
             }
         });
         
@@ -776,7 +776,7 @@ describe("Aquafier", () => {
     describe.skip("14. Hide and unhide form in form revision item - TODO: Fix this", () => {
         let mockAquaTree: AquaTree;
         let fileObject: FileObject;
-        let aquaTreeWrapper: AquaTreeWrapper;
+        let aquaTreeView: AquaTreeView;
         let resultFormRevision: Result<AquaOperationData, LogData[]>;
         let resultHide: Result<AquaOperationData, LogData[]>;
         let resultUnHide: Result<AquaOperationData, LogData[]>;
@@ -788,15 +788,15 @@ describe("Aquafier", () => {
                 fileContent: '{"name":"kenn","age":200}',
                 path: "/fake/path/test.json"
             };
-            aquaTreeWrapper = {
+            aquaTreeView = {
                 aquaTree: mockAquaTree,
                 fileObject: fileObject,
                 revision: ""
             };
             
-            resultFormRevision = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+            resultFormRevision = await aquafier.createFormRevision(aquaTreeView, fileObject);
             if (resultFormRevision.isOk()) {
-                const aquaTreeWrapperToHideWrapper: AquaTreeWrapper = {
+                const aquaTreeWrapperToHideWrapper: AquaTreeView = {
                     aquaTree: resultFormRevision.data.aquaTree!,
                     fileObject: fileObject,
                     revision: ""
@@ -804,7 +804,7 @@ describe("Aquafier", () => {
                 resultHide = await aquafier.hideFormElements(aquaTreeWrapperToHideWrapper, "name");
                 
                 if (resultHide.isOk()) {
-                    const aquaTreeWrapperHidenElementsWrapper: AquaTreeWrapper = {
+                    const aquaTreeWrapperHidenElementsWrapper: AquaTreeView = {
                         aquaTree: resultHide.data.aquaTree!,
                         fileObject: fileObject,
                         revision: ""
@@ -886,7 +886,7 @@ describe("Aquafier", () => {
     //         fileContent: "Sample content",
     //         path: "/fake/path/test.txt"
     //     };
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
+    //     const aquaTreeView: AquaTreeView = {
     //         aquaTree: mockAquaTree,
     //         fileObject: fileObject,
     //         revision: ""
@@ -896,7 +896,7 @@ describe("Aquafier", () => {
     //     // const content = await fs.readFile(filePath, "utf-8");
     //     const creds: CredentialsData = credentialsData;
 
-    //     const result = await aquafier.signAquaTree(aquaTreeWrapper, "metamask", creds, true);
+    //     const result = await aquafier.signAquaTree(aquaTreeView, "metamask", creds, true);
 
     //     expect(result.isOk()).toBe(true);
     //     if (result.isOk()) {
@@ -912,7 +912,7 @@ describe("Aquafier", () => {
     //         fileContent: "Sample content",
     //         path: "/fake/path/test.txt"
     //     };
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
+    //     const aquaTreeView: AquaTreeView = {
     //         aquaTree: mockAquaTree,
     //         fileObject: fileObject,
     //         revision: ""
@@ -922,7 +922,7 @@ describe("Aquafier", () => {
     //     // const content = await fs.readFile(filePath, "utf-8");
     //     const creds: CredentialsData = credentialsData;
 
-    //     const result = await aquafier.signAquaTree(aquaTreeWrapper, "did", creds, true);
+    //     const result = await aquafier.signAquaTree(aquaTreeView, "did", creds, true);
 
     //     expect(result.isOk()).toBe(true);
     //     if (result.isOk()) {
@@ -934,7 +934,7 @@ describe("Aquafier", () => {
     // test("should witness aquatree via cli", async () => {
     //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeOnerevision)
 
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
+    //     const aquaTreeView: AquaTreeView = {
     //         aquaTree: mockAquaTree,
     //         fileObject: {
     //             fileName: "test.txt",
@@ -945,7 +945,7 @@ describe("Aquafier", () => {
     //     }
     //     const creds: CredentialsData = credentialsData;
 
-    //     const result = await aquafier.witnessAquaTree(aquaTreeWrapper, "eth", "sepolia", "cli", creds,);
+    //     const result = await aquafier.witnessAquaTree(aquaTreeView, "eth", "sepolia", "cli", creds,);
 
     //     expect(result.isOk()).toBe(true);
     //     if (result.isOk()) {
@@ -977,7 +977,7 @@ describe("Aquafier", () => {
     //     const creds: CredentialsData = credentialsData;
 
 
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
+    //     const aquaTreeView: AquaTreeView = {
     //         aquaTree: mockAquaTree,
     //         fileObject: {
     //             fileName: "test.txt",
@@ -987,7 +987,7 @@ describe("Aquafier", () => {
     //         revision: ""
     //     }
 
-    //     const result = await aquafier.witnessAquaTree(aquaTreeWrapper, "nostr", "sepolia", "cli", creds,);
+    //     const result = await aquafier.witnessAquaTree(aquaTreeView, "nostr", "sepolia", "cli", creds,);
 
     //     expect(result.isOk()).toBe(true);
     //     if (result.isOk()) {
@@ -1005,19 +1005,19 @@ describe("Aquafier", () => {
     //         path: "/fake/path/test.txt"
     //     };
 
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
+    //     const aquaTreeView: AquaTreeView = {
     //         aquaTree: mockAquaTree,
     //         fileObject: fileObject,
     //         revision: ""
     //     }
 
-    //     const linkaquaTreeWrapper: AquaTreeWrapper = {
+    //     const linkaquaTreeWrapper: AquaTreeView = {
     //         aquaTree: mockAquaTree,
     //         fileObject: fileObject,
     //         revision: ""
     //     }
 
-    //     const result = await aquafier.linkAquaTree(aquaTreeWrapper, linkaquaTreeWrapper);
+    //     const result = await aquafier.linkAquaTree(aquaTreeView, linkaquaTreeWrapper);
 
     //     expect(result.isOk()).toBe(true);
     //     if (result.isOk()) {
@@ -1034,13 +1034,13 @@ describe("Aquafier", () => {
     //         fileContent: '{"name":"kenn","age":200}',
     //         path: "/fake/path/test.json"
     //     };
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
+    //     const aquaTreeView: AquaTreeView = {
     //         aquaTree: mockAquaTree,
     //         fileObject: fileObject,
     //         revision: ""
     //     }
 
-    //     const result = await aquafier.createFormRevision(aquaTreeWrapper, fileObject);
+    //     const result = await aquafier.createFormRevision(aquaTreeView, fileObject);
     //     expect(result.isOk()).toBe(true);
     // });
 

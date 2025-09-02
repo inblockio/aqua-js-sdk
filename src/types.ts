@@ -2,7 +2,7 @@
  * @module types
  * @description This module contains all the types used in the Aqua SDK
  * @preferred @description This module contains all the types used in the Aqua SDK
- * @preferred @exports {CredentialsData, AquaOperationData, RevisionType, WitnessType, WitnessPlatformType, WitnessNetwork, SignType, WitnessEnvironment, FileObject, LogType, LogTypeEmojis, LogData, RevisionTree, Revision, Revisions, FileIndex, FormData, TreeMapping, AquaTreeWrapper, AquaTree, SignaturePayload, SignatureResult, SignatureData, SignatureItem, IWitnessConfig, AnObject, WitnessMerkleProof, WitnessResult, GasEstimateResult, WitnessConfig, TransactionResult, WitnessTransactionData, WitnessTSAResponse, WitnessEthResponse, WitnessNostrResponse, WitnessNostrVerifyResult}
+ * @preferred @exports {CredentialsData, AquaOperationData, RevisionType, WitnessType, WitnessPlatformType, WitnessNetwork, SignType, WitnessEnvironment, FileObject, LogType, LogTypeEmojis, LogData, RevisionTree, Revision, Revisions, FileIndex, FormData, TreeMapping, AquaTreeView, AquaTree, SignaturePayload, SignatureResult, SignatureData, SignatureItem, IWitnessConfig, AnObject, WitnessMerkleProof, WitnessResult, GasEstimateResult, WitnessConfig, TransactionResult, WitnessTransactionData, WitnessTSAResponse, WitnessEthResponse, WitnessNostrResponse, WitnessNostrVerifyResult}
  */
 
 /**
@@ -390,13 +390,13 @@ export interface TreeMapping {
 }
 
 /**
- * Wrapper for Aqua Tree with additional metadata
+ * View for Aqua Tree with additional metadata
  *
  * @property aquaTree - The Aqua Tree
  * @property fileObject - Optional file metadata
  * @property revision - Revision identifier
  */
-export interface AquaTreeWrapper {
+export interface AquaTreeView {
   aquaTree: AquaTree
   fileObject?: FileObject
   revision: string

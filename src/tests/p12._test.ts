@@ -35,7 +35,7 @@ describe("P12", () => {
     // test("should sign a revision using p12", async () => {
     //     const mockAquaTree: AquaTree = structuredClone(mockAquaTreeTworevisionsReArranged)
 
-    //     const aquaTreeWrapper: AquaTreeWrapper = {
+    //     const aquaTreeView: AquaTreeView = {
     //         aquaTree: mockAquaTree,
     //         fileObject: {
     //             fileName: "test.txt",
@@ -51,7 +51,7 @@ describe("P12", () => {
     //     creds.p12_content = certStringContent
     //     creds.p12_password = "StrongPass!"
 
-    //     const result = await aquafier.signAquaTree(aquaTreeWrapper, "p12", creds, true);
+    //     const result = await aquafier.signAquaTree(aquaTreeView, "p12", creds, true);
 
     //     expect(result.isOk()).toBe(true);
     //     if (result.isOk()) {

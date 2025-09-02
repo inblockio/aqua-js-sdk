@@ -1,4 +1,5 @@
 import {
+  Aqua,
   Aquafier,
   AquafierChainable,
   Err,
@@ -10,13 +11,16 @@ import {
   Ok,
   OkResult,
   OrderRevisionInAquaTree,
+  SignConfigs,
   Some,
   SomeOption,
+  WitnessConfigs,
   checkFileHashAlreadyNotarized,
   checkInternetConnection,
   cliGreenify,
   cliRedify,
   cliYellowfy,
+  createAqua,
   createCredentials,
   createNewAquaTree,
   dict2Leaves,
@@ -55,11 +59,16 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-WAYLIT2U.js";
+} from "./chunk-WDQWI3F7.js";
 import {
-  __require,
   registerNodeModuleShims
-} from "./chunk-R4XJC7WN.js";
+} from "./chunk-FE6H7ACM.js";
+import "./chunk-ZTGEYJIV.js";
+import "./chunk-D5ETXTMD.js";
+import "./chunk-BZOC2F5B.js";
+import {
+  __require
+} from "./chunk-ARVO53NY.js";
 
 // src/react-native.ts
 var isReactNative = typeof navigator !== "undefined" && navigator.product === "ReactNative";
@@ -119,6 +128,7 @@ if (typeof global !== "undefined") {
 }
 var react_native_default = Aquafier;
 export {
+  Aqua,
   AquafierChainable,
   Err,
   ErrResult,
@@ -129,13 +139,16 @@ export {
   Ok,
   OkResult,
   OrderRevisionInAquaTree,
+  SignConfigs,
   Some,
   SomeOption,
+  WitnessConfigs,
   checkFileHashAlreadyNotarized,
   checkInternetConnection,
   cliGreenify,
   cliRedify,
   cliYellowfy,
+  createAqua,
   createCredentials,
   createNewAquaTree,
   react_native_default as default,

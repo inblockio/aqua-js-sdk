@@ -38,11 +38,11 @@ export async function getCrypto(): Promise<{
       // This prevents bundlers from trying to resolve 'node:crypto' in browser environments
       const nodeCrypto = await (async () => {
         try {
-          // Try with node: protocol first (Node.js 14+)
-          return await import('node:crypto');
-        } catch (e) {
-          // Fallback to regular import for older Node versions
+          // Use regular crypto import to avoid webpack issues with node: protocol
           return await import('crypto');
+        } catch (e) {
+          // If crypto import fails, we're likely in a browser environment
+          throw new Error('Node.js crypto module not available');
         }
       })();
       

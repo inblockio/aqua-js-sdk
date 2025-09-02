@@ -3,7 +3,7 @@ import {
   AquaOperationData,
   LogData,
   SignType,
-  AquaTreeWrapper,
+  AquaTreeView,
   CredentialsData,
   LogType,
   SignatureData,
@@ -21,14 +21,14 @@ import {
 } from "../utils"
 import { DIDSigner } from "../signature/sign_did"
 import { P12Signer } from "../signature/sign_p12"
-import { createAquaTree } from "../aquavhtree"
+import { createAquaTree } from "../aquatreevisualization"
 import { ethers } from "ethers"
 import { Err, Ok, Result } from "../type_guards"
 
 /**
  * Signs an Aqua Tree revision using specified signature method
  *
- * @param aquaTreeWrapper - Wrapper containing the Aqua Tree to sign
+ * @param aquaTreeView - View containing the Aqua Tree to sign
  * @param signType - Type of signature to use (metamask, cli, or did)
  * @param credentials - Credentials data required for signing
  * @param enableScalar - Optional flag to use scalar mode instead of tree mode
@@ -42,26 +42,26 @@ import { Err, Ok, Result } from "../type_guards"
  * - Updates Aqua Tree with signature information
  */
 export async function signAquaTreeUtil(
-  aquaTreeWrapper: AquaTreeWrapper,
+  aquaTreeView: AquaTreeView,
   signType: SignType,
   credentials: CredentialsData,
   enableScalar: boolean = false,
   identCharacter: string = "",
   reactNativeOptions?: ReactNativeMetaMaskOptions,
 ): Promise<Result<AquaOperationData, LogData[]>> {
-  let aquaTree = aquaTreeWrapper.aquaTree
+  let aquaTree = aquaTreeView.aquaTree
   let logs: Array<LogData> = []
   let targetRevisionHash = ""
   if (
-    aquaTreeWrapper.revision == undefined ||
-    aquaTreeWrapper.revision == null ||
-    aquaTreeWrapper.revision.length == 0
+    aquaTreeView.revision == undefined ||
+    aquaTreeView.revision == null ||
+    aquaTreeView.revision.length == 0
   ) {
-    const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions)
+    const verificationHashes = Object.keys(aquaTreeView.aquaTree.revisions)
     const lastRevisionHash = verificationHashes[verificationHashes.length - 1]
     targetRevisionHash = lastRevisionHash
   } else {
-    targetRevisionHash = aquaTreeWrapper.revision
+    targetRevisionHash = aquaTreeView.revision
   }
 
   let signature: string | SignatureData,
@@ -200,7 +200,7 @@ export async function signAquaTreeUtil(
 /**
  * Signs multiple Aqua Trees (Currently unimplemented)
  *
- * @param aquaTrees - Array of Aqua Tree wrappers to sign
+ * @param aquaTrees - Array of Aqua Tree views to sign
  * @param signType - Type of signature to use
  * @param credentials - Credentials data required for signing
  * @param reactNativeOptions - Options for React Native MetaMask integration
@@ -209,7 +209,7 @@ export async function signAquaTreeUtil(
  * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
  */
 export async function signMultipleAquaTreesUtil(
-  aquaTrees: AquaTreeWrapper[],
+  aquaTrees: AquaTreeView[],
   signType: SignType,
   credentials: CredentialsData,
   reactNativeOptions?: ReactNativeMetaMaskOptions,

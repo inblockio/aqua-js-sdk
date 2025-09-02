@@ -179,9 +179,10 @@ export class MetaMaskSigner {
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: getChainIdFromNetwork(network) }],
             });
+
             await window.ethereum.request({ method: 'eth_requestAccounts' });
-            // const walletAddress = window.ethereum.selectedAddress;
-            // console.log(`walletAddress ${walletAddress} if has caps`)
+            const _walletAddress = window.ethereum.selectedAddress;
+            console.log(`walletAddress ${_walletAddress} if has caps`)
 
 
             // Get the raw address from MetaMask

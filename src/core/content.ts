@@ -1,6 +1,6 @@
 import {
   AquaTree,
-  AquaTreeWrapper,
+  AquaTreeView,
   AquaOperationData,
   FileObject,
   LogData,
@@ -16,13 +16,13 @@ import {
   prepareNonce,
 } from "../utils"
 import { reorderAquaTreeRevisionsProperties } from "../utils"
-import { createAquaTree } from "../aquavhtree"
+import { createAquaTree } from "../aquatreevisualization"
 import { Err, Ok, Result } from "../type_guards"
 
 /**
  * Creates a new content revision in the Aqua Tree
  *
- * @param aquaTreeWrapper - Wrapper containing the Aqua Tree data structure
+ * @param aquaTreeView - View containing the Aqua Tree data structure
  * @param fileObject - Object containing file information (fileName and fileContent)
  * @param enableScalar - Boolean flag to determine if scalar mode should be used instead of tree mode
  * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
@@ -35,7 +35,7 @@ import { Err, Ok, Result } from "../type_guards"
  * - Updates file index if needed
  */
 export async function createContentRevisionUtil(
-  aquaTreeWrapper: AquaTreeWrapper,
+  aquaTreeView: AquaTreeView,
   fileObject: FileObject,
   enableScalar: boolean,
 ): Promise<Result<AquaOperationData, LogData[]>> {
@@ -45,7 +45,7 @@ export async function createContentRevisionUtil(
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
   let revisionType = "file"
 
-  const verificationHashes = Object.keys(aquaTreeWrapper.aquaTree.revisions)
+  const verificationHashes = Object.keys(aquaTreeView.aquaTree.revisions)
   let lastRevisionHash = verificationHashes[verificationHashes.length - 1]
 
   let verificationData: any = {
@@ -58,7 +58,7 @@ export async function createContentRevisionUtil(
 
   let alreadyNotarized = checkFileHashAlreadyNotarized(
     fileHash,
-    aquaTreeWrapper.aquaTree,
+    aquaTreeView.aquaTree,
   )
 
   if (alreadyNotarized) {
@@ -86,11 +86,11 @@ export async function createContentRevisionUtil(
     verification_hash = getMerkleRoot(leaves) // tree.getHexRoot()
   }
 
-  const revisions = aquaTreeWrapper.aquaTree.revisions
+  const revisions = aquaTreeView.aquaTree.revisions
   revisions[verification_hash] = verificationData
 
   maybeUpdateFileIndex(
-    aquaTreeWrapper.aquaTree,
+    aquaTreeView.aquaTree,
     verificationData,
     revisionType,
     fileObject.fileName,
@@ -100,7 +100,7 @@ export async function createContentRevisionUtil(
   )
 
   let aquaTreeWithOrderdRevision = reorderAquaTreeRevisionsProperties(
-    aquaTreeWrapper.aquaTree,
+    aquaTreeView.aquaTree,
   )
   let aquaTreeWithTree = createAquaTree(aquaTreeWithOrderdRevision)
 

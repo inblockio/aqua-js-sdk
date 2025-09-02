@@ -133,7 +133,7 @@ declare function isNone<T>(option: Option<T>): option is NoneOption<T>;
  * @module types
  * @description This module contains all the types used in the Aqua SDK
  * @preferred @description This module contains all the types used in the Aqua SDK
- * @preferred @exports {CredentialsData, AquaOperationData, RevisionType, WitnessType, WitnessPlatformType, WitnessNetwork, SignType, WitnessEnvironment, FileObject, LogType, LogTypeEmojis, LogData, RevisionTree, Revision, Revisions, FileIndex, FormData, TreeMapping, AquaTreeWrapper, AquaTree, SignaturePayload, SignatureResult, SignatureData, SignatureItem, IWitnessConfig, AnObject, WitnessMerkleProof, WitnessResult, GasEstimateResult, WitnessConfig, TransactionResult, WitnessTransactionData, WitnessTSAResponse, WitnessEthResponse, WitnessNostrResponse, WitnessNostrVerifyResult}
+ * @preferred @exports {CredentialsData, AquaOperationData, RevisionType, WitnessType, WitnessPlatformType, WitnessNetwork, SignType, WitnessEnvironment, FileObject, LogType, LogTypeEmojis, LogData, RevisionTree, Revision, Revisions, FileIndex, FormData, TreeMapping, AquaTreeView, AquaTree, SignaturePayload, SignatureResult, SignatureData, SignatureItem, IWitnessConfig, AnObject, WitnessMerkleProof, WitnessResult, GasEstimateResult, WitnessConfig, TransactionResult, WitnessTransactionData, WitnessTSAResponse, WitnessEthResponse, WitnessNostrResponse, WitnessNostrVerifyResult}
  */
 /**
  * @typedef {Object} CredentialsData
@@ -454,13 +454,13 @@ interface TreeMapping {
     latestHash: string;
 }
 /**
- * Wrapper for Aqua Tree with additional metadata
+ * View for Aqua Tree with additional metadata
  *
  * @property aquaTree - The Aqua Tree
  * @property fileObject - Optional file metadata
  * @property revision - Revision identifier
  */
-interface AquaTreeWrapper {
+interface AquaTreeView {
     aquaTree: AquaTree;
     fileObject?: FileObject;
     revision: string;
@@ -592,18 +592,6 @@ interface GasEstimateResult {
     balance?: string;
 }
 /**
- * Witness configuration
- *
- * @property witnessEventVerificationHash - Hash to witness
- * @property witnessNetwork - Network to use
- * @property smartContractAddress - Contract address
- */
-interface WitnessConfig {
-    witnessEventVerificationHash: string;
-    witnessNetwork: WitnessNetwork;
-    smartContractAddress: string;
-}
-/**
  * Result of transaction
  *
  * @property error - Error if transaction failed
@@ -678,6 +666,236 @@ interface AquaTreeAndFileObject {
     fileObject: FileObject[];
     aquaTree: AquaTree | null;
 }
+
+/**
+ * Configuration for witness operations
+ */
+interface WitnessConfig {
+    type: WitnessType;
+    network: WitnessNetwork;
+    platform: WitnessPlatformType;
+}
+/**
+ * Configuration for signing operations
+ */
+interface SignConfig {
+    type: SignType;
+    reactNativeOptions?: ReactNativeMetaMaskOptions;
+}
+/**
+ * Complete configuration for Aqua operations
+ */
+interface AquaConfig {
+    credentials: CredentialsData;
+    witness?: WitnessConfig;
+    signing?: SignConfig;
+    enableScalar?: boolean;
+}
+/**
+ * Improved Aqua SDK with cleaner API design
+ *
+ * Features:
+ * - Configuration-first approach to reduce parameter repetition
+ * - Cleaner method signatures
+ * - Better error handling
+ * - Rust-compatible design patterns
+ *
+ * @example
+ * ```typescript
+ * const config = {
+ *   credentials,
+ *   witness: { type: 'eth', network: 'sepolia', platform: 'metamask' },
+ *   signing: { type: 'cli' }
+ * };
+ *
+ * const aqua = new AquaV2(config);
+ * await aqua.notarize(file);
+ * await aqua.sign();
+ * await aqua.witness();
+ * const tree = aqua.getTree();
+ * ```
+ */
+declare class Aqua {
+    private config;
+    private tree;
+    private logs;
+    /**
+     * Create a new Aqua instance with configuration
+     *
+     * @param config - Configuration for operations
+     */
+    constructor(config: AquaConfig);
+    /**
+     * Update configuration
+     *
+     * @param updates - Partial configuration updates
+     */
+    configure(updates: Partial<AquaConfig>): void;
+    /**
+     * Check if running in Node.js environment
+     *
+     * @returns LogData array with error if in browser, empty array if Node.js
+     */
+    requiresNode<T>(): Result<T, LogData[]>;
+    /**
+     * Static version of Node.js environment check
+     *
+     * @returns Result with error if in browser, success if Node.js
+     */
+    static requiresNode<T>(): Result<T, LogData[]>;
+    /**
+     * Create genesis revision for file notarization
+     *
+     * @param fileObject - File to notarize
+     * @param options - Optional parameters
+     */
+    private createFromFileObject;
+    /**
+     * Sign the current tree
+     *
+     * @param signConfig - Optional signing configuration override
+     */
+    sign(signConfig?: SignConfig): Promise<Result<AquaOperationData, LogData[]>>;
+    /**
+     * Witness the current tree
+     *
+     * @param witnessConfig - Optional witness configuration override
+     */
+    witness(witnessConfig?: WitnessConfig): Promise<Result<AquaOperationData, LogData[]>>;
+    /**
+     * Verify the current tree
+     *
+     * @param linkedFiles - Files needed for verification
+     */
+    verify(linkedFiles?: FileObject[]): Promise<Result<AquaOperationData, LogData[]>>;
+    /**
+     * Get the current tree
+     */
+    getTree(): AquaTree | null;
+    /**
+     * Get all operation logs
+     */
+    getLogs(): LogData[];
+    /**
+     * Clear logs
+     */
+    clearLogs(): void;
+    /**
+     * Reset the instance (clear tree and logs)
+     */
+    reset(): void;
+    /**
+     * Load an existing aqua file from disk
+     *
+     * @param aquaFilePath - Path to the .aqua.json file
+     */
+    loadAquaFile(aquaFilePath: string): Result<AquaTree, LogData[]>;
+    /**
+   * Load an existing AquaTree object directly
+   *
+   * @param aquaTree - The AquaTree object to load
+   */
+    loadAquaTree(aquaTree: AquaTree): Result<AquaTree, LogData[]>;
+    /**
+     * Save the current tree to an aqua file
+     *
+     * @param aquaFilePath - Path where to save the .aqua.json file
+     */
+    save(aquaFilePath: string): Result<string, LogData[]>;
+    /**
+     * Load a regular file and create FileObject
+     *
+     * @param filePath - Path to the file
+     * @returns FileObject for use with operations
+     */
+    static loadFile(filePath: string): Result<FileObject, LogData[]>;
+    /**
+     * Create AquaTree from file (overloaded for browser/Node.js compatibility)
+     *
+     * @param fileObject - FileObject for browser environments
+     * @param options - Creation options
+     */
+    create(fileObject: FileObject, options?: {
+        isForm?: boolean;
+        enableContent?: boolean;
+        enableScalar?: boolean;
+    }): Promise<Result<AquaOperationData, LogData[]>>;
+    /**
+     * Create AquaTree from file path (Node.js only)
+     *
+     * @param filePath - Path to file for Node.js environments
+     * @param options - Creation options
+     */
+    create(filePath: string, options?: {
+        isForm?: boolean;
+        enableContent?: boolean;
+        enableScalar?: boolean;
+    }): Promise<Result<AquaOperationData, LogData[]>>;
+    /**
+     * Complete workflow: Load file, create, sign, witness
+     *
+     * @param filePath - Path to file
+     * @param operations - Which operations to perform
+     */
+    processFile(filePath: string, operations?: {
+        sign?: boolean | SignConfig;
+        witness?: boolean | WitnessConfig;
+        verify?: boolean;
+        save?: string;
+    }): Promise<Result<AquaTree, LogData[]>>;
+}
+/**
+ * Convenience function to create a configured Aqua instance
+ *
+ * @param credentials - User credentials
+ * @param witness - Witness configuration
+ * @param signing - Signing configuration
+ * @param enableScalar - Enable scalar operations
+ * @returns Configured Aqua instance
+ */
+declare function createAqua(credentials: CredentialsData, witness?: WitnessConfig, signing?: SignConfig, enableScalar?: boolean): Aqua;
+/**
+ * Common witness configurations for convenience
+ */
+declare const WitnessConfigs: {
+    readonly ethereumSepolia: {
+        readonly type: "eth";
+        readonly network: "sepolia";
+        readonly platform: "metamask";
+    };
+    readonly ethereumMainnet: {
+        readonly type: "eth";
+        readonly network: "mainnet";
+        readonly platform: "metamask";
+    };
+    readonly tsa: {
+        readonly type: "tsa";
+        readonly network: "sepolia";
+        readonly platform: "cli";
+    };
+    readonly nostr: {
+        readonly type: "nostr";
+        readonly network: "sepolia";
+        readonly platform: "cli";
+    };
+};
+/**
+ * Common signing configurations for convenience
+ */
+declare const SignConfigs: {
+    readonly metamask: {
+        readonly type: "metamask";
+    };
+    readonly cli: {
+        readonly type: "cli";
+    };
+    readonly did: {
+        readonly type: "did";
+    };
+    readonly p12: {
+        readonly type: "p12";
+    };
+};
 
 declare function isAquaTree(content: any): boolean;
 declare function reorderRevisionsProperties(revision: Revision): Revision;
@@ -967,7 +1185,7 @@ declare class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    createContentRevision: (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
+    createContentRevision: (aquaTree: AquaTreeView, fileObject: FileObject, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method createGenesisRevision
      * @description This method creates a genesis revision for the aqua tree
@@ -1009,7 +1227,7 @@ declare class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    witnessAquaTree: (aquaTree: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
+    witnessAquaTree: (aquaTree: AquaTreeView, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method witnessMultipleAquaTrees
      * @description This method witnesses multiple aqua trees
@@ -1021,7 +1239,7 @@ declare class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    witnessMultipleAquaTrees: (aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
+    witnessMultipleAquaTrees: (aquaTrees: AquaTreeView[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method signAquaTree
      * @description This method signs the aqua tree
@@ -1031,7 +1249,7 @@ declare class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    signAquaTree: (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar?: boolean, reactNativeOptions?: ReactNativeMetaMaskOptions) => Promise<Result<AquaOperationData, LogData[]>>;
+    signAquaTree: (aquaTree: AquaTreeView, signType: SignType, credentials: CredentialsData, enableScalar?: boolean, reactNativeOptions?: ReactNativeMetaMaskOptions) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method signMultipleAquaTrees
      * @description This method signs multiple aqua trees
@@ -1040,34 +1258,34 @@ declare class Aquafier {
      * @param credentials - The credentials to use
      * @returns Result<AquaOperationData, LogData[]>
      */
-    signMultipleAquaTrees: (aquaTrees: AquaTreeWrapper[], signType: SignType, credentials: CredentialsData) => Promise<Result<AquaOperationData, LogData[]>>;
+    signMultipleAquaTrees: (aquaTrees: AquaTreeView[], signType: SignType, credentials: CredentialsData) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method linkAquaTree
      * @description This method links an aqua tree to another aqua tree
-     * @param aquaTreeWrapper - The aqua tree to link
-     * @param linkAquaTreeWrapper - The aqua tree to link to
+     * @param aquaTreeView - The aqua tree to link
+     * @param linkAquaTreeView - The aqua tree to link to
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkAquaTree: (aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
+    linkAquaTree: (aquaTreeView: AquaTreeView, linkAquaTreeView: AquaTreeView, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method linkMultipleAquaTrees
      * @description This method links multiple aqua trees to another aqua tree
-     * @param aquaTreeWrappers - The aqua trees to link
-     * @param linkAquaTreeWrapper - The aqua tree to link to
+     * @param aquaTreeViews - The aqua trees to link
+     * @param linkAquaTreeView - The aqua tree to link to
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkMultipleAquaTrees: (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
+    linkMultipleAquaTrees: (aquaTreeViews: AquaTreeView[], linkAquaTreeView: AquaTreeView, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method linkAquaTreesToMultipleAquaTrees
      * @description This method links multiple aqua trees to multiple aqua trees
-     * @param aquaTreeWrappers - The aqua trees to link
-     * @param linkAquaTreeWrapper - The aqua trees to link to
+     * @param aquaTreeViews - The aqua trees to link
+     * @param linkAquaTreeView - The aqua trees to link to
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkAquaTreesToMultipleAquaTrees: (aquaTreeWrappers: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper[], enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
+    linkAquaTreesToMultipleAquaTrees: (aquaTreeViews: AquaTreeView, linkAquaTreeView: AquaTreeView[], enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method createFormRevision
      * @description This method creates a form revision for the aqua tree
@@ -1076,7 +1294,7 @@ declare class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, Log[]>
      */
-    createFormRevision: (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
+    createFormRevision: (aquaTree: AquaTreeView, fileObject: FileObject, enableScalar?: boolean) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method hideFormElements
      * @description This method hides form elements
@@ -1084,7 +1302,7 @@ declare class Aquafier {
      * @param keyToHide - The key to hide
      * @returns Result<AquaOperationData, LogData[]>
      */
-    hideFormElements: (aquaTree: AquaTreeWrapper, keyToHide: string) => Promise<Result<AquaOperationData, LogData[]>>;
+    hideFormElements: (aquaTree: AquaTreeView, keyToHide: string) => Promise<Result<AquaOperationData, LogData[]>>;
     /**
      * @method unHideFormElements
      * @description This method unhides form elements
@@ -1093,7 +1311,7 @@ declare class Aquafier {
      * @param content - The content to unhide
      * @returns Result<AquaOperationData, Log[]>
      */
-    unHideFormElements: (aquaTree: AquaTreeWrapper, keyToUnHide: string, content: string) => Promise<Result<AquaOperationData, LogData[]>>;
+    unHideFormElements: (aquaTree: AquaTreeView, keyToUnHide: string, content: string) => Promise<Result<AquaOperationData, LogData[]>>;
     fetchFilesToBeRead: (aquaTree: AquaTree) => string[];
     checkIfFileAlreadyNotarized: (aquaTree: AquaTree, fileObject: FileObject) => boolean;
     getRevisionByHash: (aquaTree: AquaTree, hash: string) => Result<Revision, LogData[]>;
@@ -1197,4 +1415,4 @@ declare class AquafierChainable {
     getLogs(): LogData[];
 }
 
-export { type AnObject, type AquaOperationData, type AquaTree, type AquaTreeAndFileObject, type AquaTreeWrapper, AquafierChainable, type CredentialsData, Err, ErrResult, type FileIndex, type FileObject, type FileVerificationGraphData, type FormData, type FormKeyGraphData, type FormVerificationGraphData, type FormVerificationResponseData, type GasEstimateResult, type IWitnessConfig, type LinkVerificationGraphData, type LogData, LogType, LogTypeEmojis, None, NoneOption, Ok, OkResult, type Option, OrderRevisionInAquaTree, type ReactNativeMetaMaskOptions, type Result, type Revision, type RevisionGraphInfo, type RevisionTree, type RevisionType, type Revisions, type SignType, type SignatureData, type SignatureItem, type SignaturePayload, type SignatureResult, type SignatureVerificationGraphData, Some, SomeOption, type TransactionResult, type TreeMapping, type VerificationGraphData, type WitnessConfig, type WitnessEnvironment, type WitnessEthResponse, type WitnessMerkleProof, type WitnessNetwork, type WitnessNostrResponse, type WitnessNostrVerifyResult, type WitnessPlatformType, type WitnessResult, type WitnessTSAResponse, type WitnessTransactionData, type WitnessType, type WitnessVerificationGraphData, checkFileHashAlreadyNotarized, checkInternetConnection, cliGreenify, cliRedify, cliYellowfy, createCredentials, createNewAquaTree, Aquafier as default, dict2Leaves, estimateWitnessGas, findFormKey, findNextRevisionHashByArrayofRevisions, formatMwTimestamp, getAquaTreeFileName, getAquaTreeFileObject, getChainIdFromNetwork, getEntropy, getFileHashSum, getFileNameCheckingPaths, getGenesisHash, getHashSum, getLatestVH, getMerkleRoot, getPreviousVerificationHash, getTimestamp, getWallet, isAquaTree, isErr, isNone, isOk, isSome, log_dim, log_red, log_success, log_yellow, maybeUpdateFileIndex, prepareNonce, printGraphData, printLogs, printlinkedGraphData, recoverWalletAddress, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity };
+export { type AnObject, Aqua, type AquaOperationData, type AquaTree, type AquaTreeAndFileObject, type AquaTreeView, AquafierChainable, type CredentialsData, Err, ErrResult, type FileIndex, type FileObject, type FileVerificationGraphData, type FormData, type FormKeyGraphData, type FormVerificationGraphData, type FormVerificationResponseData, type GasEstimateResult, type IWitnessConfig, type LinkVerificationGraphData, type LogData, LogType, LogTypeEmojis, None, NoneOption, Ok, OkResult, type Option, OrderRevisionInAquaTree, type ReactNativeMetaMaskOptions, type Result, type Revision, type RevisionGraphInfo, type RevisionTree, type RevisionType, type Revisions, SignConfigs, type SignType, type SignatureData, type SignatureItem, type SignaturePayload, type SignatureResult, type SignatureVerificationGraphData, Some, SomeOption, type TransactionResult, type TreeMapping, type VerificationGraphData, type WitnessConfig, WitnessConfigs, type WitnessEnvironment, type WitnessEthResponse, type WitnessMerkleProof, type WitnessNetwork, type WitnessNostrResponse, type WitnessNostrVerifyResult, type WitnessPlatformType, type WitnessResult, type WitnessTSAResponse, type WitnessTransactionData, type WitnessType, type WitnessVerificationGraphData, checkFileHashAlreadyNotarized, checkInternetConnection, cliGreenify, cliRedify, cliYellowfy, createAqua, createCredentials, createNewAquaTree, Aquafier as default, dict2Leaves, estimateWitnessGas, findFormKey, findNextRevisionHashByArrayofRevisions, formatMwTimestamp, getAquaTreeFileName, getAquaTreeFileObject, getChainIdFromNetwork, getEntropy, getFileHashSum, getFileNameCheckingPaths, getGenesisHash, getHashSum, getLatestVH, getMerkleRoot, getPreviousVerificationHash, getTimestamp, getWallet, isAquaTree, isErr, isNone, isOk, isSome, log_dim, log_red, log_success, log_yellow, maybeUpdateFileIndex, prepareNonce, printGraphData, printLogs, printlinkedGraphData, recoverWalletAddress, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity };

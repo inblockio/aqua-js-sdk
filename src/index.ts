@@ -6,16 +6,18 @@ import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
 import { verifyAndGetGraphDataRevisionUtil, verifyAndGetGraphDataUtil, verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
 import { Result } from "./type_guards";
-import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData, ReactNativeMetaMaskOptions } from "./types"
+import { AquaTree, AquaTreeView, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData, ReactNativeMetaMaskOptions } from "./types"
 import { default as packageJson } from "./../package.json";
-import { logAquaTree } from "./aquavhtree";
+import { logAquaTree } from "./aquatreevisualization";
 import {  getHashSum } from "./utils";
+import {Aqua, createAqua, WitnessConfig, WitnessConfigs, SignConfigs} from "./aqua-v2";
 
 export * from "./utils";
 export * from "./types";
 export * from "./type_guards";
 export { recoverWalletAddress } from "./core/signature"
 export * from "./core/formatter"
+export { Aqua, createAqua, WitnessConfig, WitnessConfigs, SignConfigs }
 
 
 // Letes writesome docs here
@@ -81,7 +83,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    createContentRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+    createContentRevision = async (aquaTree: AquaTreeView, fileObject: FileObject, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return createContentRevisionUtil(aquaTree, fileObject, enableScalar)
     }
 
@@ -142,7 +144,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    witnessAquaTree = async (aquaTree: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+    witnessAquaTree = async (aquaTree: AquaTreeView, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
     }
 
@@ -157,7 +159,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    witnessMultipleAquaTrees = async (aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+    witnessMultipleAquaTrees = async (aquaTrees: AquaTreeView[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return witnessMultipleAquaTreesUtil(aquaTrees, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
     }
 
@@ -170,7 +172,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = true, reactNativeOptions?: ReactNativeMetaMaskOptions): Promise<Result<AquaOperationData, LogData[]>> => {
+    signAquaTree = async (aquaTree: AquaTreeView, signType: SignType, credentials: CredentialsData, enableScalar: boolean = true, reactNativeOptions?: ReactNativeMetaMaskOptions): Promise<Result<AquaOperationData, LogData[]>> => {
 
         return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar, "", reactNativeOptions)
     }
@@ -183,44 +185,44 @@ export default class Aquafier {
      * @param credentials - The credentials to use
      * @returns Result<AquaOperationData, LogData[]>
      */
-    signMultipleAquaTrees = async (aquaTrees: AquaTreeWrapper[], signType: SignType, credentials: CredentialsData): Promise<Result<AquaOperationData, LogData[]>> => {
+    signMultipleAquaTrees = async (aquaTrees: AquaTreeView[], signType: SignType, credentials: CredentialsData): Promise<Result<AquaOperationData, LogData[]>> => {
         return signMultipleAquaTreesUtil(aquaTrees, signType, credentials)
     }
 
     /**
      * @method linkAquaTree
      * @description This method links an aqua tree to another aqua tree
-     * @param aquaTreeWrapper - The aqua tree to link
-     * @param linkAquaTreeWrapper - The aqua tree to link to
+     * @param aquaTreeView - The aqua tree to link
+     * @param linkAquaTreeView - The aqua tree to link to
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkAquaTree = async (aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
-        return linkAquaTreeUtil(aquaTreeWrapper, linkAquaTreeWrapper, enableScalar)
+    linkAquaTree = async (aquaTreeView: AquaTreeView, linkAquaTreeView: AquaTreeView, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+        return linkAquaTreeUtil(aquaTreeView, linkAquaTreeView, enableScalar)
     }
 
     /**
      * @method linkMultipleAquaTrees
      * @description This method links multiple aqua trees to another aqua tree
-     * @param aquaTreeWrappers - The aqua trees to link
-     * @param linkAquaTreeWrapper - The aqua tree to link to
+     * @param aquaTreeViews - The aqua trees to link
+     * @param linkAquaTreeView - The aqua tree to link to
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
-        return linkMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
+    linkMultipleAquaTrees = async (aquaTreeViews: AquaTreeView[], linkAquaTreeView: AquaTreeView, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+        return linkMultipleAquaTreesUtil(aquaTreeViews, linkAquaTreeView, enableScalar)
     }
 
     /**
      * @method linkAquaTreesToMultipleAquaTrees
      * @description This method links multiple aqua trees to multiple aqua trees
-     * @param aquaTreeWrappers - The aqua trees to link
-     * @param linkAquaTreeWrapper - The aqua trees to link to
+     * @param aquaTreeViews - The aqua trees to link
+     * @param linkAquaTreeView - The aqua trees to link to
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    linkAquaTreesToMultipleAquaTrees = async (aquaTreeWrappers: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper[], enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
-        return linkAquaTreesToMultipleAquaTreesUtil(aquaTreeWrappers, linkAquaTreeWrapper, enableScalar)
+    linkAquaTreesToMultipleAquaTrees = async (aquaTreeViews: AquaTreeView, linkAquaTreeView: AquaTreeView[], enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+        return linkAquaTreesToMultipleAquaTreesUtil(aquaTreeViews, linkAquaTreeView, enableScalar)
     }
 
     /**
@@ -231,7 +233,7 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, Log[]>
      */
-    createFormRevision = async (aquaTree: AquaTreeWrapper, fileObject: FileObject, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+    createFormRevision = async (aquaTree: AquaTreeView, fileObject: FileObject, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
         return createFormRevisionUtil(aquaTree, fileObject, enableScalar)
     }
 
@@ -242,7 +244,7 @@ export default class Aquafier {
      * @param keyToHide - The key to hide
      * @returns Result<AquaOperationData, LogData[]>
      */
-    hideFormElements = async (aquaTree: AquaTreeWrapper, keyToHide: string): Promise<Result<AquaOperationData, LogData[]>> => {
+    hideFormElements = async (aquaTree: AquaTreeView, keyToHide: string): Promise<Result<AquaOperationData, LogData[]>> => {
         return hideFormElementsUtil(aquaTree, keyToHide)
     }
 
@@ -254,7 +256,7 @@ export default class Aquafier {
      * @param content - The content to unhide
      * @returns Result<AquaOperationData, Log[]>
      */
-    unHideFormElements = async (aquaTree: AquaTreeWrapper, keyToUnHide: string, content: string): Promise<Result<AquaOperationData, LogData[]>> => {
+    unHideFormElements = async (aquaTree: AquaTreeView, keyToUnHide: string, content: string): Promise<Result<AquaOperationData, LogData[]>> => {
         return unHideFormElementsUtil(aquaTree, keyToUnHide, content)
     }
 

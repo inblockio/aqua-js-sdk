@@ -3,18 +3,19 @@ import { signAquaTreeUtil } from "./core/signature";
 import { witnessAquaTreeUtil } from "./core/witness";
 import { verifyAquaTreeUtil } from "./core/verify";
 import { Result } from "./type_guards";
-import { 
-  AquaTree, 
-  AquaTreeWrapper, 
-  AquaOperationData, 
-  CredentialsData, 
-  FileObject, 
-  LogData, 
-  SignType, 
-  WitnessNetwork, 
-  WitnessPlatformType, 
+import {
+  AquaTree,
+  AquaTreeView,
+  AquaOperationData,
+  CredentialsData,
+  FileObject,
+  LogData,
+  SignType,
+  WitnessNetwork,
+  WitnessPlatformType,
   WitnessType,
-  ReactNativeMetaMaskOptions 
+  ReactNativeMetaMaskOptions,
+  LogType
 } from "./types";
 import * as fs from "fs";
 import * as path from "path";
@@ -70,7 +71,7 @@ export interface AquaConfig {
  * const tree = aqua.getTree();
  * ```
  */
-export class AquaV2 {
+export class Aqua {
   private config: AquaConfig;
   private tree: AquaTree | null = null;
   private logs: LogData[] = [];
@@ -97,30 +98,63 @@ export class AquaV2 {
   }
 
   /**
+   * Check if running in Node.js environment
+   * 
+   * @returns LogData array with error if in browser, empty array if Node.js
+   */
+  requiresNode<T>(): Result<T, LogData[]> {
+    if (typeof window !== 'undefined') {
+      const error: LogData = {
+        logType: LogType.ERROR,
+        log: 'This operation requires Node.js environment'
+      };
+      this.logs.push(error);
+      return { isOk: () => false, isErr: () => true, data: [error] } as Result<T, LogData[]>;
+    } 
+    return { isOk: () => true, isErr: () => false, data: undefined } as Result<T, LogData[]>;
+  }
+
+  /**
+   * Static version of Node.js environment check
+   * 
+   * @returns Result with error if in browser, success if Node.js
+   */
+  static requiresNode<T>(): Result<T, LogData[]> {
+    if (typeof window !== 'undefined') {
+      const error: LogData = {
+        logType: LogType.ERROR,
+        log: 'This operation requires Node.js environment'
+      };
+      return { isOk: () => false, isErr: () => true, data: [error] } as Result<T, LogData[]>;
+    } 
+    return { isOk: () => true, isErr: () => false, data: undefined } as Result<T, LogData[]>;
+  }
+
+  /**
    * Create genesis revision for file notarization
    * 
    * @param fileObject - File to notarize
    * @param options - Optional parameters
    */
-  async notarize(
-    fileObject: FileObject, 
-    options: { 
-      isForm?: boolean; 
-      enableContent?: boolean; 
-      enableScalar?: boolean 
+  private async createFromFileObject(
+    fileObject: FileObject,
+    options: {
+      isForm?: boolean;
+      enableContent?: boolean;
+      enableScalar?: boolean
     } = {}
   ): Promise<Result<AquaOperationData, LogData[]>> {
     const { isForm = false, enableContent = false, enableScalar = this.config.enableScalar } = options;
-    
+
     const result = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
-    
+
     if (result.isOk()) {
       this.tree = result.data.aquaTree;
       this.logs.push(...result.data.logData);
     } else {
       this.logs.push(...result.data);
     }
-    
+
     return result;
   }
 
@@ -132,10 +166,9 @@ export class AquaV2 {
   async sign(signConfig?: SignConfig): Promise<Result<AquaOperationData, LogData[]>> {
     if (!this.tree) {
       const error: LogData = {
-        type: "error",
-        message: "No tree to sign. Call notarize() first.",
-        timestamp: new Date().toISOString(),
-        data: {}
+        logType: LogType.ERROR,
+        log: "No tree to sign. Call notarize() first.",
+        ident: ""
       };
       this.logs.push(error);
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<AquaOperationData, LogData[]>;
@@ -144,16 +177,14 @@ export class AquaV2 {
     const config = signConfig || this.config.signing;
     if (!config) {
       const error: LogData = {
-        type: "error", 
-        message: "No signing configuration provided",
-        timestamp: new Date().toISOString(),
-        data: {}
+        logType: LogType.ERROR,
+        log: "No signing configuration provided"
       };
       this.logs.push(error);
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<AquaOperationData, LogData[]>;
     }
 
-    const wrapper: AquaTreeWrapper = {
+    const view: AquaTreeView = {
       aquaTree: this.tree,
       fileObject: {
         fileName: "placeholder",
@@ -164,9 +195,9 @@ export class AquaV2 {
     };
 
     const result = await signAquaTreeUtil(
-      wrapper, 
-      config.type, 
-      this.config.credentials, 
+      view,
+      config.type,
+      this.config.credentials,
       this.config.enableScalar,
       "",
       config.reactNativeOptions
@@ -190,10 +221,8 @@ export class AquaV2 {
   async witness(witnessConfig?: WitnessConfig): Promise<Result<AquaOperationData, LogData[]>> {
     if (!this.tree) {
       const error: LogData = {
-        type: "error",
-        message: "No tree to witness. Call notarize() first.",
-        timestamp: new Date().toISOString(),
-        data: {}
+        logType: LogType.ERROR,
+        log: "No tree to witness. Call notarize() first."
       };
       this.logs.push(error);
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<AquaOperationData, LogData[]>;
@@ -202,23 +231,21 @@ export class AquaV2 {
     const config = witnessConfig || this.config.witness;
     if (!config) {
       const error: LogData = {
-        type: "error",
-        message: "No witness configuration provided",
-        timestamp: new Date().toISOString(),
-        data: {}
+        logType: LogType.ERROR,
+        log: "No witness configuration provided"
       };
       this.logs.push(error);
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<AquaOperationData, LogData[]>;
     }
 
-    const wrapper: AquaTreeWrapper = {
+    const view: AquaTreeView = {
       aquaTree: this.tree,
       fileObject: undefined,
       revision: ""
     };
 
     const result = await witnessAquaTreeUtil(
-      wrapper,
+      view,
       config.type,
       config.network,
       config.platform,
@@ -244,17 +271,15 @@ export class AquaV2 {
   async verify(linkedFiles: FileObject[] = []): Promise<Result<AquaOperationData, LogData[]>> {
     if (!this.tree) {
       const error: LogData = {
-        type: "error",
-        message: "No tree to verify. Call notarize() first.",
-        timestamp: new Date().toISOString(),
-        data: {}
+        logType: LogType.ERROR,
+        log: "No tree to verify. Call notarize() first."
       };
       this.logs.push(error);
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<AquaOperationData, LogData[]>;
     }
 
     const result = await verifyAquaTreeUtil(this.tree, linkedFiles, "", this.config.credentials);
-    
+
     if (result.isOk()) {
       this.logs.push(...result.data.logData);
     } else {
@@ -299,26 +324,53 @@ export class AquaV2 {
    * @param aquaFilePath - Path to the .aqua.json file
    */
   loadAquaFile(aquaFilePath: string): Result<AquaTree, LogData[]> {
+    const nodeCheck = this.requiresNode<AquaTree>();
+    if (nodeCheck.isErr()) {
+      return nodeCheck as Result<AquaTree, LogData[]>;
+    }
+    
     try {
       const fileContent = fs.readFileSync(aquaFilePath, { encoding: "utf-8" });
       const aquaTree: AquaTree = JSON.parse(fileContent);
       this.tree = aquaTree;
-      
+
       const log: LogData = {
-        type: "info",
-        message: `Loaded aqua file from ${aquaFilePath}`,
-        timestamp: new Date().toISOString(),
-        data: { filePath: aquaFilePath }
+        logType: LogType.INFO,
+        log: `Loaded aqua file from ${aquaFilePath}`
       };
       this.logs.push(log);
-      
+
       return { isOk: () => true, isErr: () => false, data: aquaTree } as Result<AquaTree, LogData[]>;
     } catch (error) {
       const errorLog: LogData = {
-        type: "error",
-        message: `Failed to load aqua file: ${error}`,
-        timestamp: new Date().toISOString(),
-        data: { filePath: aquaFilePath, error }
+        logType: LogType.ERROR,
+        log: `Failed to load aqua file: ${error}`
+      };
+      this.logs.push(errorLog);
+      return { isOk: () => false, isErr: () => true, data: [errorLog] } as Result<AquaTree, LogData[]>;
+    }
+  }
+
+  /**
+ * Load an existing AquaTree object directly
+ * 
+ * @param aquaTree - The AquaTree object to load
+ */
+  loadAquaTree(aquaTree: AquaTree): Result<AquaTree, LogData[]> {
+    try {
+      this.tree = aquaTree;
+
+      const log: LogData = {
+        logType: LogType.INFO,
+        log: `Loaded AquaTree object with ${Object.keys(aquaTree.revisions).length} revisions`
+      };
+      this.logs.push(log);
+
+      return { isOk: () => true, isErr: () => false, data: aquaTree } as Result<AquaTree, LogData[]>;
+    } catch (error) {
+      const errorLog: LogData = {
+        logType: LogType.ERROR,
+        log: `Failed to load AquaTree: ${error}`
       };
       this.logs.push(errorLog);
       return { isOk: () => false, isErr: () => true, data: [errorLog] } as Result<AquaTree, LogData[]>;
@@ -330,13 +382,16 @@ export class AquaV2 {
    * 
    * @param aquaFilePath - Path where to save the .aqua.json file
    */
-  saveAquaFile(aquaFilePath: string): Result<string, LogData[]> {
+  save(aquaFilePath: string): Result<string, LogData[]> {
+    const nodeCheck = this.requiresNode<string>();
+    if (nodeCheck.isErr()) {
+      return nodeCheck as Result<string, LogData[]>;
+    }
+    
     if (!this.tree) {
       const error: LogData = {
-        type: "error",
-        message: "No tree to save. Call notarize() first.",
-        timestamp: new Date().toISOString(),
-        data: {}
+        logType: LogType.ERROR,
+        log: "No tree to save. Call notarize() first."
       };
       this.logs.push(error);
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<string, LogData[]>;
@@ -345,22 +400,18 @@ export class AquaV2 {
     try {
       const fileContent = JSON.stringify(this.tree, null, 4);
       fs.writeFileSync(aquaFilePath, fileContent, { encoding: "utf-8" });
-      
+
       const log: LogData = {
-        type: "info",
-        message: `Saved aqua file to ${aquaFilePath}`,
-        timestamp: new Date().toISOString(),
-        data: { filePath: aquaFilePath }
+        logType: LogType.INFO,
+        log: `Saved aqua file to ${aquaFilePath}`
       };
       this.logs.push(log);
-      
+
       return { isOk: () => true, isErr: () => false, data: aquaFilePath } as Result<string, LogData[]>;
     } catch (error) {
       const errorLog: LogData = {
-        type: "error",
-        message: `Failed to save aqua file: ${error}`,
-        timestamp: new Date().toISOString(),
-        data: { filePath: aquaFilePath, error }
+        logType: LogType.ERROR,
+        log: `Failed to save aqua file: ${error}`
       };
       this.logs.push(errorLog);
       return { isOk: () => false, isErr: () => true, data: [errorLog] } as Result<string, LogData[]>;
@@ -374,53 +425,92 @@ export class AquaV2 {
    * @returns FileObject for use with operations
    */
   static loadFile(filePath: string): Result<FileObject, LogData[]> {
+
+    const nodeCheck = this.requiresNode<FileObject>();
+    if (nodeCheck.isErr()) {
+      return nodeCheck as Result<FileObject, LogData[]>;
+    }
+
     try {
       const fileContent = fs.readFileSync(filePath, { encoding: "utf-8" });
       const fileName = path.basename(filePath);
-      
+
       const fileObject: FileObject = {
         fileName,
         fileContent,
         path: filePath
       };
-      
+
       return { isOk: () => true, isErr: () => false, data: fileObject } as Result<FileObject, LogData[]>;
     } catch (error) {
       const errorLog: LogData = {
-        type: "error",
-        message: `Failed to load file: ${error}`,
-        timestamp: new Date().toISOString(),
-        data: { filePath, error }
+        logType: LogType.ERROR,
+        log: `Failed to load file: ${error}`
       };
       return { isOk: () => false, isErr: () => true, data: [errorLog] } as Result<FileObject, LogData[]>;
     }
   }
 
   /**
-   * Convenience method: Load file and notarize in one step
+   * Create AquaTree from file (overloaded for browser/Node.js compatibility)
    * 
-   * @param filePath - Path to file to notarize
-   * @param options - Notarization options
+   * @param fileObject - FileObject for browser environments
+   * @param options - Creation options
    */
-  async notarizeFile(
+  async create(
+    fileObject: FileObject,
+    options?: {
+      isForm?: boolean;
+      enableContent?: boolean;
+      enableScalar?: boolean
+    }
+  ): Promise<Result<AquaOperationData, LogData[]>>;
+
+  /**
+   * Create AquaTree from file path (Node.js only)
+   * 
+   * @param filePath - Path to file for Node.js environments
+   * @param options - Creation options
+   */
+  async create(
     filePath: string,
-    options: { 
-      isForm?: boolean; 
-      enableContent?: boolean; 
-      enableScalar?: boolean 
+    options?: {
+      isForm?: boolean;
+      enableContent?: boolean;
+      enableScalar?: boolean
+    }
+  ): Promise<Result<AquaOperationData, LogData[]>>;
+
+  /**
+   * Implementation of createFile with method overloading
+   */
+  async create(
+    fileOrPath: FileObject | string,
+    options: {
+      isForm?: boolean;
+      enableContent?: boolean;
+      enableScalar?: boolean
     } = {}
   ): Promise<Result<AquaOperationData, LogData[]>> {
-    const fileResult = AquaV2.loadFile(filePath);
-    if (fileResult.isErr()) {
-      this.logs.push(...fileResult.data);
-      return fileResult as unknown as Result<AquaOperationData, LogData[]>;
+    if (typeof fileOrPath === 'string') {
+      // Node.js path - check environment and load file
+      const nodeCheck = this.requiresNode<AquaOperationData>();
+      if (nodeCheck.isErr()) return nodeCheck;
+      
+      const fileResult = Aqua.loadFile(fileOrPath);
+      if (fileResult.isErr()) {
+        this.logs.push(...fileResult.data);
+        return fileResult as unknown as Result<AquaOperationData, LogData[]>;
+      }
+      return this.createFromFileObject(fileResult.data, options);
+    } else {
+      // Browser - FileObject provided directly
+      return this.createFromFileObject(fileOrPath, options);
     }
-    
-    return this.notarize(fileResult.data, options);
   }
 
   /**
-   * Complete workflow: Load file, notarize, sign, witness
+   * Complete workflow: Load file, create, sign, witness
    * 
    * @param filePath - Path to file
    * @param operations - Which operations to perform
@@ -434,10 +524,10 @@ export class AquaV2 {
       save?: string; // Path to save aqua file
     } = {}
   ): Promise<Result<AquaTree, LogData[]>> {
-    // Load and notarize
-    const notarizeResult = await this.notarizeFile(filePath);
-    if (notarizeResult.isErr()) {
-      return notarizeResult as unknown as Result<AquaTree, LogData[]>;
+    // Load and create
+    const createResult = await this.create(filePath);
+    if (createResult.isErr()) {
+      return createResult as unknown as Result<AquaTree, LogData[]>;
     }
 
     // Sign if requested
@@ -460,7 +550,7 @@ export class AquaV2 {
 
     // Verify if requested
     if (operations.verify) {
-      const fileResult = AquaV2.loadFile(filePath);
+      const fileResult = Aqua.loadFile(filePath);
       const files = fileResult.isOk() ? [fileResult.data] : [];
       const verifyResult = await this.verify(files);
       if (verifyResult.isErr()) {
@@ -470,7 +560,7 @@ export class AquaV2 {
 
     // Save if requested
     if (operations.save) {
-      const saveResult = this.saveAquaFile(operations.save);
+      const saveResult = this.save(operations.save);
       if (saveResult.isErr()) {
         return saveResult as unknown as Result<AquaTree, LogData[]>;
       }
@@ -494,8 +584,8 @@ export function createAqua(
   witness?: WitnessConfig,
   signing?: SignConfig,
   enableScalar: boolean = true
-): AquaV2 {
-  return new AquaV2({
+): Aqua {
+  return new Aqua({
     credentials,
     witness,
     signing,

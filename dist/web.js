@@ -1,4 +1,5 @@
 import {
+  Aqua,
   Aquafier,
   AquafierChainable,
   Err,
@@ -10,13 +11,16 @@ import {
   Ok,
   OkResult,
   OrderRevisionInAquaTree,
+  SignConfigs,
   Some,
   SomeOption,
+  WitnessConfigs,
   checkFileHashAlreadyNotarized,
   checkInternetConnection,
   cliGreenify,
   cliRedify,
   cliYellowfy,
+  createAqua,
   createCredentials,
   createNewAquaTree,
   dict2Leaves,
@@ -55,11 +59,16 @@ import {
   reorderAquaTreeRevisionsProperties,
   reorderRevisionsProperties,
   verifyMerkleIntegrity
-} from "./chunk-WAYLIT2U.js";
+} from "./chunk-WDQWI3F7.js";
 import {
-  __require,
   registerNodeModuleShims
-} from "./chunk-R4XJC7WN.js";
+} from "./chunk-FE6H7ACM.js";
+import "./chunk-ZTGEYJIV.js";
+import "./chunk-D5ETXTMD.js";
+import "./chunk-BZOC2F5B.js";
+import {
+  __require
+} from "./chunk-ARVO53NY.js";
 
 // src/web.ts
 registerNodeModuleShims();
@@ -94,6 +103,8 @@ if (typeof window !== "undefined") {
 }
 var web_default = Aquafier;
 export {
+  Aqua,
+  Aquafier,
   AquafierChainable,
   Err,
   ErrResult,
@@ -104,13 +115,16 @@ export {
   Ok,
   OkResult,
   OrderRevisionInAquaTree,
+  SignConfigs,
   Some,
   SomeOption,
+  WitnessConfigs,
   checkFileHashAlreadyNotarized,
   checkInternetConnection,
   cliGreenify,
   cliRedify,
   cliYellowfy,
+  createAqua,
   createCredentials,
   createNewAquaTree,
   web_default as default,

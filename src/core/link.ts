@@ -1,8 +1,8 @@
 
-import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, LogType } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeView, LogType } from "../types";
 import { dict2Leaves, getHashSum, getLatestVH, getMerkleRoot, getTimestamp, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties } from "../utils";
 
-import { createAquaTree } from "../aquavhtree";
+import { createAquaTree } from "../aquatreevisualization";
 import { Err, isOk, Ok, Result } from "../type_guards";
 
 
@@ -10,8 +10,8 @@ import { Err, isOk, Ok, Result } from "../type_guards";
 /**
  * Links one Aqua Tree to another by creating a link revision
  * 
- * @param aquaTreeWrapper - Source Aqua Tree wrapper to create link from
- * @param linkAquaTreeWrapper - Target Aqua Tree wrapper to link to
+ * @param aquaTreeView - Source Aqua Tree view to create link from
+ * @param linkAquaTreeView - Target Aqua Tree view to link to
  * @param enableScalar - Flag to use scalar mode instead of tree mode
  * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
  * 
@@ -22,13 +22,13 @@ import { Err, isOk, Ok, Result } from "../type_guards";
  * - Updates the source Aqua Tree with new link revision
  * - Updates file index with linked tree information
  */
-export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+export async function linkAquaTreeUtil(aquaTreeView: AquaTreeView, linkAquaTreeView: AquaTreeView, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     const timestamp = getTimestamp()
-    let previous_verification_hash = aquaTreeWrapper.revision
+    let previous_verification_hash = aquaTreeView.revision
 
-    if (!aquaTreeWrapper.revision || aquaTreeWrapper.revision === "") {
-        previous_verification_hash = getLatestVH(aquaTreeWrapper.aquaTree)
+    if (!aquaTreeView.revision || aquaTreeView.revision === "") {
+        previous_verification_hash = getLatestVH(aquaTreeView.aquaTree)
     }
 
     let newRevision: Revision = {
@@ -39,12 +39,12 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
     }
 
 
-    const linkVHs = [getLatestVH(linkAquaTreeWrapper.aquaTree)]
+    const linkVHs = [getLatestVH(linkAquaTreeView.aquaTree)]
 
-    const linkFileHashes = [getHashSum(linkAquaTreeWrapper.fileObject.fileContent as string)]
+    const linkFileHashes = [getHashSum(linkAquaTreeView.fileObject.fileContent as string)]
     // Validation again
     linkFileHashes.forEach((fh) => {
-        if (!(fh in linkAquaTreeWrapper.aquaTree.file_index)) {
+        if (!(fh in linkAquaTreeView.aquaTree.file_index)) {
             // Add log here
             return Err(logs)
         }
@@ -89,12 +89,12 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
 
     let updatedAquaTree: AquaTree = {
         revisions: {
-            ...aquaTreeWrapper.aquaTree.revisions,
+            ...aquaTreeView.aquaTree.revisions,
             [verificationHash]: revisionData
         },
         file_index: {
-            ...aquaTreeWrapper.aquaTree.file_index,
-            [linkVHs[0]]: linkAquaTreeWrapper.fileObject.fileName
+            ...aquaTreeView.aquaTree.file_index,
+            [linkVHs[0]]: linkAquaTreeView.fileObject.fileName
         }
     }
 
@@ -119,8 +119,8 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
 /**
  * Links multiple target Aqua Trees to a single source Aqua Tree
  * 
- * @param aquaTreeWrappers - Source Aqua Tree wrapper
- * @param linkAquaTreeWrapper - Array of target Aqua Tree wrappers to link to
+ * @param aquaTreeViews - Source Aqua Tree view
+ * @param linkAquaTreeView - Array of target Aqua Tree views to link to
  * @param enableScalar - Flag to use scalar mode instead of tree mode
  * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
  * 
@@ -129,20 +129,20 @@ export async function linkAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, linkAqu
  * - Accumulates logs from each linking operation
  * - Updates the source tree with all link revisions
  */
-export async function linkAquaTreesToMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrapper, linkAquaTreeWrapper: AquaTreeWrapper[], enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+export async function linkAquaTreesToMultipleAquaTreesUtil(aquaTreeViews: AquaTreeView, linkAquaTreeView: AquaTreeView[], enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
 
 
     let logs: Array<LogData> = [];
     // 
-    let aquaTree = aquaTreeWrappers;
-    for (const linkAquaTree of linkAquaTreeWrapper) {
+    let aquaTree = aquaTreeViews;
+    for (const linkAquaTree of linkAquaTreeView) {
         const result = await linkAquaTreeUtil(aquaTree, linkAquaTree, enableScalar); // Assuming enableScalar is false by default
 
         if (isOk(result)) {
             const resData = result.data
             aquaTree = {
                 aquaTree: resData.aquaTree,
-                fileObject: aquaTreeWrappers.fileObject,
+                fileObject: aquaTreeViews.fileObject,
                 revision: ""
             }
             logs.push(...resData.logData)
@@ -166,8 +166,8 @@ export async function linkAquaTreesToMultipleAquaTreesUtil(aquaTreeWrappers: Aqu
 /**
  * Links a single target Aqua Tree to multiple source Aqua Trees
  * 
- * @param aquaTreeWrappers - Array of source Aqua Tree wrappers
- * @param linkAquaTreeWrapper - Target Aqua Tree wrapper to link to
+ * @param aquaTreeViews - Array of source Aqua Tree views
+ * @param linkAquaTreeView - Target Aqua Tree view to link to
  * @param enableScalar - Flag to use scalar mode instead of tree mode
  * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
  * 
@@ -176,14 +176,14 @@ export async function linkAquaTreesToMultipleAquaTreesUtil(aquaTreeWrappers: Aqu
  * - Accumulates logs from each linking operation
  * - Returns array of updated Aqua Trees
  */
-export async function linkMultipleAquaTreesUtil(aquaTreeWrappers: AquaTreeWrapper[], linkAquaTreeWrapper: AquaTreeWrapper, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
+export async function linkMultipleAquaTreesUtil(aquaTreeViews: AquaTreeView[], linkAquaTreeView: AquaTreeView, enableScalar: boolean): Promise<Result<AquaOperationData, LogData[]>> {
 
 
     let logs: Array<LogData> = [];
     let aquaTrees: AquaTree[] = []
 
-    for (const aquaTree of aquaTreeWrappers) {
-        const result = await linkAquaTreeUtil(aquaTree, linkAquaTreeWrapper, enableScalar); // Assuming enableScalar is false by default
+    for (const aquaTree of aquaTreeViews) {
+        const result = await linkAquaTreeUtil(aquaTree, linkAquaTreeView, enableScalar); // Assuming enableScalar is false by default
 
         if (isOk(result)) {
             const resData = result.data

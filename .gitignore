@@ -10,3 +10,4 @@ src/credentials.json
 /docs
 /.zed
 .nvmrc
+/dist
