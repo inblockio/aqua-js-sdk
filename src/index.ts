@@ -10,14 +10,16 @@ import { AquaTree, AquaTreeView, AquaOperationData, CredentialsData, FileObject,
 import { default as packageJson } from "./../package.json";
 import { logAquaTree } from "./aquatreevisualization";
 import {  getHashSum } from "./utils";
-import {Aqua, createAqua, WitnessConfig, WitnessConfigs, SignConfigs} from "./aqua-v2";
+import {Aqua, createAqua, WitnessConfigs, SignConfigs} from "./aqua-v2";
+import type {WitnessConfig} from "./aqua-v2";
 
 export * from "./utils";
 export * from "./types";
 export * from "./type_guards";
 export { recoverWalletAddress } from "./core/signature"
 export * from "./core/formatter"
-export { Aqua, createAqua, WitnessConfig, WitnessConfigs, SignConfigs }
+export { Aqua, createAqua, WitnessConfigs, SignConfigs }
+export type { WitnessConfig }
 
 
 // Letes writesome docs here

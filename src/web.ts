@@ -21,34 +21,33 @@ if (!isBrowser) {
 }
 
 // Set up global polyfills for browser environments
+import { Buffer } from 'buffer';
+import process from 'process';
+
 if (typeof window !== 'undefined') {
-  // Polyfill for Buffer if not already available
-  if (!(window as any).Buffer) {
-    try {
-      // Try to load Buffer from the standard buffer package
-      const bufferModule = require('buffer');
-      (window as any).Buffer = bufferModule.Buffer;
-    } catch (e) {
-      try {
-        // Fallback to buffer/ if the standard import fails
-        const bufferModule = require('buffer/');
-        (window as any).Buffer = bufferModule.Buffer;
-      } catch (e2) {
-        console.warn('Failed to load Buffer polyfill:', e2);
-        // Provide a minimal Buffer-like implementation
-        (window as any).Buffer = class MinimalBuffer {
-          static from(data: any): any { return data; }
-          static isBuffer(): boolean { return false; }
-        };
-      }
-    }
-  }
+  // Make Buffer available globally
+  (window as any).Buffer = Buffer;
+  (globalThis as any).Buffer = Buffer;
+  
+  // Make process available globally
+  (window as any).process = process;
+  (globalThis as any).process = process;
 }
 
-// Re-export everything from the main entry point
+// Import everything from the main entry point
+import * as AquaSDKModule from './index';
+import Aquafier from './index';
+
+// Export everything as named exports
 export * from './index';
 
-// Import and re-export Aquafier as both named and default export
-import Aquafier from './index';
-export { Aquafier };
+// For UMD compatibility, export the Aquafier class as the main export
+// but also include all named exports as properties
+Object.assign(Aquafier, {
+  ...AquaSDKModule,
+  Aquafier,
+  default: Aquafier
+});
+
+// Export everything as default export for UMD compatibility
 export default Aquafier;
