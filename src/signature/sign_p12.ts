@@ -19,7 +19,7 @@ export class P12Signer implements SignerStrategy {
    * @param identCharacter - Identifier character for logging
    * @returns Array of validation errors (empty if valid)
    */
-  public validate(credentials: CredentialsData, identCharacter: string): LogData[] {
+  public validate(_credentials: CredentialsData, _identCharacter: string): LogData[] {
     return []
   }
 
