@@ -1,7 +1,8 @@
 import { DID } from 'dids'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import * as KeyResolver from 'key-did-resolver'
-import { SignaturePayload, SignatureResult } from '../types'
+import { SignaturePayload, SignatureResult, CredentialsData, LogData, LogType } from '../types'
+import { SignerStrategy, SignResult } from '../core/signer-types'
 
 
 /**
@@ -11,7 +12,52 @@ import { SignaturePayload, SignatureResult } from '../types'
  * using DID-based cryptographic operations. It uses the key-did-provider-ed25519
  * for Ed25519-based DID operations and key-did-resolver for DID resolution.
  */
-export class DIDSigner {
+export class DIDSigner implements SignerStrategy {
+  
+  /**
+   * Validates credentials for DID signing
+   * 
+   * @param credentials - Credentials data
+   * @param identCharacter - Identifier character for logging
+   * @returns Array of validation errors (empty if valid)
+   */
+  public validate(credentials: CredentialsData, identCharacter: string): LogData[] {
+    if (
+      credentials == null ||
+      credentials == undefined ||
+      credentials["did_key"].length === 0 ||
+      !credentials["did_key"]
+    ) {
+      return [{
+        log: "DID key is required.  Please get a key from https://hub.ebsi.eu/tools/did-generator",
+        logType: LogType.ERROR,
+        ident: identCharacter,
+      }]
+    }
+    return []
+  }
+
+  /**
+   * Signs a verification hash using DID (SignerStrategy interface)
+   * 
+   * @param targetRevisionHash - Hash of the revision to sign
+   * @param credentials - Credentials data containing DID key
+   * @returns Promise resolving to SignResult
+   */
+  public async sign(targetRevisionHash: string, credentials: CredentialsData): Promise<SignResult> {
+    const { jws, key } = await this.signWithDID(
+      targetRevisionHash,
+      Buffer.from(credentials["did_key"], "hex"),
+    )
+    
+    return {
+      signature: jws,
+      walletAddress: key,
+      publicKey: key,
+      signatureType: "did_key"
+    }
+  }
+
   /**
 * Verifies a DID-signed JWS against a verification hash
 * 
@@ -40,7 +86,7 @@ export class DIDSigner {
   }
 
   /**
- * Signs a verification hash using DID with Ed25519 provider
+ * Signs a verification hash using DID with Ed25519 provider (legacy interface)
  * 
  * @param verificationHash - Hash of the revision to sign
  * @param privateKey - Ed25519 private key as Uint8Array
@@ -52,7 +98,7 @@ export class DIDSigner {
  * - Authenticates the DID
  * - Creates and returns a JSON Web Signature
  */
-  public async sign(verificationHash: string, privateKey: Uint8Array): Promise<SignatureResult> {
+  public async signWithDID(verificationHash: string, privateKey: Uint8Array): Promise<SignatureResult> {
     const payload: SignaturePayload = {
       message: `I sign this revision: [${verificationHash}]`
     }

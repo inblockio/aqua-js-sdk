@@ -1,5 +1,7 @@
 import { ethers } from 'ethers';
 import { getChainIdFromNetwork } from '../utils';
+import { CredentialsData, LogData } from '../types';
+import { SignerStrategy, SignResult } from '../core/signer-types';
 
 // For React Native environment detection
 declare const global: {
@@ -59,7 +61,7 @@ declare global {
  * MetaMask wallet in both browser and Node.js environments. In Node.js,
  * it spins up a local server to facilitate MetaMask interaction.
  */
-export class MetaMaskSigner {
+export class MetaMaskSigner implements SignerStrategy {
     private port: number;
     private host: string;
     private serverUrl: string;
@@ -395,9 +397,40 @@ private async signInReactNative(verificationHash: string, network: string): Prom
     }
 
     /**
- * Signs a verification hash using MetaMask
+     * Validates credentials for MetaMask signing
+     * 
+     * @param credentials - Credentials data
+     * @param identCharacter - Identifier character for logging
+     * @returns Array of validation errors (empty if valid)
+     */
+    public validate(credentials: CredentialsData, identCharacter: string): LogData[] {
+        return []
+    }
+
+    /**
+ * Signs a verification hash using MetaMask (SignerStrategy interface)
+ * 
+ * @param targetRevisionHash - Hash of the revision to sign
+ * @param credentials - Credentials data
+ * @param reactNativeOptions - React Native options
+ * @returns Promise resolving to SignResult
+ */
+    public async sign(targetRevisionHash: string, credentials: CredentialsData, reactNativeOptions?: ReactNativeMetaMaskOptions): Promise<SignResult> {
+        this.reactNativeOptions = { ...this.reactNativeOptions, ...reactNativeOptions }
+        const [signature, walletAddress, publicKey] = await this.signWithNetwork(targetRevisionHash, credentials.witness_eth_network)
+        return {
+            signature,
+            walletAddress,
+            publicKey,
+            signatureType: "ethereum:eip-191"
+        }
+    }
+
+    /**
+ * Signs a verification hash using MetaMask (legacy interface)
  * 
  * @param verificationHash - Hash of the revision to sign
+ * @param network - Ethereum network
  * @returns Promise resolving to [signature, wallet address, public key]
  * 
  * This method:
@@ -405,7 +438,7 @@ private async signInReactNative(verificationHash: string, network: string): Prom
  * - Routes to appropriate signing method
  * - Returns complete signature information
  */
-    public async sign(verificationHash: string, network: string): Promise<[string, string, string]> {
+    public async signWithNetwork(verificationHash: string, network: string): Promise<[string, string, string]> {
         // Detect React Native environment
         const isReactNative = typeof global !== 'undefined' && !!global.HermesInternal;
         const isNode = typeof window === 'undefined' && !isReactNative;

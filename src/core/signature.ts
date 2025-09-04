@@ -16,7 +16,6 @@ import {
   formatMwTimestamp,
   getHashSum,
   getMerkleRoot,
-  getWallet,
   reorderRevisionsProperties,
 } from "../utils"
 import { DIDSigner } from "../signature/sign_did"
@@ -24,6 +23,14 @@ import { P12Signer } from "../signature/sign_p12"
 import { createAquaTree } from "../aquatreevisualization"
 import { ethers } from "ethers"
 import { Err, Ok, Result } from "../type_guards"
+import { SignerStrategy } from "./signer-types"
+
+const signerStrategies: Record<SignType, SignerStrategy> = {
+  metamask: new MetaMaskSigner(),
+  cli: new CLISigner(),
+  did: new DIDSigner(),
+  p12: new P12Signer(),
+}
 
 /**
  * Signs an Aqua Tree revision using specified signature method
@@ -64,85 +71,41 @@ export async function signAquaTreeUtil(
     targetRevisionHash = aquaTreeView.revision
   }
 
+  const strategy = signerStrategies[signType]
+  if (!strategy) {
+    logs.push({
+      log: `Unsupported sign type: ${signType}`,
+      logType: LogType.ERROR,
+      ident: identCharacter,
+    })
+    return Err(logs)
+  }
+  
+  // Validate credentials
+  const validationErrors = strategy.validate(credentials, identCharacter)
+  if (validationErrors.length > 0) {
+    logs.push(...validationErrors)
+    return Err(logs)
+  }
+  
   let signature: string | SignatureData,
     walletAddress: string,
     publicKey: string,
     signature_type: string
 
-  switch (signType) {
-    case "metamask":
-      let sign = new MetaMaskSigner({
-        reactNativeOptions: reactNativeOptions
-      })
-      ;[signature, walletAddress, publicKey] =
-        await sign.sign(targetRevisionHash, credentials.witness_eth_network)
-      signature_type = "ethereum:eip-191"
-      break
-    case "cli":
-      try {
-        // const credentials = readCredentials()
-
-        if (credentials == null || credentials == undefined) {
-          logs.push({
-            log: "Credentials not found ",
-            logType: LogType.ERROR,
-            ident: identCharacter,
-          })
-          return Err(logs)
-        }
-        let [wallet, _walletAddress, _publicKey] = await getWallet(
-          credentials.mnemonic,
-        )
-
-        let sign = new CLISigner()
-        signature = await sign.doSign(wallet, targetRevisionHash)
-        walletAddress = _walletAddress
-        publicKey = _publicKey
-      } catch (error) {
-        logs.push({
-          log: "Failed to read mnemonic:" + error,
-          logType: LogType.ERROR,
-          ident: identCharacter,
-        })
-        return Err(logs)
-      }
-      signature_type = "ethereum:eip-191"
-      break
-    case "did":
-      // const credentials = readCredentials()
-      if (
-        credentials == null ||
-        credentials == undefined ||
-        credentials["did_key"].length === 0 ||
-        !credentials["did_key"]
-      ) {
-        logs.push({
-          log: "DID key is required.  Please get a key from https://hub.ebsi.eu/tools/did-generator",
-          logType: LogType.ERROR,
-          ident: identCharacter,
-        })
-        return Err(logs)
-      }
-
-      let did = new DIDSigner()
-      const { jws, key } = await did.sign(
-        targetRevisionHash,
-        Buffer.from(credentials["did_key"], "hex"),
-      )
-      signature = jws //jws.payload
-      walletAddress = key
-      publicKey = key
-      signature_type = "did_key"
-      break
-    case "p12":
-      // TODO implement credential validation like above
-      const p12signer = new P12Signer()
-      const { signature: _signature, pubKey } = await p12signer.sign(targetRevisionHash, credentials["p12_content"], credentials["p12_password"])
-      signature = _signature
-      walletAddress = pubKey
-      publicKey = pubKey
-      signature_type = "p12"
-      break
+  try {
+    const result = await strategy.sign(targetRevisionHash, credentials, reactNativeOptions)
+    signature = result.signature
+    walletAddress = result.walletAddress
+    publicKey = result.publicKey
+    signature_type = result.signatureType
+  } catch (error) {
+    logs.push({
+      log: `Signing failed: ${error}`,
+      logType: LogType.ERROR,
+      ident: identCharacter,
+    })
+    return Err(logs)
   }
 
   const now = new Date().toISOString()

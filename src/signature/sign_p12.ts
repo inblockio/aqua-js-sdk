@@ -1,6 +1,8 @@
 import { getCrypto, getForge } from '../platform/crypto';
+import { CredentialsData, LogData } from '../types';
+import { SignerStrategy, SignResult } from '../core/signer-types';
 
-export class P12Signer {
+export class P12Signer implements SignerStrategy {
   // Use our platform compatibility layer instead of direct Node.js imports
   private async getCrypto() {
     return await getCrypto();
@@ -8,6 +10,35 @@ export class P12Signer {
 
   private async getForge() {
     return await getForge();
+  }
+
+  /**
+   * Validates credentials for P12 signing
+   * 
+   * @param credentials - Credentials data
+   * @param identCharacter - Identifier character for logging
+   * @returns Array of validation errors (empty if valid)
+   */
+  public validate(credentials: CredentialsData, identCharacter: string): LogData[] {
+    return []
+  }
+
+  /**
+   * Signs a verification hash using P12 certificate (SignerStrategy interface)
+   * 
+   * @param targetRevisionHash - Hash of the revision to sign
+   * @param credentials - Credentials data containing P12 content and password
+   * @returns Promise resolving to SignResult
+   */
+  public async sign(targetRevisionHash: string, credentials: CredentialsData): Promise<SignResult> {
+    const { signature, pubKey } = await this.signWithP12(targetRevisionHash, credentials["p12_content"], credentials["p12_password"])
+    
+    return {
+      signature,
+      walletAddress: pubKey,
+      publicKey: pubKey,
+      signatureType: "p12"
+    }
   }
 
   public async verify(signature: string, pubKey: string, data: string): Promise<boolean> {
@@ -32,7 +63,7 @@ export class P12Signer {
     }
   }
   
-  public async sign(verificationHash: string, privateKey: string, password: string | null): Promise<{signature: string, pubKey: string, walletAddress: string}> {
+  public async signWithP12(verificationHash: string, privateKey: string, password: string | null): Promise<{signature: string, pubKey: string, walletAddress: string}> {
     const { createSign } = await this.getCrypto()
     const forge = await this.getForge()
     
