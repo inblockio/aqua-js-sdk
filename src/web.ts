@@ -28,26 +28,28 @@ if (typeof window !== 'undefined') {
   // Make Buffer available globally
   (window as any).Buffer = Buffer;
   (globalThis as any).Buffer = Buffer;
-  
+
   // Make process available globally
   (window as any).process = process;
   (globalThis as any).process = process;
 }
 
 // Import everything from the main entry point
-import * as AquaSDKModule from './index';
+import * as AquaSDK from './index';
 import Aquafier from './index';
 
 // Export everything as named exports
-export * from './index';
+// export * from './index';
 
 // For UMD compatibility, export the Aquafier class as the main export
 // but also include all named exports as properties
-Object.assign(Aquafier, {
-  ...AquaSDKModule,
+Object.assign(AquaSDK, {
+  // ...AquaSDKModule,
   Aquafier,
-  default: Aquafier
+  // default: Aquafier
 });
 
+export default AquaSDK 
+
 // Export everything as default export for UMD compatibility
-export default Aquafier;
+// export default Aquafier;

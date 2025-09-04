@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "aqua-js-sdk": "file:../../aqua-js-sdk-3.2.1-47.tgz",
+    "aqua-js-sdk": "file:../../aqua-js-sdk-3.2.1-49.tgz",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

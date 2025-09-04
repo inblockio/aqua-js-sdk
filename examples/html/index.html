@@ -13,6 +13,7 @@
 
 <body>
     <script>
+        // let AquaSDK = undefined
         async function testAquaSDK() {
             console.log("Hello World");
             console.log("AquaSDK available:", typeof AquaSDK !== 'undefined');
@@ -20,38 +21,11 @@
 
             // Test different ways to access Aquafier
             if (typeof AquaSDK !== 'undefined') {
+                console.log()
                 try {
                     // Try as named export
-                    if (AquaSDK.Aquafier) {
-                        const aquafier1 = new AquaSDK.Aquafier();
-                        console.log("✅ Aquafier via named export:", aquafier1);
-                        const fileObject = {
-                            fileName: "test.txt",
-                            fileContent: "Sample content",
-                            path: "/fake/path/test.txt"
-                        };
 
-                        const result = await aquafier1.createGenesisRevision(fileObject);
-                        console.log("✅ Result: ", JSON.stringify(result, null, 4))
-                        if (result.isOk()) {
-                            const creds = {
-                                "did:key": "",
-                                alchemy_key: "",
-                                mnemonic: "",
-                                nostr_sk: "",
-                                witness_eth_network: "sepolia",
-                                witness_method: "metmask",
-                            }
-                            const aquaTree = result.data.aquaTree
-                            const aquaTreeView = {
-                              aquaTree: aquaTree,
-                              revision: ''
-                            }
-                            const signingResult = await aquafier1.signAquaTree(aquaTreeView, "metamask", creds)
-                            console.log("✅ Signing Result: ", JSON.stringify(signingResult, null, 4))
-                        }
-                    }
-
+                    
                     // Try as default export (UMD should expose the default export directly)
                     if (typeof AquaSDK === 'function') {
                         const aquafier2 = new AquaSDK();
@@ -59,10 +33,13 @@
                     }
 
                     // Try accessing default property
-                    if (AquaSDK.default) {
-                        const aquafier3 = new AquaSDK.default();
-                        console.log("✅ Aquafier via default property:", aquafier3);
-                    }
+                    // if (AquaSDK.default) {
+                    //     const aquafier3 = new AquaSDK.default();
+                    //     console.log("✅ Aquafier via default property:", aquafier3);
+                    // }
+
+                    await runCreate()
+
                 } catch (error) {
                     console.error("❌ Error creating Aquafier:", error);
                 }
@@ -71,8 +48,47 @@
             }
         }
 
+        async function runCreate() {
+            if (AquaSDK.default) {
+                const aquafier1 = new AquaSDK.default.Aquafier();
+                console.log("✅ Aquafier via named export:", aquafier1);
+                const fileObject = {
+                    fileName: "test.txt",
+                    fileContent: "Sample content",
+                    path: "/fake/path/test.txt"
+                };
+
+                const result = await aquafier1.createGenesisRevision(fileObject);
+                console.log("✅ Result: ", JSON.stringify(result, null, 4))
+                if (result.isOk()) {
+                    const creds = {
+                        "did:key": "",
+                        alchemy_key: "",
+                        mnemonic: "",
+                        nostr_sk: "",
+                        witness_eth_network: "sepolia",
+                        witness_method: "metmask",
+                    }
+                    const aquaTree = result.data.aquaTree
+                    const aquaTreeView = {
+                        aquaTree: aquaTree,
+                        revision: ''
+                    }
+                    const signingResult = await aquafier1.signAquaTree(aquaTreeView, "metamask", creds)
+                    console.log("✅ Signing Result: ", JSON.stringify(signingResult, null, 4))
+                }
+            }
+            else{
+                console.error("SDK not found")
+            }
+        }
+
         // Run the test function
-        testAquaSDK();
+        testAquaSDK().then(res => {
+            console.log("✅ Test completed successfully");
+        }).catch(err => {
+            console.error("❌ Test failed:", err);
+        })
     </script>
 </body>
 

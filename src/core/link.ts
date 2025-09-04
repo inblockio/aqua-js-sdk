@@ -35,7 +35,7 @@ export async function linkAquaTreeUtil(aquaTreeView: AquaTreeView, linkAquaTreeV
         previous_verification_hash: previous_verification_hash,
         local_timestamp: timestamp,
         revision_type: "link",
-        version : `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
+        version: `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
     }
 
 
@@ -43,16 +43,27 @@ export async function linkAquaTreeUtil(aquaTreeView: AquaTreeView, linkAquaTreeV
 
     const linkFileHashes = [getHashSum(linkAquaTreeView.fileObject.fileContent as string)]
     // Validation again
-    linkFileHashes.forEach((fh) => {
+    for (const fh of linkFileHashes) {
         if (!(fh in linkAquaTreeView.aquaTree.file_index)) {
             // Add log here
+            logs.push({
+                logType: LogType.ERROR,
+                log: `${fh} detected in file index. You are not allowed to interlink Aqua files of the same file`
+            })
             return Err(logs)
         }
-        console.error(
-            `${fh} detected in file index. You are not allowed to interlink Aqua files of the same file`,
-        )
-        process.exit(1)
-    })
+        // console.error(
+        //     `${fh} detected in file index. You are not allowed to interlink Aqua files of the same file`,
+        // )
+        // // TODO: Fix this, return an error here instead of throw
+        // process.exit(1)
+        // // throw new Error(`${fh} detected in file index. You are not allowed to interlink Aqua files of the same file`)
+        // logs.push({
+        //     logType: LogType.ERROR,
+        //     log: `${fh} detected in file index. You are not allowed to interlink Aqua files of the same file`
+        // })
+        // return Err(logs)
+    }
 
     const linkData = {
         link_type: "aqua",
@@ -68,7 +79,7 @@ export async function linkAquaTreeUtil(aquaTreeView: AquaTreeView, linkAquaTreeV
 
     let revisionData = reorderRevisionsProperties(newRevision)
 
- 
+
 
     const leaves = dict2Leaves(revisionData)
 

@@ -11,7 +11,7 @@ export default defineConfig({
       fileName: () => 'aqua-js-sdk.min.js'
     },
     outDir: 'dist',
-    emptyOutDir: false, // Don't clean dist since tsup also uses it
+    emptyOutDir: false,
     rollupOptions: {
       external: ['ethers'],
       output: {
@@ -40,7 +40,9 @@ export default defineConfig({
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify('production'),
-    global: 'globalThis'
+    // 'process.env': '({})',
+    global: 'globalThis',
+    'process': 'process' // Add this
   },
   optimizeDeps: {
     include: [
