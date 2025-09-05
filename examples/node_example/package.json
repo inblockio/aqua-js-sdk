@@ -14,12 +14,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aqua-js-sdk": "file:../../",
+    "aqua-js-sdk": "file:../../aqua-js-sdk-3.2.1-49.tgz",
     "aqua-protocol": "github:inblockio/aqua-verifier-js-lib",
     "aquafier-js-sdk": "^3.2.0"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.2",
+    "vite": "^5.4.19"
   }
 }
