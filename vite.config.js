@@ -20,6 +20,10 @@ export default defineConfig(
       rollupOptions: {
         external: [
           'ethers',
+          // Make crypto external for browser builds (P12 signing not typically needed in browser)
+          'crypto',
+          'node:crypto',
+          'crypto-browserify',
           // Make heavy optional dependencies external to reduce bundle size
           'node-forge',
           'pkijs', 
@@ -46,9 +50,7 @@ export default defineConfig(
     },
     resolve: {
       alias: {
-        // Keep crypto-browserify but optimize usage
-        'node:crypto': 'crypto-browserify',
-        'crypto': 'crypto-browserify',
+        // Crypto is external, no need for aliases
         'stream': 'stream-browserify',
         'buffer': 'buffer',
         'process': 'process/browser',
