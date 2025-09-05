@@ -55,7 +55,7 @@ async function basicFileExample() {
   await aqua.sign();
   await aqua.witness();
   const fileResult = Aqua.loadFile("./test.txt")
-  if(fileResult.isOk()){
+  if (fileResult.isOk()) {
     let data = fileResult.data
     console.log("✅ File loaded successfully")
     await aqua.verify([data]);
@@ -200,27 +200,36 @@ async function treeLinkingExample() {
   const aqua1 = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
   await aqua1.create("./test.txt");
   await aqua1.sign();
-  
-  const tree1View = aqua1.getView();
+  aqua1.save("./test.txt-1.aqua.json");
+
+  // const tree1View = aqua1.getView();
+  // console.log("Tree 1 View: ", JSON.stringify(tree1View, null, 4))
   console.log("✅ Created first aqua tree");
+  console.log("Aqua1 instance ID:", JSON.stringify(aqua1, null, 4));
+  console.log("Aqua1 tree hash:", Object.keys(aqua1.getTree()?.revisions || {})[0]);
 
   // Create second aqua tree
   const aqua2 = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
-  await aqua2.create("./test.txt");
+  await aqua2.create("./sample.txt");
   await aqua2.sign();
-  
+  aqua2.save("./sample.txt.aqua.json");
+
   console.log("✅ Created second aqua tree");
+  console.log("Aqua2 instance ID:", JSON.stringify(aqua2, null, 4));
+  console.log("Aqua2 tree hash:", Object.keys(aqua2.getTree()?.revisions || {})[0]);
+  console.log("Are they the same instance?", aqua1 === aqua2);
 
   // Link the first tree to the second
-  if (tree1View) {
-    const linkResult = await aqua2.link(tree1View);
-    if (linkResult.isOk()) {
-      console.log("✅ Successfully linked trees");
-      console.log(`🌳 Linked tree has ${Object.keys(aqua2.getTree()?.revisions || {}).length} revisions`);
-    } else {
-      console.log("❌ Tree linking failed:", aqua2.getLogs());
-    }
+  // if (tree1View) {
+  const linkResult = await aqua2.link(aqua1);
+  if (linkResult.isOk()) {
+    console.log("✅ Successfully linked trees");
+    aqua2.save("./linked-tree--3.aqua.json")
+    console.log(`🌳 Linked tree has ${Object.keys(aqua2.getTree()?.revisions || {}).length} revisions`);
+  } else {
+    console.log("❌ Tree linking failed:", aqua2.getLogs());
   }
+  // }
 
   // Save the linked tree
   aqua2.save("./linked-tree.aqua.json");
@@ -237,18 +246,22 @@ async function multipleLinkingExample() {
   const baseAqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
   await baseAqua.create("./test.txt");
   await baseAqua.sign();
-  
+
   // Create multiple trees to link
   const trees = [];
   for (let i = 1; i <= 3; i++) {
     const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
     await aqua.create("./test.txt");
     await aqua.sign();
-    const view = aqua.getView();
-    if (view) {
-      trees.push(view);
-    }
-    console.log(`✅ Created tree ${i}`);
+    trees.push({
+      aqua,
+      targetRevision: ""
+    })
+    // const view = aqua.getView();
+    // if (view) {
+    //   trees.push(view);
+    // }
+    // console.log(`✅ Created tree ${i}`);
   }
 
   // Link multiple trees at once

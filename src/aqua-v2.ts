@@ -250,12 +250,19 @@ export class Aqua {
     return result;
   }
 
-  async link(viewToLink: AquaTreeView): Promise<Result<AquaOperationData, LogData[]>> {
-    return linkAquaTreeUtil(this.getView(), viewToLink, this.config.enableScalar)
+  async link(aquaToLink: Aqua, targetRevision?: string): Promise<Result<AquaOperationData, LogData[]>> {
+    let result = await linkAquaTreeUtil(this.getView(), aquaToLink.getView(targetRevision), this.config.enableScalar)
+    if (result.isOk()) {
+      this.tree = result.data.aquaTree;
+      this.logs.push(...result.data.logData);
+    } else {
+      this.logs.push(...result.data);
+    }
+    return result;
   }
 
-  async linkMultiple(viewsToLink: AquaTreeView[]): Promise<Result<AquaOperationData, LogData[]>> {
-    return linkMultipleAquaTreesUtil(viewsToLink, this.getView(), this.config.enableScalar)
+  async linkMultiple(aquasToLink: { aqua: Aqua, targetRevision?: string }[]): Promise<Result<AquaOperationData, LogData[]>> {
+    return linkMultipleAquaTreesUtil(aquasToLink.map(aquaToLink => aquaToLink.aqua.getView(aquaToLink.targetRevision)), this.getView(), this.config.enableScalar)
   }
 
   /**
@@ -294,11 +301,11 @@ export class Aqua {
   /**
    * Get view
    */
-  getView(): AquaTreeView | null {
+  private getView(targetRevisionHash: string = ""): AquaTreeView | null {
     return {
       aquaTree: this.tree,
       fileObject: this.fileObject,
-      revision: ""
+      revision: targetRevisionHash
     };
   }
 

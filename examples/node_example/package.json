@@ -5,11 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "rm -rf ./dist && tsc && node ./dist/index.js",
-    "build": "rm -rf ./dist && tsc",
-    "build:v2": "rm -rf ./dist && npx tsc ./aqua-v2-example.ts",
-    "build:vite": "vite build",
-    "dev:vite": "node dist/aqua-v2-example.js"
+    "dev:bk": "rm -rf ./dist && tsc && node ./dist/index.js",
+    "build:bk": "rm -rf ./dist && tsc",
+    "build:v2:bk": "rm -rf ./dist && npx tsc ./aqua-v2-example.ts",
+    "build": "vite build",
+    "dev": "node dist/aqua-v2-example.js"
   },
   "author": "",
   "license": "ISC",

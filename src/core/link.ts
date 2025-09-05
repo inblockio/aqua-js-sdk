@@ -44,7 +44,7 @@ export async function linkAquaTreeUtil(aquaTreeView: AquaTreeView, linkAquaTreeV
     const linkFileHashes = [getHashSum(linkAquaTreeView.fileObject.fileContent as string)]
     // Validation again
     for (const fh of linkFileHashes) {
-        if (!(fh in linkAquaTreeView.aquaTree.file_index)) {
+        if (fh in linkAquaTreeView.aquaTree.file_index) {
             // Add log here
             logs.push({
                 logType: LogType.ERROR,
