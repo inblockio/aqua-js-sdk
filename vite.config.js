@@ -18,10 +18,26 @@ export default defineConfig(
       outDir: 'dist',
       emptyOutDir: false,
       rollupOptions: {
-        external: ['ethers'],
+        external: [
+          'ethers',
+          // Make heavy optional dependencies external to reduce bundle size
+          'node-forge',
+          'pkijs', 
+          'asn1js',
+          'did-resolver',
+          'dids',
+          'key-did-provider-ed25519',
+          'key-did-resolver',
+          'nostr-tools',
+          'openid-client',
+          'ws'
+        ],
         output: {
           globals: {
-            'ethers': 'ethers'
+            'ethers': 'ethers',
+            'node-forge': 'forge',
+            'pkijs': 'pkijs',
+            'asn1js': 'asn1js'
           },
           exports: 'named'
         }
@@ -30,6 +46,7 @@ export default defineConfig(
     },
     resolve: {
       alias: {
+        // Keep crypto-browserify but optimize usage
         'node:crypto': 'crypto-browserify',
         'crypto': 'crypto-browserify',
         'stream': 'stream-browserify',
