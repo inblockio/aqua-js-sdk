@@ -1,8 +1,17 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import { fileURLToPath } from 'node:url'
+import dts from 'vite-plugin-dts'
 
 export default defineConfig({
+  plugins: [
+    dts({
+      outDir: 'dist',
+      include: ['src/**/*'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+      rollupTypes: true
+    })
+  ],
   build: {
     target: 'node20',
     lib: {

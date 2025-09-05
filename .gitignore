@@ -6,8 +6,8 @@ package-log.json
 src/credentials.json
 */credentials.json
 **/credentials.json
-/new_docs
-/docs
 /.zed
 .nvmrc
 /dist
+
+**aqua.json
