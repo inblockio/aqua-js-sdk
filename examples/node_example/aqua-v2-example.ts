@@ -190,6 +190,83 @@ async function dynamicConfigExample() {
 }
 
 /**
+ * Example 6: Tree linking functionality
+ */
+async function treeLinkingExample() {
+  console.log("\n🔗 Tree Linking Example");
+
+  // Create first aqua tree
+  const aqua1 = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
+  await aqua1.create("./test.txt");
+  await aqua1.sign();
+  
+  const tree1View = aqua1.getView();
+  console.log("✅ Created first aqua tree");
+
+  // Create second aqua tree
+  const aqua2 = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
+  await aqua2.create("./test.txt");
+  await aqua2.sign();
+  
+  console.log("✅ Created second aqua tree");
+
+  // Link the first tree to the second
+  if (tree1View) {
+    const linkResult = await aqua2.link(tree1View);
+    if (linkResult.isOk()) {
+      console.log("✅ Successfully linked trees");
+      console.log(`🌳 Linked tree has ${Object.keys(aqua2.getTree()?.revisions || {}).length} revisions`);
+    } else {
+      console.log("❌ Tree linking failed:", aqua2.getLogs());
+    }
+  }
+
+  // Save the linked tree
+  aqua2.save("./linked-tree.aqua.json");
+  console.log("✅ Saved linked tree");
+}
+
+/**
+ * Example 7: Multiple tree linking
+ */
+async function multipleLinkingExample() {
+  console.log("\n🔗 Multiple Tree Linking Example");
+
+  // Create base tree
+  const baseAqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
+  await baseAqua.create("./test.txt");
+  await baseAqua.sign();
+  
+  // Create multiple trees to link
+  const trees = [];
+  for (let i = 1; i <= 3; i++) {
+    const aqua = createAqua(creds, WitnessConfigs.ethereumSepolia, SignConfigs.cli);
+    await aqua.create("./test.txt");
+    await aqua.sign();
+    const view = aqua.getView();
+    if (view) {
+      trees.push(view);
+    }
+    console.log(`✅ Created tree ${i}`);
+  }
+
+  // Link multiple trees at once
+  if (trees.length > 0) {
+    const linkResult = await baseAqua.linkMultiple(trees);
+    if (linkResult.isOk()) {
+      console.log("✅ Successfully linked multiple trees");
+      console.log(`🌳 Final tree has ${Object.keys(baseAqua.getTree()?.revisions || {}).length} revisions`);
+    } else {
+      console.log("❌ Multiple tree linking failed:", baseAqua.getLogs());
+    }
+  }
+
+  // Save the final linked tree
+  baseAqua.save("./multiple-linked-tree.aqua.json");
+  console.log("✅ Saved multiple linked tree");
+}
+
+/**
  * Comparison with original API
  */
 function showAPIComparison() {
@@ -253,6 +330,8 @@ async function runAllExamples() {
     // await selectiveOperationsExample();
     // await errorHandlingExample();
     await dynamicConfigExample();
+    await treeLinkingExample();
+    await multipleLinkingExample();
 
     console.log("\n🎉 All examples completed successfully!");
   } catch (error) {
@@ -268,7 +347,9 @@ export {
   existingAquaTreeExample,
   selectiveOperationsExample,
   errorHandlingExample,
-  dynamicConfigExample
+  dynamicConfigExample,
+  treeLinkingExample,
+  multipleLinkingExample
 };
 
 // Run if called directly
