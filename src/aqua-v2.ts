@@ -19,6 +19,7 @@ import {
 } from "./types";
 import * as fs from "fs";
 import * as path from "path";
+import { linkAquaTreeUtil, linkMultipleAquaTreesUtil } from "./core/link";
 
 /**
  * Configuration for witness operations
@@ -74,6 +75,7 @@ export interface AquaConfig {
 export class Aqua {
   private config: AquaConfig;
   private tree: AquaTree | null = null;
+  private fileObject: FileObject | null = null;
   private logs: LogData[] = [];
 
   /**
@@ -110,7 +112,7 @@ export class Aqua {
       };
       this.logs.push(error);
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<T, LogData[]>;
-    } 
+    }
     return { isOk: () => true, isErr: () => false, data: undefined } as Result<T, LogData[]>;
   }
 
@@ -126,7 +128,7 @@ export class Aqua {
         log: 'This operation requires Node.js environment'
       };
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<T, LogData[]>;
-    } 
+    }
     return { isOk: () => true, isErr: () => false, data: undefined } as Result<T, LogData[]>;
   }
 
@@ -150,6 +152,7 @@ export class Aqua {
 
     if (result.isOk()) {
       this.tree = result.data.aquaTree;
+      this.fileObject = fileObject;
       this.logs.push(...result.data.logData);
     } else {
       this.logs.push(...result.data);
@@ -184,18 +187,8 @@ export class Aqua {
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<AquaOperationData, LogData[]>;
     }
 
-    const view: AquaTreeView = {
-      aquaTree: this.tree,
-      fileObject: {
-        fileName: "placeholder",
-        fileContent: "",
-        path: "/placeholder"
-      },
-      revision: ""
-    };
-
     const result = await signAquaTreeUtil(
-      view,
+      this.getView(),
       config.type,
       this.config.credentials,
       this.config.enableScalar,
@@ -238,14 +231,8 @@ export class Aqua {
       return { isOk: () => false, isErr: () => true, data: [error] } as Result<AquaOperationData, LogData[]>;
     }
 
-    const view: AquaTreeView = {
-      aquaTree: this.tree,
-      fileObject: undefined,
-      revision: ""
-    };
-
     const result = await witnessAquaTreeUtil(
-      view,
+      this.getView(),
       config.type,
       config.network,
       config.platform,
@@ -261,6 +248,14 @@ export class Aqua {
     }
 
     return result;
+  }
+
+  async link(viewToLink: AquaTreeView): Promise<Result<AquaOperationData, LogData[]>> {
+    return linkAquaTreeUtil(this.getView(), viewToLink, this.config.enableScalar)
+  }
+
+  async linkMultiple(viewsToLink: AquaTreeView[]): Promise<Result<AquaOperationData, LogData[]>> {
+    return linkMultipleAquaTreesUtil(viewsToLink, this.getView(), this.config.enableScalar)
   }
 
   /**
@@ -297,6 +292,18 @@ export class Aqua {
   }
 
   /**
+   * Get view
+   */
+  getView(): AquaTreeView | null {
+    return {
+      aquaTree: this.tree,
+      fileObject: this.fileObject,
+      revision: ""
+    };
+  }
+
+
+  /**
    * Get all operation logs
    */
   getLogs(): LogData[] {
@@ -328,7 +335,7 @@ export class Aqua {
     if (nodeCheck.isErr()) {
       return nodeCheck as Result<AquaTree, LogData[]>;
     }
-    
+
     try {
       const fileContent = fs.readFileSync(aquaFilePath, { encoding: "utf-8" });
       const aquaTree: AquaTree = JSON.parse(fileContent);
@@ -387,7 +394,7 @@ export class Aqua {
     if (nodeCheck.isErr()) {
       return nodeCheck as Result<string, LogData[]>;
     }
-    
+
     if (!this.tree) {
       const error: LogData = {
         logType: LogType.ERROR,
@@ -496,7 +503,7 @@ export class Aqua {
       // Node.js path - check environment and load file
       const nodeCheck = this.requiresNode<AquaOperationData>();
       if (nodeCheck.isErr()) return nodeCheck;
-      
+
       const fileResult = Aqua.loadFile(fileOrPath);
       if (fileResult.isErr()) {
         this.logs.push(...fileResult.data);

@@ -126,7 +126,7 @@ export default class Aquafier {
     verifyAquaTreeRevision = async (aquaTree: AquaTree, revision: Revision, revisionItemHash: string, fileObject: Array<FileObject>, credentials?: CredentialsData): Promise<Result<AquaOperationData, LogData[]>> => {
         return verifyAquaTreeRevisionUtil(aquaTree, revision, revisionItemHash, fileObject, credentials)
     }
-
+ 
     verifyAndGetGraphData = async (aquaTree: AquaTree, fileObject: Array<FileObject>, credentials?: CredentialsData): Promise<Result<VerificationGraphData, LogData[]>> => {
         return verifyAndGetGraphDataUtil(aquaTree, fileObject, "", credentials)
     }
