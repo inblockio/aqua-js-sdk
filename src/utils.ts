@@ -310,8 +310,9 @@ export function getEntropy(): Uint8Array {
     return crypto.getRandomValues(new Uint8Array(16))
   } else {
     // Node.js environment
-    const nodeCrypto = require("crypto")
-    return new Uint8Array(nodeCrypto.randomBytes(16))
+    // const nodeCrypto = require("crypto")
+    // return new Uint8Array(nodeCrypto.randomBytes(16))
+    return crypto.getRandomValues(new Uint8Array(16))
   }
 }
 

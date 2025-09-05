@@ -98,19 +98,20 @@ async function chainExampleWithMultipleParameters() {
 chainExampleWithMultipleParameters()
 
 
-async function displayGraphTree(){
-    let aquafier = new Aquafier()
-    let genesisRevisionResult = await aquafier.createGenesisRevision(aquaFileObject)
-    if(genesisRevisionResult.isOk()){
-        let signedResult = await aquafier.signAquaTree(genesisRevisionResult.data.aquaTree!!, "cli", creds, true)
-        let graphData = await aquafier.verifyAndGetGraphData(genesisRevisionResult.data.aquaTree!!, [aquaFileObject])
-        if(graphData.isOk()){
-            console.log("Successful result: \n", JSON.stringify(graphData.data, null, 4))
-        }else{
-            console.log("Failed graph data: \n", JSON.stringify(graphData.data, null, 4))
-        }
-    }
-}
+// async function displayGraphTree(){
+//     let aquafier = new Aquafier()
+//     console.log(aquafier)
+//     let genesisRevisionResult = await aquafier.createGenesisRevision(aquaFileObject)
+//     if(genesisRevisionResult.isOk()){
+//         let signedResult = await aquafier.signAquaTree(genesisRevisionResult.data.aquaTree!!, "cli", creds, true)
+//         let graphData = await aquafier.verifyAndGetGraphData(genesisRevisionResult.data.aquaTree!!, [aquaFileObject])
+//         if(graphData.isOk()){
+//             console.log("Successful result: \n", JSON.stringify(graphData.data, null, 4))
+//         }else{
+//             console.log("Failed graph data: \n", JSON.stringify(graphData.data, null, 4))
+//         }
+//     }
+// }
 
 // displayGraphTree()
 

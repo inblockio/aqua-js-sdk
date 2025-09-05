@@ -61,7 +61,7 @@ export async function getCrypto(): Promise<{
     try {
       // Import node-forge for crypto operations (already a dependency)
       // Import node-forge for other crypto operations (already a dependency)
-      const forge = require('node-forge');
+      const forge = await import('node-forge');
       
       // Create a minimal implementation using js-sha3 and node-forge
       // which are more compatible with React Native

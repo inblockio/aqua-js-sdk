@@ -5,13 +5,14 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsc && node ./dist/index.js",
-    "build": "tsc"
+    "dev": "rm -rf ./dist && tsc && node ./dist/index.js",
+    "build": "rm -rf ./dist && tsc",
+    "build:v2": "rm -rf ./dist && tsc ./aqua-v2-example.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aqua-js-sdk": "file:../../aqua-js-sdk-3.2.1-46.tgz",
+    "aqua-js-sdk": "file:aqua-js-sdk-3.2.1-49.tgz",
     "aqua-protocol": "github:inblockio/aqua-verifier-js-lib",
     "aquafier-js-sdk": "^3.2.0"
   }
