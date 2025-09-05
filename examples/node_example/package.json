@@ -7,13 +7,19 @@
   "scripts": {
     "dev": "rm -rf ./dist && tsc && node ./dist/index.js",
     "build": "rm -rf ./dist && tsc",
-    "build:v2": "rm -rf ./dist && tsc ./aqua-v2-example.ts"
+    "build:v2": "rm -rf ./dist && npx tsc ./aqua-v2-example.ts",
+    "build:vite": "vite build",
+    "dev:vite": "node dist/aqua-v2-example.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aqua-js-sdk": "file:aqua-js-sdk-3.2.1-49.tgz",
+    "aqua-js-sdk": "file:../../",
     "aqua-protocol": "github:inblockio/aqua-verifier-js-lib",
     "aquafier-js-sdk": "^3.2.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "typescript": "^5.0.0"
   }
 }
