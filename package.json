@@ -10,8 +10,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "vite build --config vite.node.config.js",
-    "build:browser:vite": "vite build --config vite.config.js",
+    "build": "vite build",
+    "build:browser": "BUILD_TARGET=browser vite build",
     "build:browser:webpack": "webpack --mode production",
     "build:react-native": "webpack --config webpack.react-native.config.js --mode production",
     "build:all": "npm run build:browser:webpack && npm run build:react-native",

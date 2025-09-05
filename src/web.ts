@@ -35,21 +35,17 @@ if (typeof window !== 'undefined') {
 }
 
 // Import everything from the main entry point
-import * as AquaSDK from './index';
+import * as AquaSDKModule from './index';
 import Aquafier from './index';
 
 // Export everything as named exports
-// export * from './index';
+export * from './index';
 
-// For UMD compatibility, export the Aquafier class as the main export
-// but also include all named exports as properties
-Object.assign(AquaSDK, {
-  // ...AquaSDKModule,
+// Create a new extensible object for UMD compatibility
+const AquaSDK = {
+  ...AquaSDKModule,
   Aquafier,
-  // default: Aquafier
-});
+  default: Aquafier
+};
 
-export default AquaSDK 
-
-// Export everything as default export for UMD compatibility
-// export default Aquafier;
+export default AquaSDK;
