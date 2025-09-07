@@ -18,6 +18,7 @@ import { ethers, HDNodeWallet, Wallet, Mnemonic } from "ethers"
 import shajs from "sha.js"
 import { MerkleTree } from "merkletreejs"
 import { Err, Ok, Result } from "./type_guards"
+import pointer from "json8-pointer"
 
 
 export function isAquaTree(content: any): boolean {
@@ -168,14 +169,16 @@ export function maybeUpdateFileIndex(
  * @returns Array of hash strings
  *
  * This function:
+ * - Handles nested objects using RFC 6901 JSON pointer format
  * - Sorts keys for deterministic output
  * - Creates hash of each key-value pair
  * - Used in Merkle tree construction
  */
-export function dict2Leaves(obj: AnObject): string[] {
-  return Object.keys(obj)
+export function dict2Leaves(obj: AnObject, useJsonPointer: boolean = false): string[] {
+  const flattened: AnObject = useJsonPointer ? pointer.dict(obj):  obj
+  return Object.keys(flattened)
     .sort() // MUST be sorted for deterministic Merkle tree
-    .map((key) => getHashSum(`${key}:${obj[key]}`))
+    .map((key) => getHashSum(`${key}:${flattened[key]}`))
 }
 
 /**

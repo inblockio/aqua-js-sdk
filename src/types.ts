@@ -481,9 +481,7 @@ export interface IWitnessConfig {
  *
  * @property [key: string] - Maps string keys to any value
  */
-export interface AnObject {
-  [key: string]: string | number | boolean | any
-}
+export type AnObject = Record<string, unknown>
 
 /**
  * Proof of inclusion in witness Merkle tree
