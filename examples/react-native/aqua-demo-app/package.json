@@ -19,7 +19,7 @@
     "@walletconnect/client": "^1.8.0",
     "@walletconnect/types": "^2.21.3",
     "@walletconnect/utils": "^2.21.3",
-    "aqua-js-sdk": "file:../../../aqua-js-sdk-3.2.1-47.tgz",
+    "aqua-js-sdk": "file:../../../aqua-js-sdk-3.2.1-49.tgz",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "events": "^3.3.0",

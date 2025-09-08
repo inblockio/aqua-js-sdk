@@ -12,10 +12,8 @@
   "scripts": {
     "build": "vite build",
     "build:browser": "BUILD_TARGET=browser vite build",
-    "build:browser:webpack": "webpack --mode production",
     "build:react-native": "webpack --config webpack.react-native.config.js --mode production",
-    "build:all": "npm run build:browser:webpack && npm run build:react-native",
-    "prepare": "npm run build",
+    "build:all": "npm run build && npm run build:browser && npm run build:react-native",
     "dev": "tsc",
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' npx jest --verbose",
     "lint": "eslint src --ext .ts",

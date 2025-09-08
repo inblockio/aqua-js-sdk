@@ -27,7 +27,7 @@
 
                     // Try as default export (UMD should expose the default export directly)
                     if (typeof AquaSDK === 'function') {
-                        const aquafier2 = new AquaSDK();
+                        const aquafier2 = new AquaSDK.AquaV1.Aquafier();
                         console.log("✅ Aquafier via default export:", aquafier2);
                     }
 
@@ -48,8 +48,8 @@
         }
 
         async function runCreate() {
-            if (AquaSDK.default) {
-                const aquafier1 = new AquaSDK.default.Aquafier();
+            if (AquaSDK.AquaV1.Aquafier) {
+                const aquafier1 = new AquaSDK.AquaV1.Aquafier();
                 console.log("✅ Aquafier via named export:", aquafier1);
                 const fileObject = {
                     fileName: "test.txt",

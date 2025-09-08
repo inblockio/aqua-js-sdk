@@ -1,8 +1,12 @@
 import * as fs from "fs";
-import Aquafier, { Aqua, createAqua, WitnessConfigs, SignConfigs } from "aqua-js-sdk";
+// import Aquafier, { Aqua, createAqua, WitnessConfigs, SignConfigs } from "aqua-js-sdk";
+import { AquaV4 } from "aqua-js-sdk";
 import { CredentialsData } from "aqua-js-sdk";
 
-console.log(Aquafier)
+
+const { Aqua, createAqua, WitnessConfigs, SignConfigs } = AquaV4
+
+// console.log(Aquafier)
 // Load credentials
 let creds: CredentialsData = {
   "did_key": "",

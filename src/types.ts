@@ -628,8 +628,6 @@ export interface WitnessNostrVerifyResult {
 
 
 export interface AquaTreeAndFileObject {
-
   fileObject: FileObject[]
   aquaTree: AquaTree | null,
-  
 }

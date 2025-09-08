@@ -1,10 +1,11 @@
 import { jest } from "@jest/globals";
-import Aquafier, { AquaOperationData, AquaTree, AquaTreeView, FileObject, LogData, Result, Revision } from "../index";  // Adjust the path based on your structure
+import { AquaOperationData, AquaTree, AquaTreeView, FileObject, LogData, Result, Revision } from "../index";  // Adjust the path based on your structure
 // import { AquaTree, AquaTreeView, CredentialsData, FileObject } from "../types";
 // import { mockAquaTreeOnerevision, mockAquaTreeTworevisions, mockAquaTreeTworevisionsReArranged } from "./test_revisions";
 // // import { createAquaTreeTree } from "../aquavhtree";
 import { default as credentialsData } from "./../credentials.json";
 import { mockAquaTreeOnerevision } from "./test_revisions";
+import { AquaV1 } from "../index";
 //check readme
 
 jest.mock("fs/promises", () => ({
@@ -13,10 +14,10 @@ jest.mock("fs/promises", () => ({
 }));
 
 describe("Aquafier", () => {
-    let aquafier: Aquafier;
+    let aquafier: AquaV1.Aquafier;
 
     beforeEach(() => {
-        aquafier = new Aquafier();
+        aquafier = new AquaV1.Aquafier();
         jest.clearAllMocks(); // Reset mocks before each test
     });
 
