@@ -154,6 +154,7 @@ export type RevisionGraphInfo =
 // Map RevisionType to corresponding info type
 type RevisionGraphInfoMap = {
   file: FileVerificationGraphData
+  template_object: FileVerificationGraphData
   witness: WitnessVerificationGraphData
   signature: SignatureVerificationGraphData
   form: FormVerificationGraphData
@@ -186,7 +187,7 @@ export interface VerificationGraphData<T extends RevisionType = RevisionType> {
 }
 
 /** Type of revision in Aqua Tree */
-export type RevisionType = "file" | "witness" | "signature" | "form" | "link"
+export type RevisionType = "file" | "witness" | "signature" | "form" | "link" | "template_object"
 /** Type of witness service */
 export type WitnessType = "tsa" | "eth" | "nostr"
 /** Platform used for witnessing */
@@ -326,7 +327,7 @@ export interface RevisionTree {
 export interface Revision {
   previous_verification_hash: string
   local_timestamp: string
-  revision_type: "file" | "witness" | "signature" | "form" | "link"
+  revision_type: RevisionType ,
   version: string
   file_hash?: string
   file_nonce?: string

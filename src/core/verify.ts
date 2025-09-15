@@ -598,12 +598,7 @@ async function verifyRevision(
   // verify scalar should be minimal
   if (isScalar && !verifyWitnessMerkleProof) {
     let revData = JSON.stringify(revision)
-    //todo remove this log
-    // logs.push({
-    //   logType: LogType.DEBUGDATA,
-    //   log: `revison data   ${revData} `,
-    //   ident: `${identCharacter}\t`,
-    // })
+   
     const actualVH = "0x" + getHashSum(revData)
     isScalarSuccess = actualVH === verificationHash
 
@@ -1167,7 +1162,7 @@ function verifyRevisionMerkleTreeStructure(
       // actualLeaves.push(actual)
     }
 
-    const leaves2 = dict2Leaves(input)
+    const leaves2 = dict2Leaves(input, input.revision_type === "template_object" ) 
 
     const hexRoot = getMerkleRoot(leaves2) // tree.getHexRoot()
     vhOk = hexRoot === verificationHash

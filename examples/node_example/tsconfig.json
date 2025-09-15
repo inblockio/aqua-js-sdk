@@ -16,7 +16,7 @@
     "isolatedModules": true,
     "lib": ["ES2020"]
   },
-  "include": ["./index.ts", "./aqua-v2-example.ts"],
+  "include": ["./index.ts", "aqua-v4-example.ts"],
   "exclude": ["node_modules", "dist", "src"]
 }
 

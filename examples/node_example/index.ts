@@ -81,7 +81,7 @@ if (fs.existsSync("credentials.json")) {
 
 
 async function chainExampleWithMultipleParameters() {
-    const aqt = await new AquafierChainable(null).notarize(aquaFileObject);
+    const aqt = await new AquafierChainable(null).notarize(aquaFileObject, false, true, false);
     // await result.sign()
     // await result.witness()
     // await result.witness()
@@ -92,6 +92,8 @@ async function chainExampleWithMultipleParameters() {
 
     let result = aqt.getValue();
     console.log("Successful result: \n", JSON.stringify(result, null, 4))
+
+
 
 };
 

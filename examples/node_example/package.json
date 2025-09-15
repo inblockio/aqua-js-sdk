@@ -9,12 +9,12 @@
     "build:bk": "rm -rf ./dist && tsc",
     "build:v2:bk": "rm -rf ./dist && npx tsc ./aqua-v2-example.ts",
     "build": "vite build",
-    "dev": "node dist/aqua-v2-example.js"
+    "dev": "node dist/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aqua-js-sdk": "file:../../aqua-js-sdk-3.2.1-49.tgz",
+    "aqua-js-sdk": "file:../../aqua-js-sdk-3.2.1-50.tgz",
     "aquafier-js-sdk": "^3.2.0"
   },
   "devDependencies": {
