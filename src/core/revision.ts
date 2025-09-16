@@ -159,7 +159,7 @@ export function removeLastRevisionUtil(
  */
 export async function createGenesisRevision(
   fileObject: FileObject,
-  isForm: boolean,
+  isTOR: boolean,
   enableContent: boolean,
   enableScalar: boolean,
 ): Promise<Result<AquaOperationData, LogData[]>> {
@@ -170,8 +170,8 @@ export async function createGenesisRevision(
   const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
   let revisionType = "file"
 
-  if (isForm) {
-    revisionType = "form"
+  if (isTOR) {
+    revisionType = "template_object"
   }
 
   let verificationData: any = {
@@ -184,7 +184,7 @@ export async function createGenesisRevision(
     `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`
   verificationData["file_hash"] = getHashSum(fileObject.fileContent as string)
   verificationData["file_nonce"] = prepareNonce()
-  
+
 
   switch (revisionType) {
     case "file":
@@ -198,11 +198,11 @@ export async function createGenesisRevision(
       }
 
       break
-    case "form":
-      let formDataJson: any = {}
+    case "template_object":
+      let templateObjectJson: any = {}
       try {
         // Attempt to parse the JSON data
-        formDataJson = JSON.parse(fileObject.fileContent as string)
+        templateObjectJson = JSON.stringify(fileObject.fileContent)// JSON.parse(fileObject.fileContent as string)
       } catch (parseError) {
         logs.push({
           log: `Error: The file ${fileObject.fileName} does not contain valid JSON data.`,
@@ -211,25 +211,9 @@ export async function createGenesisRevision(
         return Err(logs)
       }
 
-      // Sort the keys
-      let formDataSortedKeys = Object.keys(formDataJson)
-      let formDataSortedWithPrefix: any = {}
-      for (let key of formDataSortedKeys) {
-        const formValue = formDataJson[key]
-        // if the value is not a string or a number, we need to stringify it
-        let value: string | number
-        if(typeof formValue == "string" || typeof formValue == "number"){
-         value = formValue
-        }else{
-          value = JSON.stringify(formValue)
-        }
-        formDataSortedWithPrefix[`forms_${key}`] = value
-      }
-      // console.log(`formDataSortedWithPrefix ${JSON.stringify(formDataSortedWithPrefix, null, 4)}`)
-
       verificationData = {
         ...verificationData,
-        ...formDataSortedWithPrefix,
+        template_object: templateObjectJson,
       }
       break
 
@@ -243,8 +227,6 @@ export async function createGenesisRevision(
 
   let sortedVerificationData = reorderRevisionsProperties(verificationData)
 
-  const leaves = dict2Leaves(sortedVerificationData)
-
   let verificationHash = ""
   if (enableScalar) {
     logs.push({
@@ -255,7 +237,7 @@ export async function createGenesisRevision(
 
     let hashSumData = getHashSum(stringifiedData)
 
-    //todo remoev this log
+    //todo remove this log
     // logs.push({
     //   logType: LogType.DEBUGDATA,
     //   log: `Genesi scalar  hashSumData ${hashSumData} \n input ${stringifiedData} `,
@@ -263,6 +245,7 @@ export async function createGenesisRevision(
     // })
     verificationHash = "0x" + hashSumData
   } else {
+    const leaves = dict2Leaves(sortedVerificationData, revisionType === "template_object")
     sortedVerificationData.leaves = leaves
     verificationHash = getMerkleRoot(leaves)
   }
@@ -283,15 +266,17 @@ export async function createGenesisRevision(
       "",
     )
   } else {
-    aquaTreeUpdatedResult = maybeUpdateFileIndex(
-      aquaTree,
-      verificationHash,
-      revisionType,
-      "",
-      fileObject.fileName,
-      "",
-      "",
-    )
+    if (revisionType !== "template_object") {
+      aquaTreeUpdatedResult = maybeUpdateFileIndex(
+        aquaTree,
+        verificationHash,
+        revisionType,
+        "",
+        fileObject.fileName,
+        "",
+        "",
+      )
+    }
   }
   if (isErr(aquaTreeUpdatedResult)) {
     logs.push(...aquaTreeUpdatedResult.data)
@@ -311,6 +296,8 @@ export async function createGenesisRevision(
     aquaTrees: null,
     logData: logs,
   }
+
+  console.log("Logs: ", logs)
 
   return Ok(result)
 }

@@ -73,6 +73,35 @@ async function basicFileExample() {
 }
 
 /**
+ * Example 2.1: Basic usage with file paths
+ */
+async function basicTorExample() {
+  console.log("🔧 Basic Tor Example - Direct File Operations");
+
+  const aqua = createAqua(creds, WitnessConfigs.tsa, SignConfigs.cli);
+
+  // Use file paths directly - no manual FileObject creation
+  await aqua.create("./form.json", {isTOR: true});
+  console.log("We past here")
+  const fileResult = Aqua.loadFile("./form.json")
+  if (fileResult.isOk()) {
+    let data = fileResult.data
+    console.log("✅ File loaded successfully")
+    await aqua.verify([data]);
+  }
+
+  console.log("Aqua tree: ", aqua.getTree())
+  console.log("Aqua tree: ", aqua.getLogs())
+
+  // Save the result
+  let data = aqua.save("./form.json.aqua.json");
+  console.log("Saving Data: ", data)
+
+  console.log("✅ File operations completed");
+  console.log(`📊 Generated ${aqua.getLogs().length} log entries`);
+}
+
+/**
  * Example 3: Working with existing aqua files
  */
 async function existingAquaFileExample() {
@@ -342,14 +371,15 @@ async function runAllExamples() {
   try {
     // showAPIComparison();
     // await ultraConciseExample();
+    await basicTorExample()
     // await basicFileExample();
-    await existingAquaFileExample();
-    await existingAquaTreeExample();
+    // await existingAquaFileExample();
+    // await existingAquaTreeExample();
     // await selectiveOperationsExample();
     // await errorHandlingExample();
-    await dynamicConfigExample();
-    await treeLinkingExample();
-    await multipleLinkingExample();
+    // await dynamicConfigExample();
+    // await treeLinkingExample();
+    // await multipleLinkingExample();
 
     console.log("\n🎉 All examples completed successfully!");
   } catch (error) {
@@ -367,7 +397,8 @@ export {
   errorHandlingExample,
   dynamicConfigExample,
   treeLinkingExample,
-  multipleLinkingExample
+  multipleLinkingExample,
+  basicTorExample
 };
 
 // Run if called directly

@@ -1,21 +1,18 @@
 import {
   AquaTreeView,
   AquaOperationData,
-  FileObject,
   LogData,
   LogType,
 } from "../types"
 import {
-  checkFileHashAlreadyNotarized,
   dict2Leaves,
   formatMwTimestamp,
   getHashSum,
   getMerkleRoot,
-  maybeUpdateFileIndex,
 } from "../utils"
 import { reorderAquaTreeRevisionsProperties } from "../utils"
 import { createAquaTree } from "../aquatreevisualization"
-import { Err, Ok, Result } from "../type_guards"
+import { Ok, Result } from "../type_guards"
 
 /**
  * Creates a new content revision in the Aqua Tree
@@ -34,7 +31,7 @@ import { Err, Ok, Result } from "../type_guards"
  */
 export async function createTemplateObjectRevisionUtil(
   aquaTreeView: AquaTreeView,
-  fileObject: FileObject,
+  templateObject: Record<string, unknown>,
   enableScalar: boolean,
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let logs: Array<LogData> = []
@@ -52,22 +49,7 @@ export async function createTemplateObjectRevisionUtil(
     revision_type: revisionType,
   }
 
-  let fileHash = getHashSum(fileObject.fileContent as string)
-
-  let alreadyNotarized = checkFileHashAlreadyNotarized(
-    fileHash,
-    aquaTreeView.aquaTree,
-  )
-
-  if (alreadyNotarized) {
-    logs.push({
-      log: `File ${fileObject.fileName} has already been notarized.`,
-      logType: LogType.ERROR,
-    })
-    return Err(logs)
-  }
-
-  verificationData["template_object"] = fileObject.fileContent
+  verificationData["template_object"] = templateObject
   verificationData["version"] =
     `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`
 
@@ -84,16 +66,6 @@ export async function createTemplateObjectRevisionUtil(
 
   const revisions = aquaTreeView.aquaTree.revisions
   revisions[verification_hash] = verificationData
-
-  maybeUpdateFileIndex(
-    aquaTreeView.aquaTree,
-    verificationData,
-    revisionType,
-    fileObject.fileName,
-    "",
-    "",
-    "",
-  )
 
   let aquaTreeWithOrderdRevision = reorderAquaTreeRevisionsProperties(
     aquaTreeView.aquaTree,

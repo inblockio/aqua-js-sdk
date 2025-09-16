@@ -141,15 +141,15 @@ export class Aqua {
   private async createFromFileObject(
     fileObject: FileObject,
     options: {
-      isForm?: boolean;
+      isTOR?: boolean;
       enableContent?: boolean;
       enableScalar?: boolean
     } = {}
   ): Promise<Result<AquaOperationData, LogData[]>> {
-    const { isForm = false, enableContent = false, enableScalar = this.config.enableScalar } = options;
+    const { isTOR = false, enableContent = false, enableScalar = this.config.enableScalar } = options;
 
-    const result = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
-
+    const result = await createGenesisRevision(fileObject, isTOR, enableContent, enableScalar);
+    console.log("Result here: ", result)
     if (result.isOk()) {
       this.tree = result.data.aquaTree;
       this.fileObject = fileObject;
@@ -440,6 +440,8 @@ export class Aqua {
    */
   static loadFile(filePath: string): Result<FileObject, LogData[]> {
 
+    console.log("File path inload file is: ", filePath)
+
     const nodeCheck = this.requiresNode<FileObject>();
     if (nodeCheck.isErr()) {
       return nodeCheck as Result<FileObject, LogData[]>;
@@ -474,7 +476,7 @@ export class Aqua {
   async create(
     fileObject: FileObject,
     options?: {
-      isForm?: boolean;
+      isTOR?: boolean;
       enableContent?: boolean;
       enableScalar?: boolean
     }
@@ -489,7 +491,7 @@ export class Aqua {
   async create(
     filePath: string,
     options?: {
-      isForm?: boolean;
+      isTOR?: boolean;
       enableContent?: boolean;
       enableScalar?: boolean
     }
@@ -501,7 +503,7 @@ export class Aqua {
   async create(
     fileOrPath: FileObject | string,
     options: {
-      isForm?: boolean;
+      isTOR?: boolean;
       enableContent?: boolean;
       enableScalar?: boolean
     } = {}
@@ -512,9 +514,18 @@ export class Aqua {
       if (nodeCheck.isErr()) return nodeCheck;
 
       const fileResult = Aqua.loadFile(fileOrPath);
+
+      console.log("File result here: ", fileResult)
+
       if (fileResult.isErr()) {
         this.logs.push(...fileResult.data);
         return fileResult as unknown as Result<AquaOperationData, LogData[]>;
+      }
+      if(options.isTOR){
+        return this.createFromFileObject({
+          ...fileResult.data,
+          fileContent: JSON.parse(fileResult.data.fileContent as string)
+        }, options);
       }
       return this.createFromFileObject(fileResult.data, options);
     } else {

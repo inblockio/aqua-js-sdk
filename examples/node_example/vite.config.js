@@ -4,9 +4,9 @@ export default defineConfig({
   build: {
     target: 'node24',
     lib: {
-      entry: './index.ts',
+      entry: './aqua-v4-example.ts',
       formats: ['es'],
-      fileName: 'index'
+      fileName: 'aqua-v4-example'
     },
     rollupOptions: {
       external: ['fs', 'path', 'crypto', 'util', 'os', 'buffer'],
