@@ -1,4 +1,3 @@
-import { HDNodeWallet } from "ethers"
 import { getWallet } from "../utils"
 import { CredentialsData, LogData, LogType } from "../types"
 import { SignerStrategy, SignResult } from "../core/signer-types"
@@ -42,8 +41,9 @@ export class CLISigner implements SignerStrategy {
      */
     public async sign(targetRevisionHash: string, credentials: CredentialsData): Promise<SignResult> {
         const [wallet, walletAddress, publicKey] = await getWallet(credentials.mnemonic)
-        const signature = await this.doSign(wallet, targetRevisionHash)
-        
+        const message = "I sign this revision: [" + targetRevisionHash + "]"
+        const signature = await wallet.signMessage(message)
+
         return {
             signature,
             walletAddress,
@@ -51,24 +51,4 @@ export class CLISigner implements SignerStrategy {
             signatureType: "ethereum:eip-191"
         }
     }
-
-    /**
- * Signs a verification hash using the provided wallet (legacy interface)
- * 
- * @param wallet - HDNodeWallet instance for signing
- * @param verificationHash - Hash of the revision to sign
- * @returns Promise resolving to the signature string
- * 
- * This method:
- * - Creates a standardized message with the verification hash
- * - Signs the message using the wallet's private key
- * - Returns the resulting signature
- */
-public async doSign(wallet: HDNodeWallet, verificationHash: string) {
-    const message = "I sign this revision: [" + verificationHash + "]"
-    const signature = await wallet.signMessage(message)
-    return signature
-  }
-
 }
-  
