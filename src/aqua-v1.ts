@@ -93,12 +93,12 @@ export class Aquafier {
      * @description This method creates a genesis revision for the aqua tree
      * @param fileObject - The file object to create the genesis revision for
      * @param isForm - A boolean value to check if the file object is a form
-     * @param enableContent - A boolean value to enable content
+     * @param embedContent - A boolean value to enable content
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    createGenesisRevision = async (fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
-        return createGenesisRevision(fileObject, isForm, enableContent, enableScalar)
+    createGenesisRevision = async (fileObject: FileObject, isForm: boolean = false, embedContent: boolean = false, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
+        return createGenesisRevision(fileObject, isForm, embedContent, enableScalar)
     }
 
     /**
@@ -366,12 +366,12 @@ export class AquafierChainable {
  * 
  * @param fileObject - File to notarize
  * @param isForm - Whether file is a form
- * @param enableContent - Whether to include content
+ * @param embedContent - Whether to include content
  * @param enableScalar - Whether to enable scalar values
  * @returns This instance for chaining
  */
-    async notarize(fileObject: FileObject, isForm: boolean = false, enableContent: boolean = false, enableScalar: boolean = true): Promise<this> {
-        let data = await createGenesisRevision(fileObject, isForm, enableContent, enableScalar);
+    async notarize(fileObject: FileObject, isForm: boolean = false, embedContent: boolean = false, enableScalar: boolean = true): Promise<this> {
+        let data = await createGenesisRevision(fileObject, isForm, embedContent, enableScalar);
 
         if (data.isOk()) {
             this.value = this.unwrap(data);

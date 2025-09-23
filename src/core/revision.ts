@@ -149,7 +149,7 @@ export function removeLastRevisionUtil(
  *
  * @param fileObject - File object containing content for the genesis revision
  * @param isForm - Flag indicating if the genesis revision is a form
- * @param enableContent - Flag to include file content in the revision
+ * @param embedContent - Flag to include file content in the revision
  * @param enableScalar - Flag to use scalar mode instead of tree mode
  * @returns Promise resolving to either AquaOperationData on success or array of LogData on failure
  *
@@ -163,7 +163,7 @@ export function removeLastRevisionUtil(
 export async function createGenesisRevision(
   fileObject: FileObject,
   isTOR: boolean,
-  enableContent: boolean,
+  embedContent: boolean,
   enableScalar: boolean,
 ): Promise<Result<AquaOperationData, LogData[]>> {
   //timestamp: string, revisionType: RevisionType,
@@ -191,7 +191,7 @@ export async function createGenesisRevision(
       verificationData["file_hash"] = getHashSum(fileObject.fileContent as string)
       verificationData["file_nonce"] = prepareNonce()
 
-      if (enableContent) {
+      if (embedContent) {
         verificationData["content"] = fileObject.fileContent
 
         logs.push({

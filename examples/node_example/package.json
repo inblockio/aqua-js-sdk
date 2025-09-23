@@ -14,7 +14,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aqua-js-sdk": "file:../../aqua-js-sdk-3.2.1-50.tgz",
     "aquafier-js-sdk": "^3.2.0"
   },
   "devDependencies": {

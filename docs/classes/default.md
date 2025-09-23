@@ -212,7 +212,7 @@ This method creates a form revision for the aqua tree
 
 ### createGenesisRevision()
 
-> **createGenesisRevision**(`fileObject`, `isForm`, `enableContent`, `enableScalar`): `Promise`\<[`Result`](../type-aliases/Result.md)\<[`AquaOperationData`](../interfaces/AquaOperationData.md), [`LogData`](../interfaces/LogData.md)[]\>\>
+> **createGenesisRevision**(`fileObject`, `isForm`, `embedContent`, `enableScalar`): `Promise`\<[`Result`](../type-aliases/Result.md)\<[`AquaOperationData`](../interfaces/AquaOperationData.md), [`LogData`](../interfaces/LogData.md)[]\>\>
 
 Defined in: [index.ts:79](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L79)
 
@@ -230,7 +230,7 @@ The file object to create the genesis revision for
 
 A boolean value to check if the file object is a form
 
-##### enableContent
+##### embedContent
 
 `boolean` = `false`
 

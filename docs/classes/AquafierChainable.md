@@ -64,7 +64,7 @@ Defined in: [index.ts:366](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 ### notarize()
 
-> **notarize**(`fileObject`, `isForm`, `enableContent`, `enableScalar`): `Promise`\<[`AquafierChainable`](AquafierChainable.md)\>
+> **notarize**(`fileObject`, `isForm`, `embedContent`, `enableScalar`): `Promise`\<[`AquafierChainable`](AquafierChainable.md)\>
 
 Defined in: [index.ts:291](https://github.com/inblockio/aqua-verifier-js-lib/blob/8585c670e387bba02324c5d1649cefbfbcc39ce3/src/index.ts#L291)
 
@@ -78,7 +78,7 @@ Defined in: [index.ts:291](https://github.com/inblockio/aqua-verifier-js-lib/blo
 
 `boolean` = `false`
 
-##### enableContent
+##### embedContent
 
 `boolean` = `false`
 

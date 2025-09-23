@@ -41,7 +41,7 @@ const fileObject = {
 
 const options = {
   isForm: false,
-  enableContent: false,
+  embedContent: false,
   enableScalar: true
 };
 

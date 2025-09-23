@@ -142,13 +142,13 @@ export class Aqua {
     fileObject: FileObject,
     options: {
       isTOR?: boolean;
-      enableContent?: boolean;
+      embedContent?: boolean;
       enableScalar?: boolean
     } = {}
   ): Promise<Result<AquaOperationData, LogData[]>> {
-    const { isTOR = false, enableContent = false, enableScalar = this.config.enableScalar } = options;
+    const { isTOR = false, embedContent = false, enableScalar = this.config.enableScalar } = options;
 
-    const result = await createGenesisRevision(fileObject, isTOR, enableContent, enableScalar);
+    const result = await createGenesisRevision(fileObject, isTOR, embedContent, enableScalar);
     console.log("Result here: ", result)
     if (result.isOk()) {
       this.tree = result.data.aquaTree;
@@ -477,7 +477,7 @@ export class Aqua {
     fileObject: FileObject,
     options?: {
       isTOR?: boolean;
-      enableContent?: boolean;
+      embedContent?: boolean;
       enableScalar?: boolean
     }
   ): Promise<Result<AquaOperationData, LogData[]>>;
@@ -492,7 +492,7 @@ export class Aqua {
     filePath: string,
     options?: {
       isTOR?: boolean;
-      enableContent?: boolean;
+      embedContent?: boolean;
       enableScalar?: boolean
     }
   ): Promise<Result<AquaOperationData, LogData[]>>;
@@ -504,7 +504,7 @@ export class Aqua {
     fileOrPath: FileObject | string,
     options: {
       isTOR?: boolean;
-      enableContent?: boolean;
+      embedContent?: boolean;
       enableScalar?: boolean
     } = {}
   ): Promise<Result<AquaOperationData, LogData[]>> {
