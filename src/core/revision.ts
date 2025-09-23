@@ -33,7 +33,10 @@ export function checkIfFileAlreadyNotarizedUtil(
   let keys = Object.keys(aquaTree.revisions)
   let firstRevision: Revision = aquaTree.revisions[keys[0]]
 
-  let fileHash = getHashSum(fileObject.fileContent as string)
+  const contentForHashing = typeof fileObject.fileContent === 'string'
+    ? fileObject.fileContent
+    : JSON.stringify(fileObject.fileContent)
+  let fileHash = getHashSum(contentForHashing)
   return firstRevision.file_hash == fileHash
 }
 
@@ -182,12 +185,12 @@ export async function createGenesisRevision(
 
   verificationData["version"] =
     `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`
-  verificationData["file_hash"] = getHashSum(fileObject.fileContent as string)
-  verificationData["file_nonce"] = prepareNonce()
-
 
   switch (revisionType) {
     case "file":
+      verificationData["file_hash"] = getHashSum(fileObject.fileContent as string)
+      verificationData["file_nonce"] = prepareNonce()
+
       if (enableContent) {
         verificationData["content"] = fileObject.fileContent
 
@@ -211,9 +214,10 @@ export async function createGenesisRevision(
         return Err(logs)
       }
 
+      verificationData["nonce"] = prepareNonce()
       verificationData = {
         ...verificationData,
-        template_object: templateObjectJson,
+        template_object: fileObject.fileContent,
       }
       break
 
@@ -245,9 +249,17 @@ export async function createGenesisRevision(
     // })
     verificationHash = "0x" + hashSumData
   } else {
-    const leaves = dict2Leaves(sortedVerificationData, revisionType === "template_object")
-    sortedVerificationData.leaves = leaves
-    verificationHash = getMerkleRoot(leaves)
+    try {
+      const leaves = dict2Leaves(sortedVerificationData, revisionType === "template_object")
+      sortedVerificationData.leaves = leaves
+      verificationHash = getMerkleRoot(leaves)
+    } catch (error) {
+      logs.push({
+        log: `Error in Merkle tree generation: ${error}`,
+        logType: LogType.ERROR,
+      })
+      return Err(logs)
+    }
   }
 
   const aquaTree = createNewAquaTree()
@@ -255,29 +267,15 @@ export async function createGenesisRevision(
 
   let aquaTreeUpdatedResult: Result<AquaTree, LogData[]>
 
-  if (revisionType == "file") {
-    aquaTreeUpdatedResult = maybeUpdateFileIndex(
-      aquaTree,
-      verificationHash,
-      revisionType,
-      fileObject.fileName,
-      "",
-      "",
-      "",
-    )
-  } else {
-    if (revisionType !== "template_object") {
-      aquaTreeUpdatedResult = maybeUpdateFileIndex(
-        aquaTree,
-        verificationHash,
-        revisionType,
-        "",
-        fileObject.fileName,
-        "",
-        "",
-      )
-    }
-  }
+  aquaTreeUpdatedResult = maybeUpdateFileIndex(
+    aquaTree,
+    verificationHash,
+    revisionType,
+    fileObject.fileName,
+    "",
+    "",
+    "",
+  )
   if (isErr(aquaTreeUpdatedResult)) {
     logs.push(...aquaTreeUpdatedResult.data)
     return Err(logs)

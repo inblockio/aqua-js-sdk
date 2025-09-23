@@ -130,12 +130,8 @@ export function maybeUpdateFileIndex(
   let logs: LogData[] = []
   const validRevisionTypes = ["file", "form", "link"]
   if (!validRevisionTypes.includes(revisionType)) {
-    logs.push({
-      logType: LogType.ERROR,
-      log: `❌ Invalid revision type for file index: ${revisionType}`,
-    })
-
-    return Err(logs)
+    // Do nothing if file index update is not needed
+    return Ok(aquaTree)
   }
   // let verificationHash = "";
 

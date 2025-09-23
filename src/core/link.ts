@@ -41,7 +41,10 @@ export async function linkAquaTreeUtil(aquaTreeView: AquaTreeView, linkAquaTreeV
 
     const linkVHs = [getLatestVH(linkAquaTreeView.aquaTree)]
 
-    const linkFileHashes = [getHashSum(linkAquaTreeView.fileObject.fileContent as string)]
+    const contentForHashing = typeof linkAquaTreeView.fileObject.fileContent === 'string'
+      ? linkAquaTreeView.fileObject.fileContent
+      : JSON.stringify(linkAquaTreeView.fileObject.fileContent)
+    const linkFileHashes = [getHashSum(contentForHashing)]
     // Validation again
     for (const fh of linkFileHashes) {
         if (fh in linkAquaTreeView.aquaTree.file_index) {
