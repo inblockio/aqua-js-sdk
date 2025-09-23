@@ -11,8 +11,6 @@ import {
   SignatureVerificationGraphData,
   WitnessVerificationGraphData,
   FormVerificationGraphData,
-  FormKeyGraphData,
-  FormVerificationResponseData,
   CredentialsData,
 } from "../types"
 import {
@@ -322,34 +320,11 @@ export async function verifyAndGetGraphDataUtil(
   )
   const genesisRevisionType =
     aquaTree.revisions[verificationHashes[0]].revision_type
-
    
-  if (genesisRevisionData.revision_type === "form") {
-     if(genesisRevisionData.leaves == undefined){
-       logs.push({
-          logType: LogType.ERROR,
-          log: `Leaves are required in a form revision.\n`,
-          ident: `${identCharacter}\t`,
-        })
-
-            return Err(logs)
-    }
-    let { formKeysGraphData } = verifyFormRevision(
-      genesisRevisionData,
-      genesisRevisionData.leaves,
-    )
-
-    let formData: FormVerificationGraphData = {
-      formKeys: formKeysGraphData,
-    }
-
-    infoGraphData = formData
-  } else {
-    const fileGraphData: FileVerificationGraphData = {
-      isValidationSucessful: isGenesisOkay,
-    }
-    infoGraphData = fileGraphData
+  const fileGraphData: FileVerificationGraphData = {
+    isValidationSucessful: isGenesisOkay,
   }
+  infoGraphData = fileGraphData
 
   const verificationResults: VerificationGraphData = {
     hash: verificationHashes[0],
@@ -490,14 +465,7 @@ export async function verifyAndGetGraphDataUtil(
       | LinkVerificationGraphData
       | undefined = undefined
 
-    if (revision.revision_type === "form") {
-      let { formKeysGraphData } = verifyFormRevision(revision, revision.leaves)
-      let formData: FormVerificationGraphData = {
-        formKeys: formKeysGraphData,
-      }
-
-      data = formData
-    } else if (revision.revision_type === "file") {
+    if (revision.revision_type === "file") {
       let formData: FileVerificationGraphData = {
         isValidationSucessful: result[0],
       }
@@ -645,58 +613,6 @@ async function verifyRevision(
   let logsResult: Array<LogData> = []
 
   switch (revision.revision_type) {
-    case "form":
-      let res = verifyFormRevision(revision, revision.leaves,  `${identCharacter}\t\t`)
-      isSuccess = res.isOk
-     
-      logs.push(...res.logs)
-
-       logs.push({
-            log: `Verified form fields verifying json file`,
-            logType: LogType.INFO,
-            ident: `${identCharacter}\t`,
-          })
-       let fileContent1: Buffer
-      if (!!revision.content) {
-        fileContent1 = Buffer.from(revision.content, "utf8")
-      } else {
-        let fileName = aquaTree.file_index[verificationHash]
-        let fileObjectItem = getFileNameCheckingPaths(fileObjects, fileName)
-
-        if (fileObjectItem == undefined) {
-          logs.push({
-            // log: `file not found in file objects (form) fileObjectItem ${fileObjectItem} verificationHash ${verificationHash} fileObjects ${JSON.stringify(fileObjects, null, 4)}`,
-            log: `file not found in file objects (form).`,
-            logType: LogType.ERROR,
-            ident: `${identCharacter}\t`,
-          })
-          return [false, logs]
-        }
-
-        if (fileObjectItem.fileContent instanceof Uint8Array) {
-          fileContent1 = Buffer.from(fileObjectItem.fileContent)
-        } else {
-          if (typeof fileObjectItem.fileContent === "string") {
-            fileContent1 = Buffer.from(fileObjectItem.fileContent as string)
-          } else {
-            fileContent1 = Buffer.from(
-              JSON.stringify(fileObjectItem.fileContent),
-            )
-          }
-        }
-      }
-      const fileHash1 = getHashSum(fileContent1)
-      isSuccess = fileHash1 === revision.file_hash
-
-      if(!isSuccess){
-
-        logs.push({
-          log: `File hash verification failed for form revision`,
-          logType: LogType.ERROR,
-          ident: `${identCharacter}\t`,
-        })
-      }
-      break
     case "file":
       let fileContent: Buffer
       if (!!revision.content) {
@@ -989,100 +905,6 @@ async function verifyRevision(
 }
 
 /**
- * Verifies a form revision's structure and content
- *
- * @param input - The form revision data to verify
- * @param leaves - Merkle tree leaves of the form data
- * @param identCharacter - Optional identifier character for logging
- * @returns FormVerificationResponseData containing verification results
- *
- * This function:
- * - Validates form structure
- * - Verifies form field values
- * - Tracks form key states (active/deleted)
- */
-function verifyFormRevision(
-  input: Revision,
-  leaves: string[],
-  identCharacter: string = "",
-): FormVerificationResponseData {
-  let logs: Array<LogData> = []
-  let contains_deleted_fields = false
-  let fieldsWithVerification: any = []
-  let fieldsWithPartialVerification: any = []
-  let ok = true
-
-  let formKeysGraphData: FormKeyGraphData[] = []
-
-  Object.keys(input)
-    .sort()
-    .forEach((field, i: number) => {
-      let hashString =`${field}:${input[field]}`
-      let new_hash = getHashSum(hashString)
-
-      if (!field.endsWith(".deleted")) {
-        if (field.startsWith("forms_")) {
-          if (new_hash !== leaves[i]) {
-            ok = false
-           
-            fieldsWithVerification.push(`🚫 ${field}: ${input[field]} -- hashString ${hashString} -- new hash ${new_hash} -- index ${i} -- leaves at ${leaves[i]}`)
-            formKeysGraphData.push({
-              formKey: field,
-              content: input[field],
-              isValidationSucessful: false,
-            })
-          } else {
-            fieldsWithVerification.push(`✅ ${field}: ${input[field]}`)
-            formKeysGraphData.push({
-              formKey: field,
-              content: input[field],
-              isValidationSucessful: true,
-            })
-          }
-        }
-      } else {
-        contains_deleted_fields = true
-        fieldsWithPartialVerification.push(field)
-      }
-    })
-
-  if (contains_deleted_fields) {
-    logs.push({
-      log: `Warning: The following fields cannot be verified:`,
-      logType: LogType.WARNING,
-      ident: identCharacter,
-    })
-    fieldsWithPartialVerification.forEach((field: any, i: number) => {
-      logs.push({
-        log: `${i + 1}. ${field.replace(".deleted", "")}\n`,
-        logType: LogType.WARNING,
-      })
-    })
-  }
-
-  logs.push({
-    log: `The following fields were verified:`,
-    logType: LogType.SUCCESS,
-    ident: identCharacter,
-  })
-  fieldsWithVerification.forEach((field: any) => {
-    logs.push({
-      log: `${field}\n`,
-      logType: LogType.SUCCESS,
-      ident: identCharacter,
-    })
-  })
-
-  // return [ok, logs]
-
-  return {
-    isOk: ok,
-    logs: logs,
-    formKeysGraphData,
-  }
-}
-
-/**
  * Verifies the Merkle tree structure of a revision
  *
  * @param input - The revision to verify
@@ -1134,15 +956,8 @@ function verifyRevisionMerkleTreeStructure(
   // let fieldsWithPartialVerification: string[] = []
   // let fieldsWithVerification: string[] = []
 
-  if (input.revision_type === "form") {
-    let formVerificationResult = verifyFormRevision(input, leaves)
-
-    logs.push(...formVerificationResult.logs)
-
-    vhOk = formVerificationResult.isOk
-  }
   // For witness, we verify the merkle root
-  else if (
+  if (
     input.revision_type === "witness" &&
     input.witness_merkle_proof &&
     input.witness_merkle_proof.length > 1
