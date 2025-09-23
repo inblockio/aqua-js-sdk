@@ -25,6 +25,7 @@ import {
 } from "../utils"
 import { verifySignature } from "./signature"
 import { verifyWitness } from "./witness"
+import { validateTemplateObject } from "../templates"
 import { Err, isErr, Ok, Result } from "../type_guards"
 
 /**
@@ -108,13 +109,6 @@ export async function verifyAquaTreeUtil(
     })
 
     switch (revision.revision_type) {
-      case "form":
-        logs.push({
-          logType: LogType.FORM,
-          log: "Type: Form.",
-          ident: `${identCharacter}\t`,
-        })
-        break
       case "file":
         logs.push({
           logType: LogType.FILE,
@@ -141,6 +135,13 @@ export async function verifyAquaTreeUtil(
         logs.push({
           logType: LogType.LINK,
           log: "Type: Link.",
+          ident: `${identCharacter}\t`,
+        })
+        break
+      case "template_object":
+        logs.push({
+          logType: LogType.TEMPLATE_OBJECT,
+          log: "Type: Template Object.",
           ident: `${identCharacter}\t`,
         })
         break
@@ -352,13 +353,6 @@ export async function verifyAndGetGraphDataUtil(
     })
 
     switch (revision.revision_type) {
-      case "form":
-        logs.push({
-          logType: LogType.FORM,
-          log: "Type:Form.",
-          ident: `${identCharacter}\t`,
-        })
-        break
       case "file":
         logs.push({
           logType: LogType.FILE,
@@ -385,6 +379,13 @@ export async function verifyAndGetGraphDataUtil(
         logs.push({
           logType: LogType.LINK,
           log: "Type:Link.",
+          ident: `${identCharacter}\t`,
+        })
+        break
+      case "template_object":
+        logs.push({
+          logType: LogType.TEMPLATE_OBJECT,
+          log: "Type:Template Object.",
           ident: `${identCharacter}\t`,
         })
         break
@@ -863,6 +864,37 @@ async function verifyRevision(
       }
 
       isSuccess = linkOk
+      break
+    case "template_object":
+      // Validate template_object if template hash is provided
+      if (revision.template_object && revision.schema) {
+        const validationResult = validateTemplateObject(
+          revision.template_object as Record<string, unknown>,
+          revision.schema as string
+        )
+
+        if (!validationResult.isValid) {
+          isSuccess = false
+          logs.push({
+            log: `Template object validation failed: ${validationResult.errors?.join(', ')}`,
+            logType: LogType.ERROR,
+            ident: `${identCharacter}\t`,
+          })
+        } else {
+          logs.push({
+            log: `Template object validation succeeded`,
+            logType: LogType.SUCCESS,
+            ident: `${identCharacter}\t`,
+          })
+        }
+      } else {
+        // If no template is specified, template_object revision is valid by default
+        logs.push({
+          log: `Template object revision (no template validation)`,
+          logType: LogType.INFO,
+          ident: `${identCharacter}\t`,
+        })
+      }
       break
   }
 

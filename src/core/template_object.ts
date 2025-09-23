@@ -33,6 +33,7 @@ export async function createTemplateObjectRevisionUtil(
   aquaTreeView: AquaTreeView,
   templateObject: Record<string, unknown>,
   enableScalar: boolean,
+  schema?: string,
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let logs: Array<LogData> = []
 
@@ -50,6 +51,12 @@ export async function createTemplateObjectRevisionUtil(
   }
 
   verificationData["template_object"] = templateObject
+
+  // Add template hash if provided
+  if (schema) {
+    verificationData["schema"] = schema
+  }
+
   verificationData["version"] =
     `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`
 
