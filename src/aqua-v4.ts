@@ -149,7 +149,7 @@ export class Aqua {
     const { isTOR = false, embedContent = false, enableScalar = this.config.enableScalar } = options;
 
     const result = await createGenesisRevision(fileObject, isTOR, embedContent, enableScalar);
-    console.log("Result here: ", result)
+    // console.log("Result here: ", result)
     if (result.isOk()) {
       this.tree = result.data.aquaTree;
       this.fileObject = fileObject;
@@ -440,7 +440,7 @@ export class Aqua {
    */
   static loadFile(filePath: string): Result<FileObject, LogData[]> {
 
-    console.log("File path inload file is: ", filePath)
+    // console.log("File path inload file is: ", filePath)
 
     const nodeCheck = this.requiresNode<FileObject>();
     if (nodeCheck.isErr()) {
@@ -515,7 +515,7 @@ export class Aqua {
 
       const fileResult = Aqua.loadFile(fileOrPath);
 
-      console.log("File result here: ", fileResult)
+      // console.log("File result here: ", fileResult)
 
       if (fileResult.isErr()) {
         this.logs.push(...fileResult.data);

@@ -29,18 +29,26 @@ export function isAquaTree(content: any): boolean {
     'file_index' in content;
 }
 
-export function reorderRevisionsProperties(revision: Revision): Revision {
-  const reordered: Revision = {} as Revision
-
+export function reorderRevisionsProperties<T extends AnObject | Revision>(revision: T): T {
+  const reordered: AnObject = {}
+  
   // Sort keys alphabetically
-  const sortedKeys = Object.keys(revision).sort() as (keyof Revision)[]
-
+  const sortedKeys = Object.keys(revision).sort() 
+  
   // Add all properties in alphabetical order
   for (const key of sortedKeys) {
-    reordered[key] = revision[key]
-  }
+    const value = revision[key]
+    
+    // If the value is an object (but not null, array, or Date), recursively reorder it
 
-  return reordered
+    if (value !== null && typeof value === 'object') {
+      reordered[key] = reorderRevisionsProperties(value as AnObject);
+    } else {
+      reordered[key] = value
+    }
+  }
+  
+  return reordered as T
 }
 
 export function reorderAquaTreeRevisionsProperties(aquaTree: AquaTree): AquaTree {

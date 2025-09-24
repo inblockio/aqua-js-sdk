@@ -81,24 +81,23 @@ async function basicTorExample() {
   const aqua = createAqua(creds, WitnessConfigs.tsa, SignConfigs.cli);
 
   // Use file paths directly - no manual FileObject creation
-  await aqua.create("./form.json", {isTOR: true});
-  console.log("We past here")
-  const fileResult = Aqua.loadFile("./form.json")
-  if (fileResult.isOk()) {
-    let data = fileResult.data
-    console.log("✅ File loaded successfully")
-    await aqua.verify([data]);
+  await aqua.create("./form.json", { isTOR: true });
+  aqua.save("./form.json.aqua.json");
+
+
+  const fileAquaResult = aqua.loadAquaFile("./form.json.aqua.json")
+
+
+  if (fileAquaResult.isErr()) {
+
+    console.log("❌ Failed to load  Aqua file:", fileAquaResult.data);
+    return
   }
 
-  console.log("Aqua tree: ", aqua.getTree())
-  console.log("Aqua tree: ", aqua.getLogs())
 
-  // Save the result
-  let data = aqua.save("./form.json.aqua.json");
-  console.log("Saving Data: ", data)
+  console.log("✅ File loaded successfully")
+  await aqua.verify();
 
-  console.log("✅ File operations completed");
-  console.log(`📊 Generated ${aqua.getLogs().length} log entries`);
 }
 
 /**
