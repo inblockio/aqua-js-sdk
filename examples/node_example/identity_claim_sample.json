@@ -1,0 +1,8 @@
+{
+    "type": "lab_workstation",
+    "name": "dalmas",
+    "surname": "claude",
+    "email": "abc@duck.com",
+    "date_of_birth": "1758725737",
+    "wallet_address": "0xabc"
+}

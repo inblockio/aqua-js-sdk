@@ -11,5 +11,6 @@ export { recoverWalletAddress } from "./core/signature"
 export * from "./core/formatter"
 export { AquaV1, AquaV4 }
 export type { WitnessConfig }
+export { TEMPLATE_HASHES } from "./templates"
 
 export default AquaV4

@@ -171,11 +171,7 @@ export async function createGenesisRevision(
   let logs: Array<LogData> = []
 
   const timestamp = getTimestamp()
-  let revisionType = "file"
-
-  if (isTOR) {
-    revisionType = "template_object"
-  }
+  const revisionType = isTOR ? "template_object" : "file"
 
   let verificationData: any = {
     previous_verification_hash: "",
@@ -227,7 +223,7 @@ export async function createGenesisRevision(
 
     default:
       logs.push({
-        log: `Genesis revision can either be form  or file.`,
+        log: `Genesis revision must either be TOR or file.`,
         logType: LogType.ERROR,
       })
       return Err(logs)
@@ -244,13 +240,6 @@ export async function createGenesisRevision(
     let stringifiedData = JSON.stringify(sortedVerificationData)
 
     let hashSumData = getHashSum(stringifiedData)
-
-    //todo remove this log
-    // logs.push({
-    //   logType: LogType.DEBUGDATA,
-    //   log: `Genesi scalar  hashSumData ${hashSumData} \n input ${stringifiedData} `,
-    //   ident: `\t`,
-    // })
     verificationHash = "0x" + hashSumData
   } else {
     try {

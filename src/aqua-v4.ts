@@ -143,11 +143,11 @@ export class Aqua {
     options: {
       isTOR?: boolean;
       embedContent?: boolean;
-      enableScalar?: boolean
+      enableScalar?: boolean;
+      schemaHash?: string;
     } = {},
-    schemaHash?: string
   ): Promise<Result<AquaOperationData, LogData[]>> {
-    const { isTOR = false, embedContent = false, enableScalar = this.config.enableScalar } = options;
+    const { isTOR = false, embedContent = false, enableScalar = this.config.enableScalar, schemaHash = null } = options;
 
     const result = await createGenesisRevision(fileObject, isTOR, embedContent, enableScalar, schemaHash);
     // console.log("Result here: ", result)
@@ -480,7 +480,8 @@ export class Aqua {
     options?: {
       isTOR?: boolean;
       embedContent?: boolean;
-      enableScalar?: boolean
+      enableScalar?: boolean;
+      schemaHash?: string;
     }
   ): Promise<Result<AquaOperationData, LogData[]>>;
 
@@ -495,7 +496,8 @@ export class Aqua {
     options?: {
       isTOR?: boolean;
       embedContent?: boolean;
-      enableScalar?: boolean
+      enableScalar?: boolean;
+      schemaHash?: string;
     }
   ): Promise<Result<AquaOperationData, LogData[]>>;
 
@@ -507,7 +509,9 @@ export class Aqua {
     options: {
       isTOR?: boolean;
       embedContent?: boolean;
-      enableScalar?: boolean
+      enableScalar?: boolean;
+      embedHash?: string;
+      schemaHash?: string;
     } = {}
   ): Promise<Result<AquaOperationData, LogData[]>> {
     if (typeof fileOrPath === 'string') {

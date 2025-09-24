@@ -867,10 +867,10 @@ async function verifyRevision(
       break
     case "template_object":
       // Validate template_object if template hash is provided
-      if (revision.template_object && revision.schema) {
+      if (revision.template_object) {
         const validationResult = validateTemplateObject(
           revision.template_object as Record<string, unknown>,
-          revision.schema as string
+          revision.schema_hash as string
         )
 
         if (!validationResult.isValid) {

@@ -16,7 +16,7 @@ const identityClaimSchema = z.object({
     email: z.string(),
     date_of_birth: z.string(),
     wallet_address: z.string(),
-})
+}).strict()
 
 // Configuration template schema
 const configurationSchema = z.object({
@@ -24,7 +24,7 @@ const configurationSchema = z.object({
   version: z.string(),
   settings: z.record(z.unknown()),
   environment: z.enum(["development", "staging", "production"]).optional()
-})
+}).strict()
 
 // Data record template schema
 const dataRecordSchema = z.object({
@@ -42,7 +42,7 @@ const dataRecordSchema = z.object({
     target: z.string(),
     properties: z.record(z.unknown()).optional()
   })).optional()
-})
+}).strict()
 
 /**
  * Template registry containing all standard templates
@@ -50,8 +50,8 @@ const dataRecordSchema = z.object({
  */
 export const TEMPLATES = {
   content: {
-    description: "Just a string",
     name: "Content",
+    description: "Just a string",
     schema: contentSchema,
     version: "1.0.0"
   },

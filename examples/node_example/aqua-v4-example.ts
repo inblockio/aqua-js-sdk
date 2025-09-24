@@ -1,6 +1,6 @@
 import * as fs from "fs";
 // import Aquafier, { Aqua, createAqua, WitnessConfigs, SignConfigs } from "aqua-js-sdk";
-import { AquaV4 } from "aqua-js-sdk";
+import { AquaV4, TEMPLATE_HASHES } from "aqua-js-sdk";
 import { CredentialsData } from "aqua-js-sdk";
 
 
@@ -81,11 +81,11 @@ async function basicTorExample() {
   const aqua = createAqua(creds, WitnessConfigs.tsa, SignConfigs.cli);
 
   // Use file paths directly - no manual FileObject creation
-  await aqua.create("./form.json", { isTOR: true });
-  aqua.save("./form.json.aqua.json");
+  await aqua.create("./identity_claim_sample.json", { isTOR: true, schemaHash: TEMPLATE_HASHES.identity_claim });
+  aqua.save("./identity_claim_sample.json.aqua.json");
 
 
-  const fileAquaResult = aqua.loadAquaFile("./form.json.aqua.json")
+  const fileAquaResult = aqua.loadAquaFile("./identity_claim_sample.json.aqua.json")
 
 
   if (fileAquaResult.isErr()) {
@@ -96,7 +96,8 @@ async function basicTorExample() {
 
 
   console.log("✅ File loaded successfully")
-  await aqua.verify();
+  const verifyResult = await aqua.verify();
+  console.log(verifyResult)
 
 }
 
