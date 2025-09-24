@@ -9,9 +9,9 @@ import {
 import {
   createNewAquaTree,
   dict2Leaves,
-  formatMwTimestamp,
   getHashSum,
   getMerkleRoot,
+  getTimestamp,
   maybeUpdateFileIndex,
   prepareNonce,
   reorderRevisionsProperties,
@@ -169,8 +169,7 @@ export async function createGenesisRevision(
   //timestamp: string, revisionType: RevisionType,
   let logs: Array<LogData> = []
 
-  const now = new Date().toISOString()
-  const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+  const timestamp = getTimestamp()
   let revisionType = "file"
 
   if (isTOR) {

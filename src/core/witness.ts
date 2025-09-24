@@ -1,5 +1,5 @@
 import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeView, WitnessNetwork, WitnessType, WitnessResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
-import { checkInternetConnection, dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity } from "../utils";
+import { checkInternetConnection, dict2Leaves, estimateWitnessGas, getHashSum, getMerkleRoot, getTimestamp, getWallet, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
 import { WitnessNostr } from "../witness/witness_nostr";
@@ -37,8 +37,7 @@ export async function witnessAquaTreeUtil(aquaTreeView: AquaTreeView, witnessTyp
         lastRevisionHash = aquaTreeView.revision;
     }
 
-    const now = new Date().toISOString()
-    const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+    const timestamp = getTimestamp()
     const revisionType = "witness";
 
     let verificationDataBasic: any = {
@@ -142,8 +141,7 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeView[], wi
     let revisionResult = revisionResultData.data
     revisionResult.witness_merkle_proof = lastRevisionOrSpecifiedHashes;
 
-    const now = new Date().toISOString()
-    const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+    const timestamp = getTimestamp()
     const revisionType = "witness";
 
     let aquaTreesResult: AquaTree[] = [];

@@ -6,9 +6,9 @@ import {
 } from "../types"
 import {
   dict2Leaves,
-  formatMwTimestamp,
   getHashSum,
   getMerkleRoot,
+  getTimestamp,
 } from "../utils"
 import { reorderAquaTreeRevisionsProperties } from "../utils"
 import { createAquaTree } from "../aquatreevisualization"
@@ -37,8 +37,7 @@ export async function createTemplateObjectRevisionUtil(
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let logs: Array<LogData> = []
 
-  const now = new Date().toISOString()
-  const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+  const timestamp = getTimestamp()
   let revisionType = "template_object"
 
   const verificationHashes = Object.keys(aquaTreeView.aquaTree.revisions)

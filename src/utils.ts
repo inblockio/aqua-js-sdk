@@ -380,24 +380,6 @@ export function createCredentials() {
 }
 
 /**
- * Formats timestamp into MediaWiki format
- *
- * @param ts - ISO timestamp string
- * @returns Formatted timestamp string
- *
- * This function converts ISO timestamps into
- * the format used in MediaWiki outputs.
- */
-export function formatMwTimestamp(ts: string) {
-  // Format timestamp into the timestamp format found in Mediawiki outputs
-  return ts
-    .replace(/-/g, "")
-    .replace(/:/g, "")
-    .replace("T", "")
-    .replace("Z", "")
-}
-
-/**
  * Estimates gas for witness transaction
  *
  * @param wallet_address - Address of witness wallet
@@ -588,9 +570,7 @@ export const getLatestVH = (aquaTree: AquaTree) => {
 }
 
 export const getTimestamp = () => {
-  const now = new Date().toISOString()
-  const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
-  return timestamp
+  return Math.floor(Date.now() / 1000).toString()
 }
 
 /**

@@ -13,9 +13,9 @@ import { ReactNativeMetaMaskOptions } from "../types"
 import { CLISigner } from "../signature/sign_cli"
 import {
   dict2Leaves,
-  formatMwTimestamp,
   getHashSum,
   getMerkleRoot,
+  getTimestamp,
   reorderRevisionsProperties,
 } from "../utils"
 import { DIDSigner } from "../signature/sign_did"
@@ -108,8 +108,7 @@ export async function signAquaTreeUtil(
     return Err(logs)
   }
 
-  const now = new Date().toISOString()
-  const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+  const timestamp = getTimestamp()
   let verificationDataRaw: Revision = {
     previous_verification_hash: targetRevisionHash, //previousVerificationHash,
     local_timestamp: timestamp,

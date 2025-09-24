@@ -72,7 +72,6 @@
 - [Err](functions/Err.md)
 - [estimateWitnessGas](functions/estimateWitnessGas.md)
 - [findFormKey](functions/findFormKey.md)
-- [formatMwTimestamp](functions/formatMwTimestamp.md)
 - [getFileHashSum](functions/getFileHashSum.md)
 - [getHashSum](functions/getHashSum.md)
 - [getLatestVH](functions/getLatestVH.md)

@@ -9,9 +9,9 @@ import {
 import {
   checkFileHashAlreadyNotarized,
   dict2Leaves,
-  formatMwTimestamp,
   getHashSum,
   getMerkleRoot,
+  getTimestamp,
   maybeUpdateFileIndex,
   prepareNonce,
 } from "../utils"
@@ -41,8 +41,7 @@ export async function createContentRevisionUtil(
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let logs: Array<LogData> = []
 
-  const now = new Date().toISOString()
-  const timestamp = formatMwTimestamp(now.slice(0, now.indexOf(".")))
+  const timestamp = getTimestamp()
   let revisionType = "file"
 
   const verificationHashes = Object.keys(aquaTreeView.aquaTree.revisions)
