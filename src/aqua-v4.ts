@@ -144,11 +144,12 @@ export class Aqua {
       isTOR?: boolean;
       embedContent?: boolean;
       enableScalar?: boolean
-    } = {}
+    } = {},
+    schemaHash?: string
   ): Promise<Result<AquaOperationData, LogData[]>> {
     const { isTOR = false, embedContent = false, enableScalar = this.config.enableScalar } = options;
 
-    const result = await createGenesisRevision(fileObject, isTOR, embedContent, enableScalar);
+    const result = await createGenesisRevision(fileObject, isTOR, embedContent, enableScalar, schemaHash);
     // console.log("Result here: ", result)
     if (result.isOk()) {
       this.tree = result.data.aquaTree;
@@ -330,6 +331,7 @@ export class Aqua {
   reset(): void {
     this.tree = null;
     this.logs = [];
+    this.fileObject = null;
   }
 
   /**

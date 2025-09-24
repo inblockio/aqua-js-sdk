@@ -50,8 +50,8 @@ const dataRecordSchema = z.object({
  */
 export const TEMPLATES = {
   content: {
-    name: "Content",
     description: "Just a string",
+    name: "Content",
     schema: contentSchema,
     version: "1.0.0"
   },
@@ -90,8 +90,8 @@ Object.keys(TEMPLATES).forEach((key) => {
 
   // Create a serializable representation of the template
   const templateData = {
-    name: template.name,
     description: template.description,
+    name: template.name,
     version: template.version,
     schema: template.schema._def // Zod schema definition
   }
@@ -156,15 +156,17 @@ export function validateTemplateObject(
  * @returns Array of template info objects
  */
 export function getAvailableTemplates(): Array<{
-  hash: string;
-  name: string;
   description: string;
+  hash: string;
+  key: string;
+  name: string;
   version: string;
 }> {
   return Object.entries(TEMPLATE_HASHES).map(([key, hash]) => ({
-    hash,
-    name: TEMPLATES[key as TemplateKey].name,
     description: TEMPLATES[key as TemplateKey].description,
+    hash,
+    key,
+    name: TEMPLATES[key as TemplateKey].name,
     version: TEMPLATES[key as TemplateKey].version
   }))
 }

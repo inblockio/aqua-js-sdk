@@ -165,6 +165,7 @@ export async function createGenesisRevision(
   isTOR: boolean,
   embedContent: boolean,
   enableScalar: boolean,
+  schemaHash: string,
 ): Promise<Result<AquaOperationData, LogData[]>> {
   //timestamp: string, revisionType: RevisionType,
   let logs: Array<LogData> = []
@@ -179,7 +180,11 @@ export async function createGenesisRevision(
   let verificationData: any = {
     previous_verification_hash: "",
     local_timestamp: timestamp,
-    revision_type: revisionType,
+    revision_type: revisionType
+  }
+
+  if(isTOR && schemaHash){
+    verificationData["schema_hash"] = schemaHash
   }
 
   verificationData["version"] =
