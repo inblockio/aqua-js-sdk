@@ -195,7 +195,7 @@ export type WitnessPlatformType = "cli" | "metamask"
 /** Network used for witnessing */
 export type WitnessNetwork = "sepolia" | "mainnet" | "holesky"
 /** Type of signing method */
-export type SignType = "metamask" | "cli" | "did" | "p12"
+export type SignType = "metamask" | "cli" | "did" | "p12" | "inline"
 
 /**
  * Configuration options specific to React Native MetaMask integration
@@ -208,6 +208,11 @@ export interface ReactNativeMetaMaskOptions {
   deepLinkUrl?: string;
   callbackUrl?: string;
   onDeepLinkReady?: (url: string) => void;
+}
+
+export interface InlineSignerOptions {
+  walletAddress: string;
+  signature: string;
 }
 
 /** Environment where witnessing occurs */

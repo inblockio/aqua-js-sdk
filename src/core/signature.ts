@@ -24,12 +24,14 @@ import { createAquaTree } from "../aquatreevisualization"
 import { ethers } from "ethers"
 import { Err, Ok, Result } from "../type_guards"
 import { SignerStrategy } from "./signer-types"
+import { InlineSigner } from "../signature/sign_inline"
 
 const signerStrategies: Record<SignType, SignerStrategy> = {
   metamask: new MetaMaskSigner(),
   cli: new CLISigner(),
   did: new DIDSigner(),
   p12: new P12Signer(),
+  inline: new InlineSigner(), // Using CLISigner as a placeholder for inline signing
 }
 
 /**
@@ -114,7 +116,7 @@ export async function signAquaTreeUtil(
     local_timestamp: timestamp,
     version: `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? "scalar" : "tree"}`,
     revision_type: "signature",
-    signature: signature,
+    signature: signature, 
     signature_public_key: publicKey,
     signature_wallet_address: walletAddress,
     signature_type: signature_type,

@@ -232,11 +232,11 @@ export class MetaMaskSigner implements SignerStrategy {
         const message = this.createMessage(verificationHash);
         const html = this.createHtml(message);
         const server = await createHttpServer(this.createRequestListener(html));
-        
+
         if (!server) {
-          throw new Error('Failed to create HTTP server. This feature may not be supported in React Native.');
+            throw new Error('Failed to create HTTP server. This feature may not be supported in React Native.');
         }
-        
+
         this.server = server;
 
         return new Promise((resolve, reject) => {
@@ -353,42 +353,42 @@ export class MetaMaskSigner implements SignerStrategy {
  * - Returns a promise that resolves when the signature is received
  * - Recovers public key from signature
  */
-private async signInReactNative(verificationHash: string, network: string): Promise<[string, string, string]> {
-    const message = this.createMessage(verificationHash);
-    const chainId = getChainIdFromNetwork(network);
-    
-    // Create a deep link to MetaMask mobile app
-    const encodedMessage = encodeURIComponent(message);
-    
-    // MetaMask mobile uses a different format for deep links
-    // Try the ethereum/sign format which is more reliable for direct signing
-    const deepLink = `metamask://ethereum/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
-        
-    // Return a promise that resolves when the signature is received
-    return new Promise((resolve, reject) => {
-        // Set a timeout to reject the promise if no signature is received
-        const timeoutId = setTimeout(() => {
-            reject(new Error('Signature timeout: No response from MetaMask'));
-        }, this.maxAttempts * this.pollInterval);
-        
-        // Store the resolve and reject functions to be called when the signature is received
-        // This would typically be done in a global state or context in a real app
-        (global as any).__aquaMetaMaskResolve = async (signature: string, address: string) => {
-            clearTimeout(timeoutId);
-            try {
-                const cleanedAddress = ethers.getAddress(address);
-                const publicKey = await this.recoverPublicKey(message, signature);
-                resolve([signature, cleanedAddress, publicKey]);
-            } catch (error) {
+    private async signInReactNative(verificationHash: string, network: string): Promise<[string, string, string]> {
+        const message = this.createMessage(verificationHash);
+        const chainId = getChainIdFromNetwork(network);
+
+        // Create a deep link to MetaMask mobile app
+        const encodedMessage = encodeURIComponent(message);
+
+        // MetaMask mobile uses a different format for deep links
+        // Try the ethereum/sign format which is more reliable for direct signing
+        const deepLink = `metamask://ethereum/sign?message=${encodedMessage}&chainId=${chainId}&callbackUrl=${encodeURIComponent(this.reactNativeOptions.callbackUrl)}`;
+
+        // Return a promise that resolves when the signature is received
+        return new Promise((resolve, reject) => {
+            // Set a timeout to reject the promise if no signature is received
+            const timeoutId = setTimeout(() => {
+                reject(new Error('Signature timeout: No response from MetaMask'));
+            }, this.maxAttempts * this.pollInterval);
+
+            // Store the resolve and reject functions to be called when the signature is received
+            // This would typically be done in a global state or context in a real app
+            (global as any).__aquaMetaMaskResolve = async (signature: string, address: string) => {
+                clearTimeout(timeoutId);
+                try {
+                    const cleanedAddress = ethers.getAddress(address);
+                    const publicKey = await this.recoverPublicKey(message, signature);
+                    resolve([signature, cleanedAddress, publicKey]);
+                } catch (error) {
                     reject(error);
                 }
             };
-            
+
             (global as any).__aquaMetaMaskReject = (error: Error) => {
                 clearTimeout(timeoutId);
                 reject(error);
             };
-            
+
             // Notify caller that deep link is ready
             if (this.reactNativeOptions.onDeepLinkReady) {
                 this.reactNativeOptions.onDeepLinkReady(deepLink);
@@ -442,7 +442,7 @@ private async signInReactNative(verificationHash: string, network: string): Prom
         // Detect React Native environment
         const isReactNative = typeof global !== 'undefined' && !!global.HermesInternal;
         const isNode = typeof window === 'undefined' && !isReactNative;
-        
+
         if (isReactNative) {
             return this.signInReactNative(verificationHash, network);
         } else if (isNode) {
