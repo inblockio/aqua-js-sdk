@@ -1,0 +1,64 @@
+{
+    "revisions": {
+        "0xe1bcaa92b0ea2f0eb1f046ca4fc877f26726e5bec8b1a5cf25504a29bc4e0f28": {
+            "file_hash": "b1ab25c55913c95cc6913f1dbce9bef185ebf00a64553a8ef194193e52ea5015",
+            "file_nonce": "38e7a66127b3ce9450c07166535a546e3ccdac168be470bc821ea97deefaf8d5",
+            "local_timestamp": "20250919133925",
+            "previous_verification_hash": "",
+            "revision_type": "file",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar"
+        },
+        "0xcc7d0a13b92b725f35303969679bb37eba09d0e36bfea5f0b75b0f2c34fe1b3f": {
+            "local_timestamp": "20250919133925",
+            "previous_verification_hash": "0xe1bcaa92b0ea2f0eb1f046ca4fc877f26726e5bec8b1a5cf25504a29bc4e0f28",
+            "revision_type": "signature",
+            "signature": "0x1fac3eb2402087d18f214cdcc19a9e65037798f4f82ba79eb4024173c5d9ca0717065ccdc42ec19bff2d4d9c7ba4ad00a33c1dbec2a7153f172f4f5ed8104a2c1b",
+            "signature_public_key": "0x0380a77a1a6d59be5c10d7ee5e10def79283938bb8a60025d0fe5404e650e8ccc1",
+            "signature_type": "ethereum:eip-191",
+            "signature_wallet_address": "0x568A94A8f0f3Dc0B245B853bEf572075c1Df5c50",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar"
+        },
+        "0xaf1cfde62385f22347111f1aa54e6082339f147f5c679d20304b125071ce1189": {
+            "local_timestamp": "20250919133925",
+            "previous_verification_hash": "0xcc7d0a13b92b725f35303969679bb37eba09d0e36bfea5f0b75b0f2c34fe1b3f",
+            "revision_type": "witness",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar",
+            "witness_merkle_proof": [
+                "0xcc7d0a13b92b725f35303969679bb37eba09d0e36bfea5f0b75b0f2c34fe1b3f"
+            ],
+            "witness_merkle_root": "0xcc7d0a13b92b725f35303969679bb37eba09d0e36bfea5f0b75b0f2c34fe1b3f",
+            "witness_network": "sepolia",
+            "witness_sender_account_address": "0x254B0D7b63342Fcb8955DB82e95C21d72EFdB6f7",
+            "witness_smart_contract_address": "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611",
+            "witness_timestamp": 1758289185,
+            "witness_transaction_hash": "0x2f6cfa4735d1be8fd71b19aa07ac9ab171e07b01cf8175b9c2863cdc2b24e5cc"
+        }
+    },
+    "file_index": {
+        "0xe1bcaa92b0ea2f0eb1f046ca4fc877f26726e5bec8b1a5cf25504a29bc4e0f28": "test.txt"
+    },
+    "tree": {
+        "children": [
+            {
+                "hash": "0xcc7d0a13b92b725f35303969679bb37eba09d0e36bfea5f0b75b0f2c34fe1b3f",
+                "children": [
+                    {
+                        "hash": "0xaf1cfde62385f22347111f1aa54e6082339f147f5c679d20304b125071ce1189",
+                        "children": []
+                    }
+                ]
+            }
+        ],
+        "hash": "0xe1bcaa92b0ea2f0eb1f046ca4fc877f26726e5bec8b1a5cf25504a29bc4e0f28"
+    },
+    "treeMapping": {
+        "paths": {
+            "0xaf1cfde62385f22347111f1aa54e6082339f147f5c679d20304b125071ce1189": [
+                "0xe1bcaa92b0ea2f0eb1f046ca4fc877f26726e5bec8b1a5cf25504a29bc4e0f28",
+                "0xcc7d0a13b92b725f35303969679bb37eba09d0e36bfea5f0b75b0f2c34fe1b3f",
+                "0xaf1cfde62385f22347111f1aa54e6082339f147f5c679d20304b125071ce1189"
+            ]
+        },
+        "latestHash": "0xaf1cfde62385f22347111f1aa54e6082339f147f5c679d20304b125071ce1189"
+    }
+}

@@ -190,11 +190,11 @@ export type RevisionType = "file" | "witness" | "signature" | "form" | "link"
 /** Type of witness service */
 export type WitnessType = "tsa" | "eth" | "nostr"
 /** Platform used for witnessing */
-export type WitnessPlatformType = "cli" | "metamask"
+export type WitnessPlatformType = "cli" | "metamask" | "inline"
 /** Network used for witnessing */
 export type WitnessNetwork = "sepolia" | "mainnet" | "holesky"
 /** Type of signing method */
-export type SignType = "metamask" | "cli" | "did" | "p12"
+export type SignType = "metamask" | "cli" | "did" | "p12" | "inline"
 
 /**
  * Configuration options specific to React Native MetaMask integration
@@ -633,5 +633,17 @@ export interface AquaTreeAndFileObject {
 
   fileObject: FileObject[]
   aquaTree: AquaTree | null,
-  
+
+}
+
+
+
+export interface InlineSignerOptions {
+  walletAddress: string;
+  signature: string;
+}
+
+export interface InlineWitnessOptions {
+  transaction_hash: string,
+  wallet_address: string
 }

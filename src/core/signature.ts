@@ -7,6 +7,7 @@ import {
   CredentialsData,
   LogType,
   SignatureData,
+  InlineSignerOptions,
 } from "../types"
 import { MetaMaskSigner } from "../signature/sign_metamask"
 import { ReactNativeMetaMaskOptions } from "../types"
@@ -24,6 +25,7 @@ import { P12Signer } from "../signature/sign_p12"
 import { createAquaTree } from "../aquavhtree"
 import { ethers } from "ethers"
 import { Err, Ok, Result } from "../type_guards"
+import { InlineSigner } from "../signature/sign_inline"
 
 /**
  * Signs an Aqua Tree revision using specified signature method
@@ -48,10 +50,20 @@ export async function signAquaTreeUtil(
   enableScalar: boolean = false,
   identCharacter: string = "",
   reactNativeOptions?: ReactNativeMetaMaskOptions,
+  inlineSignerOptions?: InlineSignerOptions,
 ): Promise<Result<AquaOperationData, LogData[]>> {
   let aquaTree = aquaTreeWrapper.aquaTree
   let logs: Array<LogData> = []
   let targetRevisionHash = ""
+
+  if(signType === "inline" && (!inlineSignerOptions || !inlineSignerOptions.signature || !inlineSignerOptions.walletAddress)){
+    logs.push({
+      log: `Inline signer options must be provided when using inline sign type.`,
+      logType: LogType.ERROR,
+      ident: identCharacter,
+    })
+    return Err(logs)
+  }
   if (
     aquaTreeWrapper.revision == undefined ||
     aquaTreeWrapper.revision == null ||
@@ -74,8 +86,19 @@ export async function signAquaTreeUtil(
       let sign = new MetaMaskSigner({
         reactNativeOptions: reactNativeOptions
       })
-      ;[signature, walletAddress, publicKey] =
-        await sign.sign(targetRevisionHash, credentials.witness_eth_network)
+        ;[signature, walletAddress, publicKey] =
+          await sign.sign(targetRevisionHash, credentials.witness_eth_network)
+      signature_type = "ethereum:eip-191"
+      break
+    case "inline":
+      let inlineSigner = new InlineSigner()
+      let signResult = await inlineSigner.sign(targetRevisionHash, {
+        signature: inlineSignerOptions?.signature || "",
+        walletAddress: inlineSignerOptions?.walletAddress || "",
+      })
+      signature = signResult.signature
+      walletAddress = signResult.walletAddress
+      publicKey = signResult.publicKey
       signature_type = "ethereum:eip-191"
       break
     case "cli":
@@ -159,7 +182,7 @@ export async function signAquaTreeUtil(
   }
 
   let verificationData = reorderRevisionsProperties(verificationDataRaw)
-  
+
   // Merklelize the dictionary
   const leaves = dict2Leaves(verificationData)
 

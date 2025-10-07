@@ -6,10 +6,11 @@ import { signAquaTreeUtil, signMultipleAquaTreesUtil } from "./core/signature";
 import { verifyAndGetGraphDataRevisionUtil, verifyAndGetGraphDataUtil, verifyAquaTreeRevisionUtil, verifyAquaTreeUtil } from "./core/verify";
 import { witnessAquaTreeUtil, witnessMultipleAquaTreesUtil } from "./core/witness";
 import { Result } from "./type_guards";
-import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData, ReactNativeMetaMaskOptions } from "./types"
+import { AquaTree, AquaTreeWrapper, AquaOperationData, CredentialsData, FileObject, LogData, Revision, SignType, WitnessNetwork, WitnessPlatformType, WitnessType, VerificationGraphData, ReactNativeMetaMaskOptions, InlineWitnessOptions } from "./types"
 import { default as packageJson } from "./../package.json";
 import { logAquaTree } from "./aquavhtree";
 import {  getHashSum } from "./utils";
+import { InlineSignerOptions } from "./types";
 
 export * from "./utils";
 export * from "./types";
@@ -142,8 +143,8 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    witnessAquaTree = async (aquaTree: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
-        return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
+    witnessAquaTree = async (aquaTree: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true, inlineWitnessOptions?: InlineWitnessOptions): Promise<Result<AquaOperationData, LogData[]>> => {
+        return witnessAquaTreeUtil(aquaTree, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar, inlineWitnessOptions)
     }
 
     /**
@@ -157,8 +158,8 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    witnessMultipleAquaTrees = async (aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true): Promise<Result<AquaOperationData, LogData[]>> => {
-        return witnessMultipleAquaTreesUtil(aquaTrees, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar)
+    witnessMultipleAquaTrees = async (aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = true, inlineWitnessOptions: InlineWitnessOptions): Promise<Result<AquaOperationData, LogData[]>> => {
+        return witnessMultipleAquaTreesUtil(aquaTrees, witnessType, witnessNetwork, witnessPlatform, credentials, enableScalar, inlineWitnessOptions)
     }
 
     /**
@@ -170,9 +171,9 @@ export default class Aquafier {
      * @param enableScalar - A boolean value to enable scalar
      * @returns Result<AquaOperationData, LogData[]>
      */
-    signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = true, reactNativeOptions?: ReactNativeMetaMaskOptions): Promise<Result<AquaOperationData, LogData[]>> => {
+    signAquaTree = async (aquaTree: AquaTreeWrapper, signType: SignType, credentials: CredentialsData, enableScalar: boolean = true, reactNativeOptions?: ReactNativeMetaMaskOptions, inlineSignerOptions?: InlineSignerOptions): Promise<Result<AquaOperationData, LogData[]>> => {
 
-        return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar, "", reactNativeOptions)
+        return signAquaTreeUtil(aquaTree, signType, credentials, enableScalar, "", reactNativeOptions, inlineSignerOptions)
     }
 
     /**

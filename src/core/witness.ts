@@ -1,4 +1,4 @@
-import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult } from "../types";
+import { Revision, AquaOperationData, LogData, AquaTree, AquaTreeWrapper, WitnessNetwork, WitnessType, WitnessResult, WitnessPlatformType, CredentialsData, LogType, WitnessConfig, TransactionResult, InlineWitnessOptions } from "../types";
 import { checkInternetConnection, dict2Leaves, estimateWitnessGas, formatMwTimestamp, getHashSum, getMerkleRoot, getWallet, reorderAquaTreeRevisionsProperties, reorderRevisionsProperties, verifyMerkleIntegrity } from "../utils";
 import { WitnessEth } from "../witness/wintess_eth";
 import { WitnessTSA } from "../witness/witness_tsa";
@@ -26,7 +26,7 @@ import { Err, isErr, Ok, Result } from "../type_guards";
  * - Creates verification data with Merkle tree or scalar hash
  * - Updates Aqua Tree with witness revision
  */
-export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false, inlineWitnessOptions?: InlineWitnessOptions): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
 
     let lastRevisionHash = "";
@@ -49,7 +49,7 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
     verificationDataBasic["version"] = `https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: ${enableScalar ? 'scalar' : 'tree'}`
 
 
-    const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials!!, witnessNetwork)
+    const revisionResultData = await prepareWitness(lastRevisionHash, witnessType, witnessPlatform, credentials!!, witnessNetwork, inlineWitnessOptions)
 
     if (isErr(revisionResultData)) {
         revisionResultData.data.forEach((e) => logs.push(e));
@@ -115,7 +115,7 @@ export async function witnessAquaTreeUtil(aquaTreeWrapper: AquaTreeWrapper, witn
  * - Updates each tree with witness revision
  * - Handles batch witnessing efficiently
  */
-export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false): Promise<Result<AquaOperationData, LogData[]>> {
+export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[], witnessType: WitnessType, witnessNetwork: WitnessNetwork, witnessPlatform: WitnessPlatformType, credentials: CredentialsData, enableScalar: boolean = false, inlineWitnessOptions?: InlineWitnessOptions): Promise<Result<AquaOperationData, LogData[]>> {
     let logs: Array<LogData> = [];
     let lastRevisionOrSpecifiedHashes: string[] = [];
 
@@ -132,7 +132,7 @@ export async function witnessMultipleAquaTreesUtil(aquaTrees: AquaTreeWrapper[],
 
     let merkleRoot = getMerkleRoot(lastRevisionOrSpecifiedHashes);
 
-    let revisionResultData = await prepareWitness(merkleRoot, witnessType, witnessPlatform, credentials!!, witnessNetwork);
+    let revisionResultData = await prepareWitness(merkleRoot, witnessType, witnessPlatform, credentials!!, witnessNetwork, inlineWitnessOptions);
 
     if (isErr(revisionResultData)) {
         revisionResultData.data.forEach((e) => logs.push(e));
@@ -247,9 +247,18 @@ const prepareWitness = async (
     WitnessPlatformType: WitnessPlatformType,
     credentials: CredentialsData,
     witness_network: string = 'sepolia',
+    inlineWitnessOptions?: InlineWitnessOptions
 ): Promise<Result<WitnessResult, LogData[]>> => {
 
     let logs: Array<LogData> = [];
+
+    if(WitnessPlatformType === "inline" && !inlineWitnessOptions){
+        logs.push({
+            log: `Inline witness options must be provided when using inline platform type.`,
+            logType: LogType.ERROR
+        });
+        return Err(logs);
+    }
 
     const merkle_root: string = verificationHash;
     // let witness_type: string = "";
@@ -397,7 +406,17 @@ const prepareWitness = async (
 
                 transactionHash = transactionResult.transactionHash;
                 publisher = walletAddress;
-            } else {
+            } 
+            else if (WitnessPlatformType === "inline") {
+                logs.push({
+                    log: `Inline signing platform selected. Ensure signature and wallet address are provided.`,
+                    logType: LogType.DEBUGDATA
+                });
+
+                transactionHash = inlineWitnessOptions?.transaction_hash || "";
+                publisher = inlineWitnessOptions?.wallet_address || "";
+            }
+            else {
                 /**
                  *  merkle_root,
                     witness_network,

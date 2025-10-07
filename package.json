@@ -1,6 +1,6 @@
 {
   "name": "aqua-js-sdk",
-  "version": "3.2.1-44",
+  "version": "3.2.1-45",
   "description": "A TypeScript SDK Library for Aqua Protocol for data accounting",
   "type": "module",
   "repository": {
