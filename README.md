@@ -123,8 +123,6 @@ Run p12 tests
 npm test -- ./tests/p12.test.ts
 ```
 
+## Contribution
 
-
-
-
-
+Please check the [CONTRIBUTION.md](CONTRIBUTION.md) file for more information on how to contribute to the project.
