@@ -93,7 +93,7 @@
   },
   "devDependencies": {
     "@types/asn1js": "^3.0.11",
-    "@types/dotenv": "^6.1.1",
+    "@types/dotenv": "^8.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.0.0",
     "@types/pkijs": "^3.0.1",
