@@ -1,12 +1,12 @@
 node_modules
-# dist
+dist
 package-log.json
 
 *.tgz
 src/credentials.json
 */credentials.json
 **/credentials.json
-/new_docs
-/docs
+# /new_docs
+# /docs
 /.zed
 .nvmrc

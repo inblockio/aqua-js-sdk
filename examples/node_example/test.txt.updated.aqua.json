@@ -1,0 +1,93 @@
+{
+    "revisions": {
+        "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396": {
+            "file_hash": "b1ab25c55913c95cc6913f1dbce9bef185ebf00a64553a8ef194193e52ea5015",
+            "file_nonce": "3471247d436d42f5f5aca34d09adb3fbe4fc176d9da3f62bf865c02cb88f8384",
+            "local_timestamp": "20250919133427",
+            "previous_verification_hash": "",
+            "revision_type": "file",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar"
+        },
+        "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0": {
+            "local_timestamp": "20250919133427",
+            "previous_verification_hash": "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396",
+            "revision_type": "witness",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar",
+            "witness_merkle_proof": [
+                "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396"
+            ],
+            "witness_merkle_root": "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396",
+            "witness_network": "sepolia",
+            "witness_sender_account_address": "0x254B0D7b63342Fcb8955DB82e95C21d72EFdB6f7",
+            "witness_smart_contract_address": "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611",
+            "witness_timestamp": 1758288877,
+            "witness_transaction_hash": "0x63e93fafdd06b846176b97f90296634a60d9ff1af13f129b1e19d2f67968595c"
+        },
+        "0x85c7eae826ec29236eeb1499da6af67607b8168b31b850d7995712550276b4c7": {
+            "local_timestamp": "20250919133826",
+            "previous_verification_hash": "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0",
+            "revision_type": "signature",
+            "signature": {
+                "payload": "eyJtZXNzYWdlIjoiSSBzaWduIHRoaXMgcmV2aXNpb246IFsweDFkZWRkNWNjOWQwYzk0ZTFhM2EzNTFkYTBmZTk3ZGUxNjA4YmYxMDJmNDA1MWIwYzQzY2M4Yzc1ZjVlYmNkYzBdIn0",
+                "signatures": [
+                    {
+                        "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa24xd01panVGdzVkZEE3SmN5dmdVa0tpZDhXaDN3WW5Cc1hXa2FUVVJrTWRMI3o2TWtuMXdNaWp1Rnc1ZGRBN0pjeXZnVWtLaWQ4V2gzd1luQnNYV2thVFVSa01kTCJ9",
+                        "signature": "r1yX0InKmCoFt2uLM0ygV_ipXbdpYtmtJDl-k-ka43QpL_d3ZC6436PyAxSXzCBkJByefHkhzd6xRPTZEoxiBA"
+                    }
+                ]
+            },
+            "signature_public_key": "did:key:z6Mkn1wMijuFw5ddA7JcyvgUkKid8Wh3wYnBsXWkaTURkMdL",
+            "signature_type": "did_key",
+            "signature_wallet_address": "did:key:z6Mkn1wMijuFw5ddA7JcyvgUkKid8Wh3wYnBsXWkaTURkMdL",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar"
+        },
+        "0x4153edd5091c82b645837b02564680cdd2e137fd21dfc6af908bf3cb1367a51a": {
+            "local_timestamp": "20250919133826",
+            "previous_verification_hash": "0x85c7eae826ec29236eeb1499da6af67607b8168b31b850d7995712550276b4c7",
+            "revision_type": "witness",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar",
+            "witness_merkle_proof": [
+                "0x85c7eae826ec29236eeb1499da6af67607b8168b31b850d7995712550276b4c7"
+            ],
+            "witness_merkle_root": "0x85c7eae826ec29236eeb1499da6af67607b8168b31b850d7995712550276b4c7",
+            "witness_network": "nostr",
+            "witness_sender_account_address": "npub1q6630dunsktyhzl8s4algmugnd73nntk99vkyyl8ayvqc5ddktwqxmmf46",
+            "witness_smart_contract_address": "N/A",
+            "witness_timestamp": 1758289106,
+            "witness_transaction_hash": "nevent1qgsqddghk7fct9jt30nc27l5d7yfklgee4mzjktzz0n7jxqv2xkm9hqpz4mhxue69uhhyetvv9ujuerpd46hxtnfduhsqg8kq4nkdux2p323r4z7yfr3jw64g7h7n8rnh5tse4u3ap5shav4myyffrl3"
+        }
+    },
+    "file_index": {
+        "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396": "test.txt"
+    },
+    "tree": {
+        "children": [
+            {
+                "hash": "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0",
+                "children": [
+                    {
+                        "hash": "0x85c7eae826ec29236eeb1499da6af67607b8168b31b850d7995712550276b4c7",
+                        "children": [
+                            {
+                                "hash": "0x4153edd5091c82b645837b02564680cdd2e137fd21dfc6af908bf3cb1367a51a",
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "hash": "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396"
+    },
+    "treeMapping": {
+        "paths": {
+            "0x4153edd5091c82b645837b02564680cdd2e137fd21dfc6af908bf3cb1367a51a": [
+                "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396",
+                "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0",
+                "0x85c7eae826ec29236eeb1499da6af67607b8168b31b850d7995712550276b4c7",
+                "0x4153edd5091c82b645837b02564680cdd2e137fd21dfc6af908bf3cb1367a51a"
+            ]
+        },
+        "latestHash": "0x4153edd5091c82b645837b02564680cdd2e137fd21dfc6af908bf3cb1367a51a"
+    }
+}

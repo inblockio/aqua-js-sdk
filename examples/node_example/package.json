@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aqua-protocol": "github:inblockio/aqua-verifier-js-lib"
-  
+    
+  "aqua-js-sdk": "^3.2.1-44"
   }
 }

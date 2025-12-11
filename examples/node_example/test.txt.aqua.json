@@ -1,0 +1,48 @@
+{
+    "revisions": {
+        "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396": {
+            "file_hash": "b1ab25c55913c95cc6913f1dbce9bef185ebf00a64553a8ef194193e52ea5015",
+            "file_nonce": "3471247d436d42f5f5aca34d09adb3fbe4fc176d9da3f62bf865c02cb88f8384",
+            "local_timestamp": "20250919133427",
+            "previous_verification_hash": "",
+            "revision_type": "file",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar"
+        },
+        "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0": {
+            "local_timestamp": "20250919133427",
+            "previous_verification_hash": "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396",
+            "revision_type": "witness",
+            "version": "https://aqua-protocol.org/docs/v3/schema_2 | SHA256 | Method: scalar",
+            "witness_merkle_proof": [
+                "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396"
+            ],
+            "witness_merkle_root": "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396",
+            "witness_network": "sepolia",
+            "witness_sender_account_address": "0x254B0D7b63342Fcb8955DB82e95C21d72EFdB6f7",
+            "witness_smart_contract_address": "0x45f59310ADD88E6d23ca58A0Fa7A55BEE6d2a611",
+            "witness_timestamp": 1758288877,
+            "witness_transaction_hash": "0x63e93fafdd06b846176b97f90296634a60d9ff1af13f129b1e19d2f67968595c"
+        }
+    },
+    "file_index": {
+        "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396": "test.txt"
+    },
+    "tree": {
+        "children": [
+            {
+                "hash": "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0",
+                "children": []
+            }
+        ],
+        "hash": "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396"
+    },
+    "treeMapping": {
+        "paths": {
+            "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0": [
+                "0xa7cd13f31b2b499902465fa7b1aa38f44b0b812cb379f29b42a3eb3cf9844396",
+                "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0"
+            ]
+        },
+        "latestHash": "0x1dedd5cc9d0c94e1a3a351da0fe97de1608bf102f4051b0c43cc8c75f5ebcdc0"
+    }
+}
