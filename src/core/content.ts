@@ -79,10 +79,10 @@ export async function createContentRevisionUtil(
   const leaves = dict2Leaves(verificationData)
 
   let verification_hash = ""
-  if (!enableScalar) {
+  if (enableScalar) {
     verification_hash = "0x" + getHashSum(JSON.stringify(verificationData))
-    verificationData.leaves = leaves
   } else {
+    verificationData.leaves = leaves
     verification_hash = getMerkleRoot(leaves) // tree.getHexRoot()
   }
 
@@ -91,7 +91,7 @@ export async function createContentRevisionUtil(
 
   maybeUpdateFileIndex(
     aquaTreeWrapper.aquaTree,
-    verificationData,
+    verification_hash,
     revisionType,
     fileObject.fileName,
     "",
