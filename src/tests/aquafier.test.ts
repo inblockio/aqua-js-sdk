@@ -44,7 +44,7 @@ describe("Aquafier", () => {
         };
 
         beforeAll(async () => {
-            result = await aquafier.createGenesisRevision(fileObject, false, true, false);
+            result = await aquafier.createGenesisRevision(fileObject, false, true, true);
             if (result.isOk()) {
                 const data = result.data;
                 const aquaTree = data.aquaTree;
