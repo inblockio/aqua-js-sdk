@@ -612,10 +612,7 @@ describe("Aquafier", () => {
         });
     });
 
-    // Skip the TSA test as it requires browser interaction
-    // TEST: It works but sometimes fails
-    // TODO: Fix this
-    describe.skip("11. Witness aqua tree (TSA, CLI) - TODO: Fix this", () => {
+    describe("11. Witness aqua tree (TSA, CLI)", () => {
         let result: Result<AquaOperationData, LogData[]>;
         let firstRevision: Revision;
         let secondRevision: Revision;
