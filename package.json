@@ -7,6 +7,7 @@
     "type": "git",
     "url": "https://github.com/inblockio/aqua-verifier-js-lib.git"
   },
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
