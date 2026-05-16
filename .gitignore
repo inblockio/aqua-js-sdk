@@ -10,3 +10,5 @@ src/credentials.json
 # /docs
 /.zed
 .nvmrc
+.gitnexus
+.claude/
