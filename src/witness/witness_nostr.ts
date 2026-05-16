@@ -14,20 +14,24 @@ import ws from 'ws';
  * using the Nostr protocol. It supports both browser and Node.js environments
  * and uses the nostr-tools library for Nostr operations.
  */
+export const NOSTR_RELAYS = [
+    'wss://relay.damus.io',
+    'wss://nos.lol',
+    'wss://relay.nostr.band',
+]
+
 export class WitnessNostr {
     /**
  * Waits for an event from a specific author on a Nostr relay
- * 
+ *
  * @param relay - Connected Nostr relay instance
  * @param pk - Public key of the author to watch
+ * @param timeoutMs - Timeout in milliseconds (default 10000)
  * @returns Promise resolving to the received Nostr event
- * 
- * This method:
- * - Subscribes to kind 1 events from specific author
- * - Returns first matching event received
  */
-waitForEventAuthor = async (relay: Relay, pk: string): Promise<Event> => {
-        return new Promise((resolve) => {
+waitForEventAuthor = async (relay: Relay, pk: string, timeoutMs = 10000): Promise<Event> => {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error(`Timeout waiting for event from ${pk} on ${relay.url}`)), timeoutMs)
             relay.subscribe([
                 {
                     kinds: [1],
@@ -35,6 +39,7 @@ waitForEventAuthor = async (relay: Relay, pk: string): Promise<Event> => {
                 },
             ], {
                 onevent(event: Event) {
+                    clearTimeout(timer)
                     resolve(event)
                 }
             })
@@ -43,27 +48,42 @@ waitForEventAuthor = async (relay: Relay, pk: string): Promise<Event> => {
 
     /**
  * Waits for a specific event by ID on a Nostr relay
- * 
+ *
  * @param relay - Connected Nostr relay instance
  * @param id - Event ID to watch for
+ * @param timeoutMs - Timeout in milliseconds (default 10000)
  * @returns Promise resolving to the received Nostr event
- * 
- * This method:
- * - Subscribes to events with specific ID
- * - Returns first matching event received
  */
-waitForEventId = async (relay: Relay, id: string): Promise<Event> => {
-        return new Promise((resolve) => {
+waitForEventId = async (relay: Relay, id: string, timeoutMs = 10000): Promise<Event> => {
+        return new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error(`Timeout waiting for event ${id} on ${relay.url}`)), timeoutMs)
             relay.subscribe([
                 {
                     ids: [id],
                 },
             ], {
                 onevent(event: Event) {
+                    clearTimeout(timer)
                     resolve(event)
                 }
             })
         })
+    }
+
+    /**
+ * Connects to the first available relay from the list
+ */
+connectToRelay = async (relayUrls: string[] = NOSTR_RELAYS): Promise<Relay> => {
+        for (const url of relayUrls) {
+            try {
+                const relay = await Relay.connect(url)
+                console.log(`connected to ${relay.url}`)
+                return relay
+            } catch {
+                console.log(`failed to connect to ${url}, trying next...`)
+            }
+        }
+        throw new Error(`Could not connect to any Nostr relay: ${relayUrls.join(', ')}`)
     }
 
     /**
@@ -90,7 +110,6 @@ witness = async (witnessEventVerificationHash: string, credentials: CredentialsD
         //     return Err("nostr_sk in credntial is missing or empty")
         // }
         const skHex = credentials.nostr_sk
-        const relayUrl = 'wss://relay.damus.io'
 
         if (!skHex) {
             throw new Error("Nostr SK key is required. Please get an API key from https://snort.social/login/sign-up")
@@ -113,24 +132,11 @@ witness = async (witnessEventVerificationHash: string, credentials: CredentialsD
 
         const event = finalizeEvent(eventTemplate, sk)
 
-        // Check if we're in Node.js environment
-        const isNode = typeof window === 'undefined';
-
-        let websocket: typeof WebSocket;
-        // Set WebSocket implementation based on environment
-        // node does not have native wbsocket 
-        if (isNode) {
-
-            websocket = ws as unknown as typeof WebSocket;
-            global.WebSocket = websocket;
+        if (typeof window === 'undefined') {
+            global.WebSocket = ws as unknown as typeof WebSocket;
         }
 
-        console.log("Is node: ", isNode)
-
-
-        const relay = await Relay.connect(relayUrl);
-
-        console.log(`connected to ${relay.url}`)
+        const relay = await this.connectToRelay()
 
         await relay.publish(event)
         const publishEvent = await this.waitForEventAuthor(relay, pk)
@@ -169,29 +175,17 @@ verify = async (
         expectedTimestamp: number
     ): Promise<boolean> => {
         const decoded = nip19.decode(transactionHash) as WitnessNostrVerifyResult
-        const relayUrl = 'wss://relay.damus.io'
 
         if (decoded.type !== "nevent") {
             return false
         }
 
-        // const relay = await Relay.connect('wss://relay.damus.io')
-        // Check if we're in Node.js environment
-        const isNode = typeof window === 'undefined';
-
-        let websocket: typeof WebSocket;
-        // Set WebSocket implementation based on environment
-        // node does not have native wbsocket 
-        if (isNode) {
-
-            websocket = ws as unknown as typeof WebSocket;
-            global.WebSocket = websocket;
+        if (typeof window === 'undefined') {
+            global.WebSocket = ws as unknown as typeof WebSocket;
         }
 
-        console.log("Is node: ", isNode)
-
-
-        const relay = await Relay.connect(relayUrl);
+        const relayUrls = decoded.data.relays?.length ? decoded.data.relays : NOSTR_RELAYS
+        const relay = await this.connectToRelay(relayUrls)
 
         const publishEvent = await this.waitForEventId(relay, decoded.data.id)
         relay.close()
