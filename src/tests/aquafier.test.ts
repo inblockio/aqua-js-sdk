@@ -113,7 +113,7 @@ describe("Aquafier", () => {
 
         test("Should have forms_age field", () => {
             expect(firstRevision.forms_age).not.toBe(undefined);
-            expect(firstRevision.forms_age).toContain("200");
+            expect(firstRevision.forms_age).toBe(200);
         });
 
         test("Should verify the aqua tree", () => {
@@ -160,7 +160,7 @@ describe("Aquafier", () => {
 
         test("Should have forms_age field", () => {
             expect(firstRevision.forms_age).not.toBe(undefined);
-            expect(firstRevision.forms_age).toContain("200");
+            expect(firstRevision.forms_age).toBe(200);
         });
 
         test("Should have forms_address field", () => {
