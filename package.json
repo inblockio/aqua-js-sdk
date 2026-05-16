@@ -74,7 +74,7 @@
     "asn1js": "^3.0.5",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
-    "did-resolver": "^4.1.0",
+    "did-resolver": "^5.0.0",
     "dids": "^5.0.3",
     "dotenv": "^17.2.3",
     "ethers": "^6.7.1",
